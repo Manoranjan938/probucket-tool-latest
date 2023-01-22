@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://localhost:9025/api/v1";
+export const API_BASE_URL = "http://probucket_backend:9025/api/v1";
 export const ACCESS_TOKEN = "accessToken";
 
 export const OAUTH2_REDIRECT_URI = "http://localhost:3002/oauth2/redirect";
