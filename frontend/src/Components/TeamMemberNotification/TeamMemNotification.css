@@ -1,0 +1,22 @@
+.team_member_noti_container{
+    margin-right: 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    background: #fee8c8;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.noti_container{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 18px;
+}
+
+.noti_container > span{
+    font-size: 18px;
+    font-weight: 600;
+}

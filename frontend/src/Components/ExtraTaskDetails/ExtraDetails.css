@@ -1,0 +1,62 @@
+.extra_owner_details{
+    width: auto;
+    margin-top: 10px;
+    border: 1px solid #999999;
+    border-radius: 10px;
+}
+
+.owner__details__header{
+    border-bottom: 1px solid #999999;
+    padding: 1rem;
+}
+
+.owner__details__header > h5{
+    font-size: 16px;
+}
+
+.owner__details__body{
+    padding: 1rem;
+}
+
+.labels{
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    margin: 10px 0;
+}
+
+.choose_one{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.change{
+    color: blue;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.task_status_container{
+    width: 350px;
+    margin: 5% auto;
+    border-radius: 10px;
+    background: #fff;
+    padding: 1rem;
+    outline: none;
+}
+
+.task_status_header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task_status_header > h4{
+    margin: 0;
+}
+
+.task_status_header > i {
+    font-size: 20px;
+    cursor: pointer;
+}

@@ -1,0 +1,22 @@
+.trash__container{
+    width: 70%;
+    margin: 0 auto;
+}
+
+.trash__container > img{
+    width: 100%;
+}
+
+.trash__content{
+    text-align: center;
+}
+
+.trash__content > h3{
+    font-size: 26px;
+    font-weight: 700;
+    color: #919191;
+}
+
+.trash__content > p{
+    font-size: 17px;
+}

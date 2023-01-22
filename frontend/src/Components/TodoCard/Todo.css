@@ -1,0 +1,60 @@
+.todo__card{
+    width: 250px;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4);
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+.todo__title{
+    width: 80%;
+}
+
+.todo__extras{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.btn__task{
+    width: 100px;
+    border: none;
+    background: #827ED8;
+    padding: 3px 0;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.done{
+    width: auto;
+    background: #40fc98;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 3px;
+    text-transform: capitalize;
+}
+
+.pending{
+    width: auto;
+    background: #fbc536;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 3px;
+    text-transform: capitalize;
+}
+
+@media(max-width: 1400px){
+    .todo__card{
+        width: 210px;
+    }
+
+    .btn__task{
+        width: 90px;
+    }
+}

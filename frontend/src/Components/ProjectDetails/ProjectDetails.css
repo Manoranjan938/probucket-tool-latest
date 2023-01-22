@@ -1,0 +1,72 @@
+.project__details_container{
+    width: calc(100% - 400px);
+    margin: 2% auto;
+}
+
+.project__details__header > button{
+    background: none;
+    color: #555555;
+    padding: 0;
+    cursor: pointer;
+    margin: 20px 0;
+}
+
+.project__details__body{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 80px;
+}
+
+.header_section{
+    margin-bottom: 20px;
+}
+
+.header_section > h3{
+    font-size: 34px;
+    font-weight: 600;
+}
+
+.header_section > span{
+    font-size: 15px;
+}
+
+.input-field{
+    margin-top: 10px!important;
+    margin-bottom: 10px!important;
+}
+
+.project__details_choose__section{
+    background: #efefef;
+    padding: 2rem 1.4rem;
+    border-radius: 20px;
+}
+
+.option_template_header{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.option_template_header, .option_type_header > h4{
+    font-size: 15px;
+    color: #888888;
+    cursor: pointer;
+}
+
+.option_type_header{
+    display: flex;
+    justify-content: space-between;
+}
+
+.project__details__footer{
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 2px solid #888888;
+}
+
+.cancel_btn{
+    background: #efefef;
+    color: #444444;
+}

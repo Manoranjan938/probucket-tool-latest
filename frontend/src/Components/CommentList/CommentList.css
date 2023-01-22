@@ -1,0 +1,38 @@
+.comment_list_container{
+    width: auto;
+    margin-top: 20px;
+    display: flex;
+}
+
+.user_avatar{
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+}
+
+.comments{
+    width: 100%;
+}
+
+.comment_header{
+    display: flex;
+    align-items: center;
+}
+
+.comment_header > h4{
+    margin: 0;
+}
+
+.comment_header > span{
+    margin-left: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.comment_body{
+    margin-top: 10px;
+}
+
+.comment_body > span{
+    font-size: 16px;
+}

@@ -1,0 +1,41 @@
+.no__projects{
+    width: auto;
+    height: 100vh!important;
+    overflow-y: hidden;
+}
+
+.no__project__wrapper{
+    width: 400px;
+    margin: 13% auto;
+    text-align: center;
+}
+
+.no__project__wrapper > img{
+    display: flex;
+    margin: 10px auto;
+    width: 200px;
+    height: 200px;
+}
+
+.no__project__wrapper > h2{
+    text-align: center;
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.no__project__wrapper > p{
+    text-align: center;
+    font-size: 16px;
+}
+
+.new_project_btn{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 1400px){
+    .no__projects{
+        margin: 5% auto;
+    }
+}

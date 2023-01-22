@@ -1,0 +1,120 @@
+.signin_container{
+    width: 100%;
+}
+
+.signin__wrapper{
+    width: 400px;
+    margin: 2% auto;
+    padding: 1rem;
+}
+
+.signin__header{
+    display: flex;
+    justify-content: center;
+}
+
+.signin__header > img{
+    width: 40px;
+    height: 40px;
+}
+
+.signin__header > span{
+    align-items: center;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.signin__body{
+    margin-top: 20px;
+    box-shadow: 1px 10px 30px rgba(0,0,0,0.2);
+    padding: 2.5rem;
+    border-radius: 5px;
+}
+
+.signin__body__header{
+    text-align: center;
+}
+
+.signin__body__header > span{
+    font-size: 16px;
+    color: #999999;
+    font-weight: 600;
+}
+
+.signin__body__header > h5{
+    margin-top: 12px;
+    font-size: 18px;
+    color: #b5b5b5;
+}
+
+.signin__body__content{
+    margin-top: 10px;
+    display: block;
+}
+
+.input__email{
+    margin: 10px 0;
+    width: 305px;
+    height: 30px;
+    border: 2px solid #e5e5e5;
+    background: #fefefe;
+    border-radius: 3px;
+    outline: #827ED8;
+    padding-left: 10px;
+}
+
+.signin__btn{
+    margin-top: 10px;
+    width: 100%;
+    height: 35px;
+    border: none;
+    background: #827ED8;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.signin__btn:hover{
+    cursor: pointer;
+}
+
+.signin_or{
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    color: #b3b3b3;
+}
+
+.signin__btn__google{
+    width: 100%;
+    height: 35px;
+    border: none;
+    background: none;
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+    border-radius: 3px;
+    color: #999999;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.signin__btn__google:hover{
+    cursor: pointer;
+    background: #efefef;
+    transition: all 450ms;
+}
+
+.signin_links{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.signin_links > a{
+    text-decoration: none;
+    color: #827ED8;
+}

@@ -1,0 +1,23 @@
+.activity_header{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tabs{
+    background: #efefef;
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: #777777;
+}
+
+.tabs > span{
+    font-weight: 600!important;
+}
+
+.activity_active_tab{
+    background: #585151;
+    color: #fff!important;
+}

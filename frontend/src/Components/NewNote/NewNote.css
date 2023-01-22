@@ -1,0 +1,27 @@
+.new_note_container{
+    width: 300px;
+    margin: 5% auto;
+    border-radius: 10px;
+    background: #fff;
+    padding: 1rem;
+}
+
+.new_task_header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.new_task_header > h4{
+    margin: 0;
+}
+
+.new_task_header > i{
+    font-size: 26px;
+    cursor: pointer;
+}
+
+.fields{
+    margin-top: 10px!important;
+    margin-bottom: 10px!important;
+}
