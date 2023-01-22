@@ -1,0 +1,52 @@
+.task_cards_container{
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-right: 20px;
+}
+
+.cards{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px solid #e5e5e5;
+    padding: 1rem;
+}
+
+.task_card_icon{
+    font-size: 30px;
+    color: #fff!important;
+}
+
+.task_counts{
+    text-align: center;
+}
+
+.task_counts > h3{
+    font-size: 20px;
+    color: #fff;
+}
+
+.task_counts > h5{
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.team_task_total{
+background: #F9AA60;
+}
+
+.team_task_completed{
+background: #04CB52;
+}
+
+.team_task_on_going{
+background: #39a1f0;
+}
+
+.team_task_not_completed{
+background: #FC6464;
+}

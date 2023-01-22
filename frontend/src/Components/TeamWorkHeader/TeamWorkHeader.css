@@ -1,0 +1,40 @@
+.team_work_header_container{
+    margin-top: 20px;
+    padding: 0 3rem;
+    display: flex;
+    align-items: center;
+}
+
+.search_task{
+    width: 200px;
+}
+
+.search__field{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    border: 2px solid #e5e5e5;
+    padding: 6px;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.search__field > input{
+    border: none;
+    outline: none;
+    font-weight: 700;
+    color: #929191;
+}
+
+.search{
+    color: #929191!important;
+}
+
+.filter_task{
+    margin-left: 50px;
+}
+
+.filter_by_asignee{
+    display: flex;
+    align-items: center;
+}

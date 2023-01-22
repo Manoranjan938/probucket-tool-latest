@@ -1,0 +1,23 @@
+spring:
+  security:
+    oauth2:
+        client:
+          registration:
+            google:
+              clientId: 844897069826-fc45v6pj6b3uup77vamkgvb6clb7hjr3.apps.googleusercontent.com
+              clientSecret: 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
+              redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
+              scope:
+                - email
+                - profile
+                
+app:
+  oauth2:
+    # After successfully authenticating with the OAuth2 Provider,
+    # we'll be generating an auth token for the user and sending the token to the
+    # redirectUri mentioned by the client in the /oauth2/authorize request.
+    # We're not using cookies because they won't work well in mobile clients.
+    authorizedRedirectUris:
+      - http://localhost:3002/oauth2/redirect
+      - myandroidapp://oauth2/redirect
+      - myiosapp://oauth2/redirect

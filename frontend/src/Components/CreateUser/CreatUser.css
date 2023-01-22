@@ -1,0 +1,39 @@
+.create_new_user{
+    background: #efefef;
+    padding: 2rem 5rem;
+    display: flex;
+    gap: 20px;
+    border-radius: 10px;
+}
+
+.image > img{
+    width: 350px;
+    height: 300px;
+}
+
+.user_fields > h3{
+    font-size: 28px;
+    margin: 10px 0;
+}
+
+.new_team_btn{
+    margin-top: 10px!important;
+}
+
+.temp_pass{
+    width: 300px;
+    margin: 5% auto;
+    background-color: #efefef;
+    border-radius: 10px;
+    padding: 1rem;
+    outline: none;
+}
+
+.temp_pass > p{
+    font-size: 18px;
+}
+
+.temp_pass > span{
+    font-size: 15px;
+    font-weight: 600;
+}

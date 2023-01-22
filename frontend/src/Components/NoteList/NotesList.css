@@ -1,0 +1,33 @@
+.notes__cards{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-right: 20px;
+    margin-top: 10px;
+}
+
+.notes__card{
+    width: auto;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4);
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+.notes__card:hover{
+    cursor: move;
+}
+
+.notes_title{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notes_title > span{
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.notes__description{
+    margin-top: 10px;
+}

@@ -1,0 +1,85 @@
+.task_container{
+    width: auto;
+    margin-top: 20px;
+}
+
+.task_card{
+    width: auto;
+    padding: 5px 15px;
+    border-radius: 4px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+    cursor: move;
+}
+
+.task_card:hover{
+    background: #efefef;
+}
+
+.contents{
+    display: flex;
+    justify-content: space-between;
+}
+
+.asignee_icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    border: 1px dashed #888888;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.extras{
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.more_icons{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.priority_low > i{
+    color: #888888;
+}
+
+.priority_med > i{
+    color: #fbc536;
+}
+
+.priority_high > i{
+    color: #ff8367;
+}
+
+.priority_none > i{
+    color: #9999;
+}
+
+.task_id > a{
+    color: #827ED8;
+}
+
+.edit_options{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+@media (max-width: 1400px){
+    .task_card{
+        width: auto;
+    }
+}
+
+@media(max-width: 1100px){
+    .task_card{
+        width: auto;
+    }
+}

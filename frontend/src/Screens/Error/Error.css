@@ -1,0 +1,50 @@
+.error__container{
+    width: 700px;
+    margin: 2% auto;
+}
+
+.error__image{
+    width: 100%;
+    height: 500px;
+}
+
+.error__image > img{
+    width: 100%;
+    height: 100%;
+}
+
+.error__content{
+    text-align: center;
+}
+
+.error__content > h1{
+    font-size: 60px;
+    margin: 0;
+}
+
+.error__content > h5{
+    width: 70%;
+    margin: 10px auto;
+    font-size: 18px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.error__footer{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.error_page_btn{
+    width: auto;
+    padding: 5px 15px;
+    border: none;
+    outline: none;
+    background: #827ed8;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}

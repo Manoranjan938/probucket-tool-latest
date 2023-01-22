@@ -1,0 +1,25 @@
+.create__project__container{
+    background: #efefef;
+    height: 100vh;
+}
+
+.wrapper{
+    width: 800px;
+    margin: 0 auto;
+    padding: 2% 0;
+}
+
+h4{
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px){
+    .create__project__container{
+        padding: 2.5rem 1.3rem;
+    }
+
+    .wrapper{
+        width: auto;
+        padding: 0;
+    }
+}

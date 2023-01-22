@@ -1,0 +1,14 @@
+.graph_container{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 0 10px;
+}
+
+/* .days_bar_graph{
+    background: #efeffe;
+}
+
+.total_time_graph{
+    background: #e5e5e5;
+} */

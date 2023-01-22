@@ -1,0 +1,26 @@
+.project__setting__container{
+    width: auto;
+    padding: 0 20px;
+}
+
+.project__setting__details{
+    width: 500px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+    border: 1px solid #888888;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.project__image > img{
+    width: 170px;
+    height: 170px;
+    object-fit: cover;
+}
+
+.text-field{
+    margin-bottom: 10px!important;
+}

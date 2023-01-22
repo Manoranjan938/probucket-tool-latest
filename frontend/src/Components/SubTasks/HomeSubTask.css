@@ -1,0 +1,44 @@
+.subtask__container{
+    width: auto;
+    padding: 0 10px;
+}
+
+.sub_task_header{
+    margin-top: 10px;
+    width: auto;
+    display: flex;
+    border-top: 1px solid #9999;
+    border-bottom: 1px solid #9999;
+    padding: 10px;
+    background: #4effbb;
+    color: #fff;
+}
+
+.sub_task_header > span{
+    font-size: 17px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.subtask{
+    width: 320px;
+}
+
+.subtask > span{
+    font-weight: 600;
+}
+
+.parent{
+    width: 120px;
+    margin-left: 5px;
+}
+
+.parent > span {
+    font-weight: 600;
+}
+
+@media(max-width: 1400px){
+    .subtask{
+        width: 250px;
+    }
+}

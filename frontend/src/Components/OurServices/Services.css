@@ -1,0 +1,67 @@
+.service_container{
+    background: #efefef;
+}
+
+.service_container > h1{
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.service__wrapper{
+    padding: 1rem 4rem;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.service__card{
+    background: #fff;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+}
+
+.service__card__header{
+    display: flex;
+}
+
+.service__card__header > h2{
+    margin-left: 20px;
+    font-weight: 500;
+    font-size: 26px;
+    color: #333333;
+}
+
+.service__icon{
+    font-size: 50px;
+}
+
+.project{
+    color: darkolivegreen;
+}
+
+.bug{
+    color: crimson;
+}
+
+.headset{
+    color: darkorchid;
+}
+
+.service__card > p{
+    margin-top: 10px;
+    font-size: 17px;
+    color: #444444;
+}
+
+@media (max-width: 768px){
+    .service__wrapper{
+        display: block;
+    }
+
+    .service__card{
+        margin: 20px 0;
+    }
+}

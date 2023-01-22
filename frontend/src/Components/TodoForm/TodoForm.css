@@ -1,0 +1,49 @@
+.todo_modal_container{
+    width: 400px;
+    height: 370px;
+    background: #fff;
+    margin: 5% auto;
+    border-radius: 12px;
+    padding: 14px 20px;
+    outline: none;
+}
+
+.modal__header{
+    width: auto;
+    border-bottom: 2px solid #e5e5e5;
+    margin-bottom: 10px;
+}
+
+.modal__body{
+    margin-top: 20px;
+    width: auto;
+    height: 290px;
+    overflow-y: auto;
+}
+
+.modal__footer{
+    width: auto;
+    position: fixed;
+    display: flex;
+    gap: 10px;
+    left: 51%;
+}
+
+.input_form{
+    margin-top: 10px!important;
+}
+
+@media(max-width: 1400px){
+    .todo_modal_container{
+        height: 370px;
+        width: 350px;
+    }
+
+    .modal__body{
+        height: 290px;
+    }
+
+    .modal__footer{
+        left: 50%;
+    }
+}

@@ -1,0 +1,89 @@
+.new_user_container{
+    width: auto;
+    padding: 0 10px;
+    margin-right: 20px;
+}
+
+.new_user__header{
+    margin-top: 10px;
+    width: auto;
+    height: 30px;
+    display: flex;
+    border-top: 1px solid #9999;
+    border-bottom: 1px solid #9999;
+    padding: 10px;
+    background: #c4c4c4;
+    color: #fff;
+    align-items: center;
+}
+
+.new_user__header > span{
+    font-size: 17px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.user{
+    width: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.user_names{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user_email{
+    font-size: 14px;
+}
+
+.last_active{
+    width: 180px;
+}
+
+.status{
+    width: 180px;
+}
+
+.role{
+    width: 180px;
+}
+
+.action{
+    width: 110px;
+}
+
+.actn_btn{
+    cursor: pointer;
+    color: #2ea5fbdd;
+}
+
+.new_user_row{
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+@media (max-width: 1400px){
+    .user{
+        width: 150px;
+    }
+    
+    .last_active{
+        width: 250px;
+    }
+    
+    .status{
+        width: 150px;
+    }
+    
+    .role{
+        width: 150px;
+    }
+    
+    .action{
+        width: 120px;
+    }
+}

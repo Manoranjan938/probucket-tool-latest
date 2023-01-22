@@ -1,0 +1,18 @@
+.data_not_container{
+    width: 480px;
+    padding: 1rem;
+    margin: 0 auto;
+}
+
+.not_found_text{
+    border: 2px solid #827ED8;
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.not_found_text > span{
+    font-size: 20px;
+    font-weight: 600;
+    color: #827ED8;
+}
