@@ -119,7 +119,7 @@
         <div class="contents">
             <p>Dear ProBucket user,</p>
             <p>Before starting your adventure lets verify your email</p>
-            <a href="http://localhost:9025/api/v1/auth/verify?token=${token}">
+            <a href="http://manoranjan.link:9025/api/v1/auth/verify?token=${token}">
                 <button type="button" name="button" class="pwd_btn">Verify your email</button>
             </a>
         </div>
