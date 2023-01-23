@@ -29,7 +29,7 @@ import com.tool.ProjectTool.service.ValidationErrorService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin({ "https://localhost:3002" })
+@CrossOrigin({ "http://manoranjan.link:3000" })
 public class AuthController {
 
 	@Autowired

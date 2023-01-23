@@ -20,7 +20,7 @@ import com.tool.ProjectTool.service.NotesService;
 
 @RestController
 @RequestMapping("/api/v1/note")
-@CrossOrigin("https://localhost:3002")
+@CrossOrigin({ "http://manoranjan.link:3000" })
 public class NotesController {
 
 	@Autowired
