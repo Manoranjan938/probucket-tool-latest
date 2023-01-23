@@ -1,4 +1,4 @@
-export const API_BASE_URL = "http://45.90.108.88:9025/api/v1";
+export const API_BASE_URL = "http://manoranjan.link:9025/api/v1";
 export const ACCESS_TOKEN = "accessToken";
 
 export const OAUTH2_REDIRECT_URI = "http://localhost:3002/oauth2/redirect";

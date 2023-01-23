@@ -30,7 +30,7 @@ services:
 
   probucket_frontend:
     container_name: pro_tool_frontend
-    image: manoranjan938/project-tool:frontend-1.0.0
+    image: manoranjan938/project-tool:frontend-1.0.1
     # build: /frontend
     ports:
       - 3000:80
