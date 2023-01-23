@@ -18,7 +18,7 @@ services:
     image: manoranjan938/project-tool:backend-1.0.1
     # build: /backend
     ports:
-      - 9025:8080
+      - 9025:9025
     depends_on:
       - postgresdb
     environment:
