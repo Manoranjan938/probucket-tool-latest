@@ -25,7 +25,7 @@ import com.tool.ProjectTool.service.ValidationErrorService;
 
 @RestController
 @RequestMapping("/api/v1/team")
-@CrossOrigin({ "https://localhost:3002" })
+@CrossOrigin({ "http://manoranjan.link:3000" })
 public class TeamController {
 
 	@Autowired

@@ -15,9 +15,10 @@ services:
 
   probucket_backend:
     container_name: pro_tool_backend
-    build: /backend
+    image: manoranjan938/project-tool:backend-1.0.2
+    # build: /backend
     ports:
-      - 9025:8080
+      - 9025:9025
     depends_on:
       - postgresdb
     environment:
@@ -29,7 +30,8 @@ services:
 
   probucket_frontend:
     container_name: pro_tool_frontend
-    build: /frontend
+    image: manoranjan938/project-tool:frontend-1.0.1
+    # build: /frontend
     ports:
       - 3000:80
 

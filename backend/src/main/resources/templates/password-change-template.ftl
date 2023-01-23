@@ -105,7 +105,7 @@
         <div class="contents">
             <p>Dear ProBucket user,</p>
             <p>We have received your request to change your password. Please click the below button to complete the change</p>
-            <a href="https://localhost:3002/reset-passwords?token=${token}">
+            <a href="http://manoranjan.link:3000/reset-passwords?token=${token}">
               <button type="button" name="button" class="pwd_btn">Change my password</button>
             </a>
         </div>
