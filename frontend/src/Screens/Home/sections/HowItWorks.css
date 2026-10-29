@@ -1,0 +1,62 @@
+.landing__steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing__step {
+  position: relative;
+  text-align: center;
+}
+
+/* Connector line between the step numbers */
+.landing__step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: calc(50% + 40px);
+  width: calc(100% - 80px + 32px);
+  height: 2px;
+  background: var(--landing-border);
+}
+
+.landing__step__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+  border-radius: 50%;
+  background: var(--landing-primary-strong);
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.landing__step > h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--landing-ink);
+}
+
+.landing__step > p {
+  max-width: 300px;
+  margin: 0 auto;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .landing__steps {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .landing__step:not(:last-child)::after {
+    display: none;
+  }
+}

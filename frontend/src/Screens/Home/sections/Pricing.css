@@ -1,0 +1,68 @@
+.landing__plans {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing__plan {
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  border: 1px solid var(--landing-border);
+  border-radius: var(--landing-radius);
+  background: var(--landing-surface);
+  box-shadow: var(--landing-shadow);
+  text-align: center;
+}
+
+.landing__plan > h3 {
+  margin: 0 0 20px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--landing-primary-strong);
+}
+
+.landing__plan__price {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--landing-ink);
+}
+
+.landing__plan__period {
+  margin-top: 6px;
+  font-size: 15px;
+  color: var(--landing-muted);
+}
+
+.landing__plan__users {
+  margin: 20px 0 28px;
+  padding: 10px 0;
+  border-top: 1px solid var(--landing-border);
+  border-bottom: 1px solid var(--landing-border);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--landing-ink);
+}
+
+.landing__plan > .landing__btn {
+  margin-top: auto;
+}
+
+.landing__plan__note {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--landing-muted);
+}
+
+@media (max-width: 960px) {
+  .landing__plans {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+}
