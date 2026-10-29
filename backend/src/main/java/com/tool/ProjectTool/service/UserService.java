@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -40,6 +41,15 @@ public class UserService {
 
 	@Autowired
 	private JavaMailSender mailSender;
+
+	@Value("${app.mail.from}")
+	private String mailFrom;
+
+	@Value("${app.backend-url}")
+	private String backendUrl;
+
+	@Value("${app.frontend-url}")
+	private String frontendUrl;
 
 	@Autowired
 	private Configuration config;
@@ -225,13 +235,15 @@ public class UserService {
 
 			model.put("token", token);
 
+			model.put("backendUrl", backendUrl);
+
 			Template t = config.getTemplate("registration-confirmation-template.ftl");
 			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
 
 			helper.setTo(email);
 			helper.setText(html, true);
 			helper.setSubject("Verify email request");
-			helper.setFrom("probucket@info.co.in");
+			helper.setFrom(mailFrom);
 			helper.addInline("logo.png", new ClassPathResource("logo.png"));
 
 			mailSender.send(message);
@@ -265,13 +277,15 @@ public class UserService {
 
 			model.put("token", token);
 
+			model.put("frontendUrl", frontendUrl);
+
 			Template t = config.getTemplate("password-change-template.ftl");
 			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
 
 			helper.setTo(email);
 			helper.setText(html, true);
 			helper.setSubject("Complete your password reset request");
-			helper.setFrom("probucket@info.co.in");
+			helper.setFrom(mailFrom);
 			helper.addInline("logo.png", new ClassPathResource("logo.png"));
 
 			mailSender.send(message);

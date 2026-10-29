@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +21,18 @@ import io.jsonwebtoken.UnsupportedJwtException;
 @Component
 public class TokenProvider {
 
+	@Value("${app.jwt.secret}")
+	private String secret;
+
+	@Value("${app.jwt.expiration-ms}")
+	private long expirationTime;
+
 	public String generateToken(Authentication auth) {
 
 		Users user = (Users) auth.getPrincipal();
 		Date now = new Date(System.currentTimeMillis());
 
-		Date expiryDate = new Date(now.getTime() + SecurityConstants.TOKEN_EXPIRATION_TIME);
+		Date expiryDate = new Date(now.getTime() + expirationTime);
 		String id = user.getUserId();
 
 		Map<String, Object> claims = new HashMap<>();
@@ -35,14 +42,14 @@ public class TokenProvider {
 		claims.put("fullName", user.getName());
 
 		return Jwts.builder().setSubject(id).setClaims(claims).setIssuedAt(now).setExpiration(expiryDate)
-				.signWith(SignatureAlgorithm.HS512, SecurityConstants.SECRET).compact();
+				.signWith(SignatureAlgorithm.HS512, secret).compact();
 
 	}
 
 	public boolean validateToken(String token) {
 		try {
 
-			Jwts.parser().setSigningKey(SecurityConstants.SECRET).parseClaimsJws(token);
+			Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
 			return true;
 
 		} catch (SignatureException e) {
@@ -61,7 +68,7 @@ public class TokenProvider {
 	}
 
 	public String getUserIdFromJwt(String token) {
-		Claims claims = Jwts.parser().setSigningKey(SecurityConstants.SECRET).parseClaimsJws(token).getBody();
+		Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 
 		String id = (String) claims.get("id");
 
@@ -69,7 +76,7 @@ public class TokenProvider {
 	}
 
 	public String getRoleFromJwt(String token) {
-		Claims claims = Jwts.parser().setSigningKey(SecurityConstants.SECRET).parseClaimsJws(token).getBody();
+		Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 
 		String role = (String) claims.get("rolename");
 

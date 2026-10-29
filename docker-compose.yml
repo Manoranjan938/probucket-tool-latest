@@ -1,39 +1,68 @@
-version: '3'
 services:
   postgresdb:
     image: postgres:alpine3.17
     container_name: postgresqldb
     ports:
       - 5432:5432
-    environment:
-      - POSTGRES_USER=probucketool
-      - POSTGRES_PASSWORD=password
+    # POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB come from here.
+    # POSTGRES_DB is created automatically only when the data volume is empty.
+    env_file: ./backend/.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      # -h localhost: TCP only opens after the init scripts have finished
+      test: ["CMD-SHELL", "pg_isready -h localhost -U \"$$POSTGRES_USER\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - probucketool
+
+  # Creates the app database if it is missing (e.g. on a volume initialized before POSTGRES_DB was set)
+  postgresdb_init:
+    image: postgres:alpine3.17
+    container_name: postgresqldb_init
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    env_file: ./backend/.env
+    environment:
+      - PGHOST=postgresdb
+      - PGDATABASE=postgres
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        export PGUSER="$$POSTGRES_USER" PGPASSWORD="$$POSTGRES_PASSWORD";
+        psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$$POSTGRES_DB'" | grep -q 1
+        || psql -c "CREATE DATABASE \"$$POSTGRES_DB\""
+    restart: "no"
     networks:
       - probucketool
 
   probucket_backend:
     container_name: pro_tool_backend
-    image: manoranjan938/project-tool:backend-1.0.3
-    # build: /backend
+    build: ./backend
     ports:
       - 9025:9025
     depends_on:
-      - postgresdb
+      postgresdb_init:
+        condition: service_completed_successfully
+    env_file: ./backend/.env
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/pro_bucket_tool
-      - SPRING_DATASOURCE_USERNAME=probucketool
-      - SPRING_DATASOURCE_PASSWORD=password
+      - DB_HOST=postgresdb
+      - DB_PORT=5432
+    restart: on-failure
     networks:
       - probucketool
 
   probucket_frontend:
     container_name: pro_tool_frontend
-    image: manoranjan938/project-tool:frontend-1.0.1
-    # build: /frontend
+    # frontend/.env is picked up by the React build inside the image
+    build: ./frontend
     ports:
       - 3000:80
+    depends_on:
+      - probucket_backend
 
 
 volumes:

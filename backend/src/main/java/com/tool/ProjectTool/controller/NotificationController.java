@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin({ "http://manoranjan.link:3000" })
+@CrossOrigin({ "${app.cors.allowed-origin}" })
 public class NotificationController {
 
 	@GetMapping("/getNotificationList/{userId}")

@@ -18,7 +18,7 @@ import com.tool.ProjectTool.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/user")
-@CrossOrigin({ "http://manoranjan.link:3000" })
+@CrossOrigin({ "${app.cors.allowed-origin}" })
 public class UserController {
 
 	@Autowired

@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -50,6 +51,12 @@ public class TeamService {
 	
 	@Autowired
 	private JavaMailSender mailSender;
+
+	@Value("${app.mail.from}")
+	private String mailFrom;
+
+	@Value("${app.backend-url}")
+	private String backendUrl;
 
 	@Autowired
 	private Configuration config;
@@ -210,13 +217,15 @@ public class TeamService {
 
 			model.put("token", secretString);
 
+			model.put("backendUrl", backendUrl);
+
 			Template t = config.getTemplate("registration-confirmation-template.ftl");
 			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
 
 			helper.setTo(email);
 			helper.setText(html, true);
 			helper.setSubject("Complete your password reset request");
-			helper.setFrom("probucket@info.co.in");
+			helper.setFrom(mailFrom);
 			helper.addInline("logo.png", new ClassPathResource("logo.png"));
 
 			mailSender.send(message);
