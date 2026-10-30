@@ -81,3 +81,6 @@ export const panelIcon =
   "flex shrink-0 items-center justify-center w-11 h-11 rounded-xl bg-[rgba(255,255,255,0.15)] text-[18px] font-bold text-white";
 export const panelItemTitle = "mb-0.5 text-[16px] font-bold text-white";
 export const panelItemText = "text-[15px]";
+
+/* MUI Skeleton colour on the purple panel (needs ! to win over MUI's own background) */
+export const panelSkeleton = "bg-[rgba(255,255,255,0.15)]!";
