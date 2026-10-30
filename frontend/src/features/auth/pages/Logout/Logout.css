@@ -1,3 +1,7 @@
+/* Legacy logout styles. NewUser (team) uses the .user class from here,
+   so this file is kept unchanged.
+   The redesigned logout page uses features/auth/styles/Auth.css. */
+
 .logout_container{
     width: 100%;
 }
