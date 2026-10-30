@@ -13,7 +13,7 @@ import type { TeamMember, UpdateTeamRequest } from "features/team/types";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
 import type { SnackbarState, ApiError } from "shared/types";
 
-import "./NewUser.css";
+import { divider, formFieldCompact, modalHeader, smallModalCard, smallModalClose } from "shared/styles/sharedClasses";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
@@ -149,35 +149,35 @@ const NewUser = ({ getTeamList }: Props) => {
 
   return (
     <>
-      <div className="new_user_container">
+      <div className="w-auto mr-5 px-2.5">
         <CreateUser />
-        <div className="new_user_contents">
-          <div className="new_user__header">
-            <span className="user">User</span>
-            <span className="last_active">Added On</span>
-            <span className="status">Status</span>
-            <span className="role">Role</span>
-            <span className="action">Action</span>
+        <div>
+          <div className="flex items-center w-auto h-[30px] mt-2.5 p-2.5 border-t border-b border-[#9999] bg-[#c4c4c4] text-white">
+            <span className="uppercase text-[17px] font-bold flex items-center w-[400px] my-2.5 max-[1400px]:w-[150px]">User</span>
+            <span className="uppercase text-[17px] font-bold w-[180px] max-[1400px]:w-[250px]">Added On</span>
+            <span className="uppercase text-[17px] font-bold w-[180px] max-[1400px]:w-[150px]">Status</span>
+            <span className="uppercase text-[17px] font-bold w-[180px] max-[1400px]:w-[150px]">Role</span>
+            <span className="uppercase text-[17px] font-bold w-[110px] max-[1400px]:w-[120px]">Action</span>
           </div>
-          <div className="new_user__body">
+          <div>
             {teamList.map((item, index) => (
-              <div className="new_user_row" key={index}>
-                <div className="user user_names">
+              <div className="flex items-center p-2.5" key={index}>
+                <div className="flex items-center w-[400px] my-2.5 max-[1400px]:w-[150px] gap-5">
                   <Avatar {...stringAvatar(item.name)} />
-                  <div className="user_details">
-                    <span className="user_name">{item.name}</span>
-                    <p className="user_email">{item.email}</p>
+                  <div>
+                    <span>{item.name}</span>
+                    <p className="text-[14px]">{item.email}</p>
                   </div>
                 </div>
-                <div className="last_active">
+                <div className="w-[180px] max-[1400px]:w-[250px]">
                   <span>21-05-2022</span>
                 </div>
-                <div className="status">
-                  <span className="status_text">
+                <div className="w-[180px] max-[1400px]:w-[150px]">
+                  <span>
                     {item.status === 0 ? "Active" : "In-Active"}
                   </span>
                 </div>
-                <div className="role">
+                <div className="w-[180px] max-[1400px]:w-[150px]">
                   <span>
                     {item.role === null || item.role === "null"
                       ? "Not Added"
@@ -185,7 +185,7 @@ const NewUser = ({ getTeamList }: Props) => {
                   </span>
                 </div>
                 <div
-                  className="action actn_btn"
+                  className="w-[110px] max-[1400px]:w-[120px] text-[#2ea5fbdd] cursor-pointer"
                   onClick={() => handleTaskModal(item)}
                 >
                   <span>Edit Details</span>
@@ -201,13 +201,13 @@ const NewUser = ({ getTeamList }: Props) => {
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="task_status_container">
-          <div className="task_status_header">
-            <h4>Update Assignee and Priority</h4>
-            <i className="fa fa-times-circle-o" onClick={handleTaskClose} />
+        <div className={smallModalCard}>
+          <div className={modalHeader}>
+            <h4 className="m-0">Update Assignee and Priority</h4>
+            <i className={`fa fa-times-circle-o ${smallModalClose}`} onClick={handleTaskClose} />
           </div>
-          <div className="divider" />
-          <div className="task_status_body">
+          <div className={divider} />
+          <div>
             <TextField
               fullWidth
               id="outlined-basic"
@@ -218,7 +218,7 @@ const NewUser = ({ getTeamList }: Props) => {
                 setUpdateTeam({ ...updateTeam, role: e.target.value })
               }
             />
-            <FormControl fullWidth className="fields">
+            <FormControl fullWidth className={formFieldCompact}>
               <InputLabel id="demo-simple-select-label">Status</InputLabel>
               <Select
                 labelId="demo-simple-select-label"

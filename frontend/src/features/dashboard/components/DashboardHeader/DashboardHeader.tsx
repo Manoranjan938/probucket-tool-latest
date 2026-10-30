@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./DashboardHeader.css";
+import { searchField, searchIcon, searchInput } from "shared/styles/sharedClasses";
 
 import image from "shared/assets/images/logo.png";
 import user from 'shared/assets/images/user.png'
@@ -30,24 +30,24 @@ const DashboardHeader = ({currentUser}: Props) => {
     nav("/dashboard/notifications");
   }
   return (
-    <div className="dashboard__header">
-      <div className="dashboard__header__logo">
-        <img src={image} alt="" />
-        <span>ProBucket</span>
+    <div className="fixed top-0 left-0 right-0 z-1000 flex justify-between items-center py-[15px] px-[2%] bg-white shadow-[0_.5rem_1.5rem_rgba(0,0,0,.1)]">
+      <div className="flex items-center">
+        <img src={image} alt="" className="w-10 h-10" />
+        <span className="items-center ml-[5px] text-[28px] font-semibold">ProBucket</span>
       </div>
-      <div className="header__icons">
-        <div className="search__field">
-          <FaSearch className="search" />
-          <input type="text" placeholder="Search" />
+      <div className="flex items-center">
+        <div className={searchField}>
+          <FaSearch className={searchIcon} />
+          <input type="text" placeholder="Search" className={searchInput} />
         </div>
         {/* <Tooltip title="Setting">
           <IconButton>
-            <MdSettings className="header__icon" />
+            <MdSettings className="text-[22px] text-[#101] cursor-pointer" />
           </IconButton>
         </Tooltip> */}
         <Tooltip title="Notification">
           <IconButton onClick={handleNotification}>
-            <MdNotifications className="header__icon" />
+            <MdNotifications className="text-[22px] text-[#101] cursor-pointer" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Profile">
@@ -57,7 +57,7 @@ const DashboardHeader = ({currentUser}: Props) => {
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
           >
-            <img src={user} alt="" className="user__img" />
+            <img src={user} alt="" className="w-[25px] h-[25px] rounded-[50%] cursor-pointer" />
           </IconButton>
         </Tooltip>
       </div>
@@ -101,32 +101,32 @@ const DashboardHeader = ({currentUser}: Props) => {
           <ListItemIcon>
             <Avatar>{currentUser.fullName!.substring(0,1)}</Avatar>
           </ListItemIcon>
-          <div className="profile">
-            <h5>{currentUser.fullName} </h5>
-            <p>{currentUser.username}</p>
+          <div>
+            <h5 className="text-[16px]">{currentUser.fullName} </h5>
+            <p className="text-[13px]">{currentUser.username}</p>
           </div>
         </MenuItem>
         {/* <MenuItem onClick={handleClose}>
-          <div className="menu__items">Switch account</div>
+          <div className="py-[5px]">Switch account</div>
         </MenuItem>
         <MenuItem onClick={handleClose}>
-          <div className="menu__items">
+          <div className="py-[5px]">
             <Link to="/manage-account/profile-setting">Manage account</Link>
           </div>
         </MenuItem> */}
         <Divider />
         <MenuItem onClick={handleClose}>
-          <div className="menu__items">
+          <div className="py-[5px]">
             <Link to="/people">Profile</Link>
           </div>
         </MenuItem>
         <MenuItem onClick={handleClose}>
-          <div className="menu__items">
+          <div className="py-[5px]">
             <Link to="/projects">Projects</Link>
           </div>
         </MenuItem>
         {/* <MenuItem onClick={handleClose}>
-          <div className="menu__items">
+          <div className="py-[5px]">
             <Link to="/account/setting">Personal Setting</Link>
           </div>
         </MenuItem> */}

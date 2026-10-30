@@ -3,8 +3,6 @@ import ChooseType from "features/projects/components/ChooseType/ChooseType";
 import ProjectDetails from "features/projects/components/ProjectDetails/ProjectDetails";
 import React, { useState } from "react";
 
-import "./NewProject.css";
-
 const NewProject = () => {
   const [page, setPage] = useState(0);
   const [projectDetails, setProjectDetails] = useState({

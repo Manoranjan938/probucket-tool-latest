@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import "./CreateUser.css";
+import { divider, formField } from "shared/styles/sharedClasses";
 
 import image1 from "shared/assets/images/new_user.png";
 import { Button, Modal, Snackbar, TextField } from "@mui/material";
@@ -146,16 +146,16 @@ const CreateUser = ({ currentProject, getTeamList }: Props) => {
 
   return (
     <>
-      <div className="create_new_user">
-        <div className="image">
-          <img src={image1} alt="" />
+      <div className="flex gap-5 py-8 px-20 rounded-[10px] bg-[#efefef]">
+        <div>
+          <img src={image1} alt="" className="w-[350px] h-[300px]" />
         </div>
-        <div className="user_fields">
-          <h3>There's a team behind every success</h3>
+        <div>
+          <h3 className="my-2.5 text-[28px]">There's a team behind every success</h3>
           <p>Add your team and start creating great things together</p>
           <TextField
             fullWidth
-            className="input_form"
+            className={formField}
             id="outlined-basic"
             label="Email address"
             variant="outlined"
@@ -168,7 +168,7 @@ const CreateUser = ({ currentProject, getTeamList }: Props) => {
           />
           <TextField
             fullWidth
-            className="input_form"
+            className={formField}
             id="outlined-basic"
             label="User's name"
             variant="outlined"
@@ -180,7 +180,7 @@ const CreateUser = ({ currentProject, getTeamList }: Props) => {
           <Button
             variant="contained"
             color="primary"
-            className="new_team_btn"
+            className="mt-2.5!"
             onClick={handleAddTeam}
           >
             Add Team Member
@@ -209,12 +209,12 @@ const CreateUser = ({ currentProject, getTeamList }: Props) => {
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="temp_pass">
+        <div className="w-[300px] my-[5%] mx-auto p-4 rounded-[10px] bg-[#efefef] outline-none">
           <h4>Team Success</h4>
-          <div className="divider" />
-          <p>{popUp.message}</p>
-          <div className="divider" />
-          <span>Copy the temporary password</span>
+          <div className={divider} />
+          <p className="text-[18px]">{popUp.message}</p>
+          <div className={divider} />
+          <span className="text-[15px] font-semibold">Copy the temporary password</span>
         </div>
       </Modal>
     </>

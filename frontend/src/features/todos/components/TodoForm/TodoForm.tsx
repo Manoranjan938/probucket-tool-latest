@@ -2,7 +2,7 @@ import { Autocomplete, Box, Button, Modal, TextField } from "@mui/material";
 import React from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-import "./TodoForm.css";
+import { formField } from "shared/styles/sharedClasses";
 
 import image1 from "shared/assets/images/avatar1.png";
 import image2 from "shared/assets/images/avatar2.png";
@@ -46,12 +46,12 @@ const TodoForm = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetState
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="todo_modal_container">
+        <div className="w-[400px] h-[370px] my-[5%] mx-auto py-3.5 px-5 rounded-xl bg-white outline-none max-[1400px]:w-[350px]">
           <form>
-            <div className="modal__header">
+            <div className="w-auto mb-2.5 border-b-2 border-[#e5e5e5]">
               <h3 id="parent-modal-title">Create a todo</h3>
             </div>
-            <div className="modal__body">
+            <div className="w-auto h-[290px] mt-5 overflow-y-auto">
               <Autocomplete
                 id="country-select-demo"
                 options={projectData}
@@ -81,21 +81,21 @@ const TodoForm = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetState
               />
               <TextField
                 fullWidth
-                className="input_form"
+                className={formField}
                 id="outlined-basic"
                 label="Todo title"
                 variant="outlined"
               />
               <TextField
                 fullWidth
-                className="input_form"
+                className={formField}
                 id="outlined-multiline-static"
                 label="Description"
                 multiline
                 rows={4}
               />
             </div>
-            <div className="modal__footer">
+            <div className="fixed left-[51%] flex gap-2.5 w-auto max-[1400px]:left-[50%]">
               <Button onClick={handleClose}>Cancel</Button>
               <Button variant="contained">Create</Button>
             </div>

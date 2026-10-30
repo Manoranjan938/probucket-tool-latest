@@ -1,7 +1,7 @@
 import { Button } from '@mui/material'
 import React from 'react'
 
-import './NotesHeader.css'
+import { searchField, searchIcon, searchInput } from "shared/styles/sharedClasses";
 
 import { FaSearch } from "react-icons/fa";
 import { useState } from 'react';
@@ -21,14 +21,14 @@ const NotesHeader = () => {
 
   return (
     <>
-      <div className="notes_header_container">
-        <div className="search">
-          <div className="search__field">
-            <FaSearch className="search" />
-            <input type="text" placeholder="Search" />
+      <div className="flex justify-between items-center mt-2.5 mr-5">
+        <div className="text-[#929191]">
+          <div className={searchField}>
+            <FaSearch className={searchIcon} />
+            <input type="text" placeholder="Search" className={searchInput} />
           </div>
         </div>
-        <div className="notes_create_btn">
+        <div>
           <Button variant="contained" color="primary" onClick={handleClick}>
             Create New Note
           </Button>

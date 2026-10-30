@@ -5,7 +5,6 @@ import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 import type { RootState } from "app/store";
 
-import "./ProjectWorks.css";
 
 const ProjectWorks = ({ myTasks }: Props) => {
   const [showNewModal, setShowNewModal] = useState(false);
@@ -40,49 +39,49 @@ const ProjectWorks = ({ myTasks }: Props) => {
 
   return (
     <>
-      <div className="project_works_container">
-        <div className="projects_task_header_row">
-          <div className="project_status_card todo">
-            <div className="details">
-              <span>To Do</span>
-              <span className="counter">{todoItems.length}</span>
+      <div className="w-auto my-8 mx-12">
+        <div className="grid grid-cols-[repeat(3,1fr)] gap-5 w-auto">
+          <div className="flex justify-between items-center w-auto h-10 py-[5px] px-[15px] rounded-bl-[4px] rounded-br-[4px] shadow-[1px_1px_4px_#0006] border-t-[3px] border-t-[#888]">
+            <div className="flex items-center gap-2.5 w-full">
+              <span className="uppercase text-[16px] font-semibold text-[#777]">To Do</span>
+              <span className="flex items-center py-px px-[9px] border border-[#e5e5e5] rounded-[50px] uppercase text-[16px] font-semibold text-[#777]">{todoItems.length}</span>
             </div>
-            <div className="icons">
-              <i className="fa fa-ellipsis-h" />
-              <i className="fa fa-plus" onClick={handleNewModal} />
-            </div>
-          </div>
-          <div className="project_status_card inprogress">
-            <div className="details">
-              <span>In Progress</span>
-              <span className="counter">{inProgressItems.length}</span>
-            </div>
-            <div className="icons">
-              <i className="fa fa-ellipsis-h" />
-              {/* <i className="fa fa-plus" onClick={handleNewModal} /> */}
+            <div className="flex gap-2.5">
+              <i className="fa fa-ellipsis-h text-[#777] hover:cursor-pointer hover:text-[#999]" />
+              <i className="fa fa-plus text-[#777] hover:cursor-pointer hover:text-[#999]" onClick={handleNewModal} />
             </div>
           </div>
-          <div className="project_status_card project_completed">
-            <div className="details">
-              <span>Completed</span>
-              <span className="counter">{completedItems.length}</span>
+          <div className="flex justify-between items-center w-auto h-10 py-[5px] px-[15px] rounded-bl-[4px] rounded-br-[4px] shadow-[1px_1px_4px_#0006] border-t-[3px] border-t-[#4bbafa]">
+            <div className="flex items-center gap-2.5 w-full">
+              <span className="uppercase text-[16px] font-semibold text-[#777]">In Progress</span>
+              <span className="flex items-center py-px px-[9px] border border-[#e5e5e5] rounded-[50px] uppercase text-[16px] font-semibold text-[#777]">{inProgressItems.length}</span>
             </div>
-            <div className="icons">
-              <i className="fa fa-ellipsis-h" />
+            <div className="flex gap-2.5">
+              <i className="fa fa-ellipsis-h text-[#777] hover:cursor-pointer hover:text-[#999]" />
+              {/* <i className="fa fa-plus text-[#777] hover:cursor-pointer hover:text-[#999]" onClick={handleNewModal} /> */}
+            </div>
+          </div>
+          <div className="flex justify-between items-center w-auto h-10 py-[5px] px-[15px] rounded-bl-[4px] rounded-br-[4px] shadow-[1px_1px_4px_#0006] border-t-[3px] border-t-[#63cf21]">
+            <div className="flex items-center gap-2.5 w-full">
+              <span className="uppercase text-[16px] font-semibold text-[#777]">Completed</span>
+              <span className="flex items-center py-px px-[9px] border border-[#e5e5e5] rounded-[50px] uppercase text-[16px] font-semibold text-[#777]">{completedItems.length}</span>
+            </div>
+            <div className="flex gap-2.5">
+              <i className="fa fa-ellipsis-h text-[#777] hover:cursor-pointer hover:text-[#999]" />
             </div>
           </div>
         </div>
 
-        <div className="project_task_body_row">
-          <div className="todo_task">
+        <div className="grid grid-cols-[repeat(3,1fr)] gap-5 w-auto">
+          <div>
             {todoItems}
             {/* <WorkTask /> */}
           </div>
-          <div className="inprogress_task">
+          <div>
             {inProgressItems}
             {/* <WorkTask /> */}
           </div>
-          <div className="completed_task">
+          <div>
             {completedItems}
             {/* <WorkTask /> */}
           </div>

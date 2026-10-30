@@ -1,7 +1,6 @@
 import React from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
-import './Template.css'
 import type { ProjectDraft, TemplateCard } from 'features/projects/types'
 
 interface TemplateProps {
@@ -24,18 +23,18 @@ const Template = ({nextPage, currentPage, details, setDetails, items}: TemplateP
     return (
       <>
         <div
-          className="project__template__contaier"
+          className="flex w-full h-[160px] mb-5 rounded-xl shadow-[1px_1px_5px_1px_#0003] cursor-pointer"
           onClick={() => handleClick(items.type)}
         >
-          <div className="image_container">
-            <img src={items.image} alt="" />
+          <div className="w-[250px] -mr-2.5 bg-[#efeeef]">
+            <img src={items.image} alt="" className="w-full h-[150px] rounded-tl-xl" />
           </div>
-          <div className="content_container">
-            <div className="content">
+          <div className="flex justify-between items-center w-full ml-2.5 bg-white rounded-tr-xl rounded-br-xl">
+            <div className="w-[80%] ml-5 max-[768px]:w-[70%]">
               <h3>{items.title}</h3>
               <p>{items.description}</p>
             </div>
-            <div className="icon">
+            <div className="flex py-2 px-1.5 mr-5">
               <i className="fa fa-chevron-right" />
             </div>
           </div>

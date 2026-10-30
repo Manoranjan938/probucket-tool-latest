@@ -16,7 +16,7 @@ import type { RootState } from "app/store";
 import type { TeamMember } from "features/team/types";
 import type { UpdateTaskRequest } from "features/tasks/types";
 
-import "./ExtraDetails.css";
+import { divider, formFieldCompact, modalHeader, smallModalCard, smallModalClose } from "shared/styles/sharedClasses";
 
 const ExtraDetails = ({ currentuser, myTeams, currentTask }: Props) => {
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -105,45 +105,45 @@ const ExtraDetails = ({ currentuser, myTeams, currentTask }: Props) => {
 
   return (
     <>
-      <div className="extra_details_container">
-        <div className="task_completion_progress_bars">
+      <div>
+        <div>
           <TaskStatusCompletion task={currentTask} />
         </div>
-        <div className="extra_owner_details">
-          <div className="owner__details__header">
-            <h5>Details</h5>
+        <div className="w-auto mt-2.5 border border-[#999] rounded-[10px]">
+          <div className="p-4 border-b border-[#999]">
+            <h5 className="text-[16px]">Details</h5>
           </div>
-          <div className="owner__details__body">
-            <div className="labels">
-              <div className="label">Assignee</div>
-              <div className="choose_one">
-                <span className="unassign">
-                  <div className="choose_one">
+          <div className="p-4">
+            <div className="grid grid-cols-[1.5fr_2fr] my-2.5">
+              <div className="flex flex-1">Assignee</div>
+              <div className="flex items-center gap-3">
+                <span>
+                  <div className="flex items-center gap-3">
                     {currentTask != null && (
                       <>
                         {/* <Avatar {...stringAvatar(currentTask.assignee)} /> */}
-                        <span className="name">{currentTask.assignee === "NA" ? "Un-Assigned" : currentTask.assignee}</span>
+                        <span>{currentTask.assignee === "NA" ? "Un-Assigned" : currentTask.assignee}</span>
                       </>
                     )}
                   </div>
                 </span>
-                <span className="change" onClick={handleTaskModal}>
+                <span className="text-[14px] font-semibold text-[#00f] cursor-pointer" onClick={handleTaskModal}>
                   Change
                 </span>
               </div>
             </div>
-            <div className="labels">
-              <div className="label">Reporter</div>
-              <div className="choose_one">
+            <div className="grid grid-cols-[1.5fr_2fr] my-2.5">
+              <div className="flex flex-1">Reporter</div>
+              <div className="flex items-center gap-3">
                 <Avatar {...stringAvatar(currentuser.fullName!)} />
-                <span className="name">{currentuser.fullName}</span>
+                <span>{currentuser.fullName}</span>
               </div>
             </div>
-            <div className="labels">
-              <div className="label">Priority</div>
-              <div className="choose_one">
-                <span className="unassign">{currentTask.priority}</span>
-                {/* <span className="change" onClick={handleTaskModal}>
+            <div className="grid grid-cols-[1.5fr_2fr] my-2.5">
+              <div className="flex flex-1">Priority</div>
+              <div className="flex items-center gap-3">
+                <span>{currentTask.priority}</span>
+                {/* <span className="text-[14px] font-semibold text-[#00f] cursor-pointer" onClick={handleTaskModal}>
                   Change
                 </span> */}
               </div>
@@ -157,16 +157,16 @@ const ExtraDetails = ({ currentuser, myTeams, currentTask }: Props) => {
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="task_status_container">
-          <div className="task_status_header">
-            <h4>Update Assignee and Priority</h4>
-            <i className="fa fa-times-circle-o" onClick={handleClose} />
+        <div className={smallModalCard}>
+          <div className={modalHeader}>
+            <h4 className="m-0">Update Assignee and Priority</h4>
+            <i className={`fa fa-times-circle-o ${smallModalClose}`} onClick={handleClose} />
           </div>
-          <div className="divider" />
-          <div className="task_status_body">
+          <div className={divider} />
+          <div>
             <Autocomplete
               id="country-select-demo"
-              className="fields"
+              className={formFieldCompact}
               fullWidth
               value={assignee as TeamMember | null}
               onChange={(event, value) => {
@@ -191,7 +191,7 @@ const ExtraDetails = ({ currentuser, myTeams, currentTask }: Props) => {
                 />
               )}
             />
-            {/* <FormControl fullWidth className="fields">
+            {/* <FormControl fullWidth className={formFieldCompact}>
               <InputLabel id="demo-simple-select-label">Priority</InputLabel>
               <Select
                 labelId="demo-simple-select-label"

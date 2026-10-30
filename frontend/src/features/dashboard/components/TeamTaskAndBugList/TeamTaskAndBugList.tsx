@@ -1,12 +1,11 @@
 import React from "react";
 
-import "./TeamTaskAndBugList.css";
 
 const TeamTaskAndBugList = () => {
   return (
     <>
-      <div className="task_and_bug_container">
-        <div className="task_list">
+      <div className="mt-5 mr-5 p-4 rounded-[10px] bg-[#efefef]">
+        <div>
             <h1>Task List</h1>
         </div>
         {/* <div className="bug_list">

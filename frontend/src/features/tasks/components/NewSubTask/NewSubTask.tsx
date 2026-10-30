@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
 import { setSubtaskList } from "features/tasks/store/taskAction";
 import type { AppDispatch, RootState } from "app/store";
+import { divider, formField, modalCard, modalClose, modalHeader } from "shared/styles/sharedClasses";
 import type { CreateSubtaskRequest, Subtask } from "features/tasks/types";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -135,15 +136,15 @@ const NewSubTask = ({ open, setOpen, currentProject, currentTask, setSubtasks }:
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="new_task">
-          <div className="new_task_header">
+        <div className={modalCard}>
+          <div className={modalHeader}>
             <h3>New SubTask</h3>
-            <i className="fa fa-times-circle-o" onClick={handleSubTaskClose} />
+            <i className={`fa fa-times-circle-o ${modalClose}`} onClick={handleSubTaskClose} />
           </div>
-          <div className="divider" />
+          <div className={divider} />
           <TextField
             fullWidth
-            className="input_form"
+            className={formField}
             id="outlined-multiline-static"
             label="About subtask..."
             multiline
@@ -170,7 +171,7 @@ const NewSubTask = ({ open, setOpen, currentProject, currentTask, setSubtasks }:
               <MenuItem value="HIGH">HIGH</MenuItem>
             </Select>
           </FormControl>
-          <div className="divider" />
+          <div className={divider} />
           <Button
             variant="contained"
             color="primary"

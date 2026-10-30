@@ -1,43 +1,42 @@
 import React from 'react'
 
-import './PersonalTask.css'
 
 const PersonalTask = () => {
   return (
     <>
-      <div className="personal_task_container">
+      <div className="w-auto px-2.5">
         <h1>Personal Tasks</h1>
-        <div className="task_contents">
-          <div className="task__header">
-            <span className="status">Status</span>
-            <span className="task">Task Name</span>
-            <span className="priority">Priority</span>
-            <span className="created">Created On</span>
-            <span className="completed">Completed By</span>
-            <span className="action">Action</span>
+        <div>
+          <div className="flex w-auto mt-2.5 p-2.5 border-t border-b border-[#9999] bg-[#f55eae] text-white">
+            <span className="uppercase text-[17px] font-bold flex items-center w-[150px]">Status</span>
+            <span className="uppercase text-[17px] font-bold w-[320px] max-[1400px]:w-[250px]">Task Name</span>
+            <span className="uppercase text-[17px] font-bold flex items-center gap-2.5 w-[170px] ml-[5px] max-[1400px]:w-[150px]">Priority</span>
+            <span className="uppercase text-[17px] font-bold w-[200px] max-[1400px]:w-[150px]">Created On</span>
+            <span className="uppercase text-[17px] font-bold w-[180px] max-[1400px]:w-[150px]">Completed By</span>
+            <span className="uppercase text-[17px] font-bold w-[110px] max-[1400px]:w-[120px]">Action</span>
           </div>
-          <div className="task__body">
-            <div className="task_row">
-              <div className="status">
-                <span className="icon_status" />
-                <span className="status_text">Todo</span>
+          <div>
+            <div className="flex items-center p-2.5">
+              <div className="flex items-center w-[150px]">
+                <span className="flex items-center w-2.5 h-[11px] mr-2.5 rounded-[2px] bg-[#777777]" />
+                <span className="flex items-center font-semibold">Todo</span>
               </div>
-              <div className="task">
-                <span>Going to add some style in dashboard</span>
+              <div className="w-[320px] max-[1400px]:w-[250px]">
+                <span className="font-semibold">Going to add some style in dashboard</span>
               </div>
-              <div className="priority">
-                <span className="icon_priority_low" >
-                  <i className='fa fa-flag' />
+              <div className="flex items-center gap-2.5 w-[170px] ml-[5px] max-[1400px]:w-[150px]">
+                <span>
+                  <i className='fa fa-flag text-[#9999]' />
                 </span>
-                <span className="priority_task_text">High</span>
+                <span className="flex items-center font-semibold">High</span>
               </div>
-              <div className="created">
-                <span>4 Days ago</span>
+              <div className="w-[200px] max-[1400px]:w-[150px]">
+                <span className="font-semibold">4 Days ago</span>
               </div>
-              <div className="completed">
-                <span>2 Days Remaining</span>
+              <div className="w-[180px] max-[1400px]:w-[150px]">
+                <span className="font-semibold">2 Days Remaining</span>
               </div>
-              <div className="action">
+              <div className="w-[110px] max-[1400px]:w-[120px]">
                 <span>Edit</span>
               </div>
             </div>

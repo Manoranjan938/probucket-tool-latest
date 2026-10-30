@@ -4,7 +4,6 @@ import React from "react";
 import type { PropsWithChildren } from "react";
 import { useLocation } from "react-router-dom";
 
-import "./DashboardScreen.css";
 
 const DashboardScreen = ({ children }: PropsWithChildren) => {
   let { search } = useLocation();
@@ -15,12 +14,12 @@ const DashboardScreen = ({ children }: PropsWithChildren) => {
 
   return (
     <>
-      <div className="sidebar__layout">
-        <div className="const">
+      <div>
+        <div>
           <DashboardHeader />
           <Sidebar id={param} name={name} />
         </div>
-        <div className="sidebar__main">{children}</div>
+        <div className="pt-[100px] pl-[300px]">{children}</div>
       </div>
     </>
   );

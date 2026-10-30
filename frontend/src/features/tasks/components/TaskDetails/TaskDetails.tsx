@@ -10,7 +10,6 @@ import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
 import { GrAttachment } from "react-icons/gr";
 import { VscTypeHierarchySub } from "react-icons/vsc";
 
-import "./TaskDetails.css";
 import { Button, Menu, MenuItem, type ButtonProps } from "@mui/material";
 import SubTask from "features/tasks/components/SubTask/SubTask";
 import ExtraDetails from "features/tasks/components/ExtraDetails/ExtraDetails";
@@ -135,43 +134,43 @@ const TaskDetails = ({ close, task, setSubtasks, allSubtask }: { close: () => vo
 
   return (
     <>
-      <div className="task_details_container">
-        <div className="task_details_header">
-          <div className="identifier">
-            <div className="type_icon">
+      <div className="w-[80%] h-[80%] my-[3%] mx-auto py-6 px-8 rounded-xl bg-white">
+        <div className="flex justify-between">
+          <div className="flex items-center gap-[5px]">
+            <div>
               {type === "epic" && (
-                <span className="icon_epic">
+                <span>
                   <GiElectric />
                 </span>
               )}
               {type === "bug" && (
-                <span className="icon_bug">
+                <span>
                   <GoPrimitiveDot />
                 </span>
               )}
               {type === "task" && (
-                <span className="icon_task">
+                <span className="p-px rounded-[2px] bg-[#2cceb8] text-[14px] text-white">
                   <GoCheck />
                 </span>
               )}
             </div>
-            <Link to="#" className="unique_ids">
+            <Link to="#" className="text-[15px]">
               {task.taskSequence}
             </Link>
           </div>
-          <div className="extra_icons">
+          <div className="flex gap-[30px] text-[26px] cursor-pointer">
             <AiFillEye />
             <FiShare2 />
             <BsThreeDots />
             <AiOutlineClose onClick={close} />
           </div>
         </div>
-        <div className="task_details_body">
-          <div className="task_operatives">
-            <div className="task_title">
-              <h1>{task.taskName}</h1>
+        <div className="grid grid-cols-[2fr_1fr] gap-10 mt-5">
+          <div className="h-[550px] pr-2.5 overflow-y-auto max-[1500px]:h-[450px]">
+            <div>
+              <h1 className="font-medium">{task.taskName}</h1>
             </div>
-            <div className="tasks_links">
+            <div className="flex gap-2.5 mt-2.5">
               <Button variant="contained" color="inherit">
                 <GrAttachment /> &nbsp; Attach
               </Button>
@@ -183,10 +182,11 @@ const TaskDetails = ({ close, task, setSubtasks, allSubtask }: { close: () => vo
                 <VscTypeHierarchySub /> &nbsp; Create Subtask
               </Button>
             </div>
-            <div className="description">
-              <h5>Description</h5>
-              <div className="text-field">
+            <div className="w-auto mt-5">
+              <h5 className="font-medium">Description</h5>
+              <div className="mt-[5px] mb-2.5 py-4 px-8 border border-[#b7acac] rounded-[3px]">
                 <input
+                  className="w-full bg-transparent border-none outline-none text-[18px]"
                   type="text"
                   name=""
                   id=""
@@ -196,22 +196,22 @@ const TaskDetails = ({ close, task, setSubtasks, allSubtask }: { close: () => vo
                   }
                 />
               </div>
-              <div className="desc_btns">
+              <div className="flex gap-2.5">
                 <Button variant="contained">Save</Button>
                 <Button variant="contained" color="inherit">
                   Cancel
                 </Button>
               </div>
             </div>
-            <div className="subtasks_list">
+            <div>
               {allSubtask.length > 0 && <SubTask subtask={allSubtask} />}
             </div>
-            <div className="activities">
+            <div className="mt-[30px]">
               <TaskActivity />
             </div>
           </div>
-          <div className="task_extras">
-            <div className="status_btn">
+          <div>
+            <div className="[&>button]:flex [&>button]:gap-2.5 [&>button]:items-center!">
               <Button
                 variant="contained"
                 color={taskStatus.type}

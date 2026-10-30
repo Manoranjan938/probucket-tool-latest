@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 
-import "./SubTask.css";
 
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { BsPlus } from "react-icons/bs";
@@ -39,11 +38,11 @@ const SubTask = ({ subtask }: { subtask: Subtask[] }) => {
 
   return (
     <>
-      <div className="subtask_container">
-        <div className="subtask_header">
-          <h5>Subtasks</h5>
-          <div className="subtask_icons">
-            <div className="order_by_btn" onClick={handleClick}>
+      <div className="w-auto mt-[5px]">
+        <div className="flex justify-between items-center my-2.5">
+          <h5 className="text-[15px] text-[#909090]">Subtasks</h5>
+          <div className="flex items-center gap-2.5 text-[16px] font-semibold">
+            <div className="flex items-center gap-[5px] py-[5px] px-2.5 rounded-[2px] text-[14px] font-semibold hover:cursor-pointer hover:bg-[#e5e5e5]" onClick={handleClick}>
               <span>Order by</span>
               <RiArrowDropDownLine />
             </div>
@@ -54,41 +53,41 @@ const SubTask = ({ subtask }: { subtask: Subtask[] }) => {
             </Tooltip>
           </div>
         </div>
-        <div className="subtask_body">
+        <div>
           {subtask.map((item, index) => (
-            <div className="subtask_card" key={index}>
-              <div className="details">
-                <div className="subtask_type_icon">
+            <div className="flex justify-between items-center w-auto mb-2.5 py-3 px-2.5 border border-[#e5e5e5] rounded-[3px] shadow-[1px_1px_4px_#0006] cursor-pointer" key={index}>
+              <div className="flex items-center gap-2.5 w-full">
+                <div>
                   {subtaskType === "bug" && (
-                    <span className="icon_bug">
+                    <span>
                       <GoPrimitiveDot />
                     </span>
                   )}
                   {subtaskType === "task" && (
-                    <span className="icon_task">
+                    <span className="p-px rounded-[2px] bg-[#2cceb8] text-[14px] text-white">
                       <GoCheck />
                     </span>
                   )}
                   {subtaskType === "subtask" && (
-                    <span className="icon_subtask">
+                    <span className="p-0.5 rounded-[3px] bg-[#4acef9] text-[13px] text-white">
                       <BiCopyAlt />
                     </span>
                   )}
                 </div>
-                <div className="subtask_unique_id">
+                <div className="ml-2.5">
                   <Link to="#">
-                    <span>{item.taskSequence}</span>
+                    <span className="uppercase text-[14px] font-bold text-[#4acef9]">{item.taskSequence}</span>
                   </Link>
                 </div>
-                <div className="subtask_title">
+                <div className="w-[70%] ml-2.5">
                   <p>{truncate(item.taskName, 55)}</p>
                 </div>
               </div>
-              <div className="subtask_extras">
-                <div className="subtask_priority">
+              <div className="flex items-center gap-[5px]">
+                <div>
                   <Tooltip title="Priority: Low">
                     <IconButton>
-                      <span className="subtask_priority_icon">
+                      <span className="text-[16px]">
                         <i className="fa fa-flag" />
                       </span>
                     </IconButton>
@@ -97,18 +96,18 @@ const SubTask = ({ subtask }: { subtask: Subtask[] }) => {
                   <i className="fa fa-flag" />
                 </span> */}
                 </div>
-                <div className="subtask_asignee" onClick={handleAssigneeMenu}>
+                <div onClick={handleAssigneeMenu}>
                   <Tooltip title="Assignee: Manoranjan Sahoo">
                     <IconButton>
-                      <span className="subtask_priority_icon">
+                      <span className="text-[16px]">
                         <i className="fa fa-user" />
                       </span>
                     </IconButton>
                   </Tooltip>
                 </div>
-                <div className="subtask_status" onClick={handleStatusMenu}>
-                  <div className="status_name_icon">
-                    <span>{item.status}</span>
+                <div onClick={handleStatusMenu}>
+                  <div className="flex items-center py-0.5 px-[5px] rounded-[3px] bg-[#e5e5e5] uppercase font-bold cursor-pointer">
+                    <span className="text-[13px]">{item.status}</span>
                     <RiArrowDropDownLine />
                   </div>
                 </div>

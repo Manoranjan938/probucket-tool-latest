@@ -1,13 +1,14 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 const fromSrc = (dir: string) =>
   fileURLToPath(new URL(`./src/${dir}`, import.meta.url));
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     // Same absolute imports as before (e.g. "features/tasks/...") – keep in sync with tsconfig.app.json "paths"
     alias: {

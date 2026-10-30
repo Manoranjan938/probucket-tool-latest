@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import "features/auth/styles/Auth.css";
+import * as auth from "features/auth/styles/authClasses";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
 import type { SnackbarState, ApiError } from "shared/types";
 
@@ -78,47 +78,47 @@ const Forgot = () => {
   };
 
   return (
-    <div className="auth">
-      <div className="auth__main">
-        <Link to="/" className="auth__brand">
-          <img src={image} alt="" />
-          <span>ProBucket</span>
+    <div className={auth.layout}>
+      <div className={auth.main}>
+        <Link to="/" className={auth.brand}>
+          <img src={image} alt="" className={auth.brandLogo} />
+          <span className={auth.brandName}>ProBucket</span>
         </Link>
 
-        <div className="auth__content">
-          <h1 className="auth__title">Forgot your password?</h1>
-          <p className="auth__subtitle">
+        <div className={auth.content}>
+          <h1 className={auth.title}>Forgot your password?</h1>
+          <p className={auth.subtitle}>
             Enter your email and we'll send you a link to reset your password.
           </p>
 
           {/* The form only lets Enter trigger the Continue button's onClick (handleContinue calls preventDefault) */}
           <form noValidate>
-            <div className="auth__field">
-              <div className="auth__label__row">
-                <label htmlFor="forgot-email" className="auth__label">Email</label>
+            <div className={auth.field}>
+              <div className={auth.labelRow}>
+                <label htmlFor="forgot-email" className={auth.label}>Email</label>
               </div>
               <input
                 id="forgot-email"
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="auth__input"
+                className={auth.input}
                 placeholder="Enter email"
                 autoComplete="username"
                 aria-invalid={error.show}
               />
               {error.show ? (
-                <p className="auth__error">{error.message}</p>
+                <p className={auth.error}>{error.message}</p>
               ) : null}
             </div>
 
-            <button type="submit" className="auth__btn auth__btn--primary" onClick={handleContinue}>
+            <button type="submit" className={auth.btnPrimary} onClick={handleContinue}>
               Continue
             </button>
           </form>
 
-          <div className="auth__footer">
-            <Link to="/login">Return to login</Link>
+          <div className={auth.footer}>
+            <Link to="/login" className={auth.link}>Return to login</Link>
           </div>
         </div>
       </div>

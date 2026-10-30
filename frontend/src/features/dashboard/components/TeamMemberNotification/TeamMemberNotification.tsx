@@ -2,7 +2,6 @@ import { Button } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import "./TeamMemberNotification.css";
 
 const TeamMemberNotification = () => {
   const navigate = useNavigate();
@@ -13,10 +12,10 @@ const TeamMemberNotification = () => {
 
   return (
     <>
-      <div className="team_member_noti_container">
-        <div className="noti_container">
+      <div className="flex justify-between mt-5 mb-2.5 mr-5 p-4 rounded-[10px] bg-[#fee8c8]">
+        <div className="flex items-center gap-2.5 text-[18px]">
           <i className="fa fa-exclamation-circle" />
-          <span>
+          <span className="text-[18px] font-semibold">
             You don't have any team members. To work with team add some team
             members.
           </span>

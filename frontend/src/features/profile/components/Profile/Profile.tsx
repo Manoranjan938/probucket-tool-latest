@@ -90,32 +90,32 @@ const Profile = ({ user }: Props) => {
 
   return (
     <>
-      <div className="login_container">
-        <div className="login__wrapper">
-          <div className="login__header">
-            <img src={image} alt="" />
-            <span>ProBucket</span>
+      <div className="w-full">
+        <div className="w-[400px] my-[2%] mx-auto p-4">
+          <div className="flex justify-center">
+            <img src={image} alt="" className="w-10 h-10" />
+            <span className="items-center text-[28px] font-semibold">ProBucket</span>
           </div>
-          <div className="login__body">
-            <div className="login__body__header">
-              <span>Update your password</span>
-              <h5>Probucket</h5>
+          <div className="mt-5 p-10 rounded-[5px] shadow-[1px_10px_30px_#0003]">
+            <div className="text-center">
+              <span className="text-[16px] font-semibold text-[#999]">Update your password</span>
+              <h5 className="mt-3 text-[18px] text-[#b5b5b5]">Probucket</h5>
             </div>
-            <div className="login__body__content">
+            <div className="block mt-5">
               <input
                 type="password"
                 value={password}
-                className="input__email"
+                className="w-[305px] h-[30px] my-2.5 pl-2.5 border-2 border-[#e5e5e5] rounded-[3px] bg-[#fefefe] [outline:#827ed8]"
                 placeholder="Enter password"
                 onChange={(e) => setPassword(e.target.value)}
               />
               {error.showPassword && (
-                <div className="error_msg">
-                  <span>{error.message}</span>
+                <div className="m-0">
+                  <span className="ml-[5px] text-[12px] font-semibold text-[red] uppercase">{error.message}</span>
                 </div>
               )}
 
-              <button className="login__btn" onClick={handleSubmit}>
+              <button className="w-full h-[35px] mt-5 border-none rounded-[3px] bg-[#827ed8] font-semibold text-white cursor-pointer" onClick={handleSubmit}>
                 Continue
               </button>
             </div>

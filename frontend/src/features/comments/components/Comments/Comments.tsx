@@ -1,7 +1,6 @@
 import { Avatar, Button, Snackbar } from "@mui/material";
 import React, { useState, useEffect } from "react";
 
-import "./Comments.css";
 
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
@@ -130,13 +129,14 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
 
   return (
     <>
-      <div className="comments_container">
-        <div className="user_avatar">
+      <div className="flex w-auto mt-5">
+        <div className="w-[50px] h-[50px] mr-[15px]">
           <Avatar {...stringAvatar(currentUser.fullName!)} />
         </div>
-        <div className="comments">
-          <div className="comment-text-field">
+        <div className="w-full">
+          <div className="py-[.7rem] px-[1.2rem] border border-[#b7acac] rounded-[3px]">
             <input
+              className="w-full bg-transparent border-none outline-none text-[18px]"
               type="text"
               name=""
               id=""
@@ -145,7 +145,7 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
               onChange={(e) => setComment(e.target.value)}
             />
           </div>
-          <div className="comment__btns">
+          <div className="flex gap-2.5 mt-2.5">
             <Button variant="contained" color="primary" onClick={handleComment}>
               Save
             </Button>

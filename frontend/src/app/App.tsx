@@ -1,4 +1,3 @@
-import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Home from "features/landing/pages/Home/Home";
 import Login from "features/auth/pages/Login/Login";
@@ -54,7 +53,7 @@ if (jwtToken) {
 function App() {
   return (
     <Provider store={store}>
-      <div className="app">
+      <div className="h-screen">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

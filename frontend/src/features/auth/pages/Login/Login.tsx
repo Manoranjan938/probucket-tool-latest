@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./Login.css";
-import "features/auth/styles/Auth.css";
+import * as auth from "features/auth/styles/authClasses";
 
 import image from "shared/assets/images/logo.png";
 import googleImage from "shared/assets/images/google-logo.png";
@@ -128,49 +127,49 @@ const Login = ({getUsers}: Props) => {
 
   return (
     <>
-      <div className="auth">
-        <div className="auth__main">
-          <Link to="/" className="auth__brand">
-            <img src={image} alt="" />
-            <span>ProBucket</span>
+      <div className={auth.layout}>
+        <div className={auth.main}>
+          <Link to="/" className={auth.brand}>
+            <img src={image} alt="" className={auth.brandLogo} />
+            <span className={auth.brandName}>ProBucket</span>
           </Link>
 
-          <div className="auth__content">
-            <h1 className="auth__title">Welcome back</h1>
-            <p className="auth__subtitle">Log in to continue to ProBucket.</p>
+          <div className={auth.content}>
+            <h1 className={auth.title}>Welcome back</h1>
+            <p className={auth.subtitle}>Log in to continue to ProBucket.</p>
 
             {/* The form only lets Enter trigger the Continue button's onClick (handleSubmit calls preventDefault) */}
             <form noValidate>
-              <div className="auth__field">
-                <div className="auth__label__row">
-                  <label htmlFor="login-email" className="auth__label">Email</label>
+              <div className={auth.field}>
+                <div className={auth.labelRow}>
+                  <label htmlFor="login-email" className={auth.label}>Email</label>
                 </div>
                 <input
                   id="login-email"
                   type="text"
                   value={email}
-                  className="auth__input"
+                  className={auth.input}
                   placeholder="Enter email"
                   autoComplete="username"
                   aria-invalid={error.showEmail}
                   onChange={(e) => setEmail(e.target.value)}
                 />
                 {error.showEmail && (
-                  <p className="auth__error">{error.message}</p>
+                  <p className={auth.error}>{error.message}</p>
                 )}
               </div>
 
-              <div className="auth__field">
-                <div className="auth__label__row">
-                  <label htmlFor="login-password" className="auth__label">Password</label>
-                  <Link to="/resetpassword">Can't login?</Link>
+              <div className={auth.field}>
+                <div className={auth.labelRow}>
+                  <label htmlFor="login-password" className={auth.label}>Password</label>
+                  <Link to="/resetpassword" className={auth.link}>Can't login?</Link>
                 </div>
-                <div className="auth__input__wrap">
+                <div className={auth.inputWrap}>
                   <input
                     id="login-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    className="auth__input auth__input--password"
+                    className={auth.inputPassword}
                     placeholder="Enter password"
                     autoComplete="current-password"
                     aria-invalid={error.showPassword}
@@ -178,7 +177,7 @@ const Login = ({getUsers}: Props) => {
                   />
                   <button
                     type="button"
-                    className="auth__toggle"
+                    className={auth.toggle}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
@@ -187,24 +186,24 @@ const Login = ({getUsers}: Props) => {
                   </button>
                 </div>
                 {error.showPassword && (
-                  <p className="auth__error">{error.message}</p>
+                  <p className={auth.error}>{error.message}</p>
                 )}
               </div>
 
-              <button type="submit" className="auth__btn auth__btn--primary" onClick={handleSubmit}>
+              <button type="submit" className={auth.btnPrimary} onClick={handleSubmit}>
                 Continue
               </button>
             </form>
 
-            <div className="auth__divider">or</div>
+            <div className={auth.divider}>or</div>
 
-            <a className="auth__btn auth__btn--google" href={GOOGLE_AUTH_URL}>
-              <img src={googleImage} alt="" />
+            <a className={auth.btnGoogle} href={GOOGLE_AUTH_URL}>
+              <img src={googleImage} alt="" className={auth.btnGoogleLogo} />
               <span>Continue with Google</span>
             </a>
 
-            <div className="auth__footer">
-              <Link to="/signup">Sign up for an account</Link>
+            <div className={auth.footer}>
+              <Link to="/signup" className={auth.link}>Sign up for an account</Link>
             </div>
           </div>
         </div>

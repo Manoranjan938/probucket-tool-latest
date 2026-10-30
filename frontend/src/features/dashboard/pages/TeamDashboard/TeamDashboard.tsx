@@ -4,7 +4,6 @@ import React from "react";
 import type { PropsWithChildren } from "react";
 import { useLocation } from "react-router-dom";
 
-import "./TeamDashboard.css";
 
 const TeamDashboard = ({ children }: PropsWithChildren) => {
   
@@ -16,12 +15,12 @@ const TeamDashboard = ({ children }: PropsWithChildren) => {
 
   return (
     <>
-      <div className="team_sidebar__layout">
-        <div className="const">
+      <div>
+        <div>
           <DashboardHeader />
           <TeamSidebar id={param} name={name} />
         </div>
-        <div className="team_sidebar__main">{children}</div>
+        <div className="h-full ml-[310px] pt-[100px]">{children}</div>
       </div>
     </>
   );

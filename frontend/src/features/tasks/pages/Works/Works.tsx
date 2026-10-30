@@ -13,7 +13,6 @@ import { compose } from "redux";
 import type { AppDispatch, RootState } from "app/store";
 import type { TaskListItem } from "features/tasks/types";
 
-import "./Works.css";
 
 const Works = ({ title, currentProject, getTaskList, myTasks }: { title: string } & Props) => {
   const [tasks, getTaskLists] = useGetTaskLists();
@@ -57,7 +56,7 @@ const Works = ({ title, currentProject, getTaskList, myTasks }: { title: string 
       ) : (
         <>
           <DataNotFound text="No Tasks are there... Click the Button below to create a task." />
-          <div className="task_create_btn" onClick={handleOpenTask}>
+          <div className="flex justify-center" onClick={handleOpenTask}>
             <Button title="Create Task" />
           </div>
         </>

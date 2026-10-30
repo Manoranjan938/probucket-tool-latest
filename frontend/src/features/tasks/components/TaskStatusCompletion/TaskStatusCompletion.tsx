@@ -3,7 +3,6 @@ import useGetTaskStatistics from "features/tasks/hooks/useGetTaskStatistics";
 import React from "react";
 import { useEffect } from "react";
 
-import "./TaskStatusCompletion.css";
 import type { TaskDetails } from "features/tasks/types";
 
 const TaskStatusCompletion = ({ task }: { task: Partial<TaskDetails> }) => {
@@ -15,12 +14,12 @@ const TaskStatusCompletion = ({ task }: { task: Partial<TaskDetails> }) => {
 
   return (
     <>
-      <div className="task__status__container">
-        <div className="task__status__header">
-          <h5>Task Progress</h5>
+      <div className="w-auto mt-2.5 border border-[#999] rounded-[10px]">
+        <div className="p-4 border-b border-[#999]">
+          <h5 className="text-[16px]">Task Progress</h5>
         </div>
-        <div className="task__status__body">
-          <div className="status__in__progress">
+        <div className="flex justify-around p-4">
+          <div>
             <Box sx={{ position: "relative", display: "inline-flex" }}>
               <CircularProgress
                 variant="determinate"
@@ -47,11 +46,11 @@ const TaskStatusCompletion = ({ task }: { task: Partial<TaskDetails> }) => {
                 </Typography>
               </Box>
             </Box>
-            <div className="status__label">
-              <span>In Progress</span>
+            <div>
+              <span className="text-[16px] font-semibold text-[#777]">In Progress</span>
             </div>
           </div>
-          <div className="status__done">
+          <div>
             <Box sx={{ position: "relative", display: "inline-flex" }}>
               <CircularProgress
                 variant="determinate"
@@ -79,11 +78,11 @@ const TaskStatusCompletion = ({ task }: { task: Partial<TaskDetails> }) => {
                 </Typography>
               </Box>
             </Box>
-            <div className="status__label">
-              <span>Completed</span>
+            <div>
+              <span className="text-[16px] font-semibold text-[#777]">Completed</span>
             </div>
           </div>
-          <div className="status__not__started">
+          <div>
             <Box sx={{ position: "relative", display: "inline-flex" }}>
               <CircularProgress
                 variant="determinate"
@@ -111,8 +110,8 @@ const TaskStatusCompletion = ({ task }: { task: Partial<TaskDetails> }) => {
                 </Typography>
               </Box>
             </Box>
-            <div className="status__label">
-              <span>Not Started</span>
+            <div>
+              <span className="text-[16px] font-semibold text-[#777]">Not Started</span>
             </div>
           </div>
         </div>

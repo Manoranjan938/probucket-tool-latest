@@ -1,3 +1,31 @@
+/* Tailwind without Preflight: only the theme variables and the utilities.
+   The utilities are imported unlayered on purpose – MUI's (emotion) styles are
+   unlayered too, so both keep competing by specificity and order like the old CSS did. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css";
+
+/* Plain :hover (Tailwind v4 wraps hover in @media (hover: hover) by default) */
+@custom-variant hover (&:hover);
+
+/* Landing and auth palette (was --landing-* / --auth-*) */
+@theme {
+  --color-brand-primary: #827ed8;
+  --color-brand-strong: #5f59c9;
+  --color-brand-soft: #f1f0fc;
+  --color-brand-ink: #1f1d3a;
+  --color-brand-text: #55536e;
+  --color-brand-muted: #8a889f;
+  --color-brand-border: #e7e6f2;
+  --color-brand-surface: #ffffff;
+  --color-brand-surface-alt: #f8f8fc;
+  --color-brand-danger: #d93a3a;
+
+  --radius-brand: 14px;
+
+  --shadow-brand: 0 1px 2px rgba(31, 29, 58, 0.06),
+    0 8px 24px rgba(31, 29, 58, 0.06);
+}
+
 *{
   margin: 0;
 }
@@ -14,4 +42,14 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* These two used to sit in DashboardHeader.css and ChooseTemplate.css but applied to the whole app */
+a{
+  text-decoration: none;
+  color: #585757;
+}
+
+h4{
+  margin-bottom: 10px;
 }

@@ -12,13 +12,12 @@ import {
 import { data } from "features/dashboard/components/DashboardGraph/Data/BarData";
 import { data1 } from "features/dashboard/components/DashboardGraph/Data/PieData";
 
-import './DashboardGraph.css'
 
 const DashboardGraph = () => {
   return (
     <>
-      <div className="graph_container">
-        <div className="days_bar_graph">
+      <div className="grid grid-cols-[1fr_1fr] gap-2.5 mx-2.5">
+        <div>
           <BarChart
             width={500}
             height={400}
@@ -38,7 +37,7 @@ const DashboardGraph = () => {
             {/* <Bar dataKey="uv" fill="#82ca9d" /> */}
           </BarChart>
         </div>
-        <div className="total_time_graph">
+        <div>
           <PieChart width={400} height={400}>
             <Pie
               dataKey="value"

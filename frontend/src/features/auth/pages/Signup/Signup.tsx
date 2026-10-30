@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "./Signup.css";
-import "features/auth/styles/Auth.css";
+import * as auth from "features/auth/styles/authClasses";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import type { SnackbarState, ApiError } from "shared/types";
 
@@ -137,75 +136,75 @@ const Signup = () => {
   }, [registerRequest]);
 
   return (
-    <div className="auth">
-      <div className="auth__main">
-        <Link to="/" className="auth__brand">
-          <img src={image} alt="" />
-          <span>ProBucket</span>
+    <div className={auth.layout}>
+      <div className={auth.main}>
+        <Link to="/" className={auth.brand}>
+          <img src={image} alt="" className={auth.brandLogo} />
+          <span className={auth.brandName}>ProBucket</span>
         </Link>
 
-        <div className="auth__content">
-          <h1 className="auth__title">Create your account</h1>
-          <p className="auth__subtitle">Sign up for your account.</p>
+        <div className={auth.content}>
+          <h1 className={auth.title}>Create your account</h1>
+          <p className={auth.subtitle}>Sign up for your account.</p>
 
           {/* The form only lets Enter trigger the Continue button's onClick (handleContinue calls preventDefault) */}
           <form noValidate>
-            <div className="auth__field">
-              <div className="auth__label__row">
-                <label htmlFor="signup-email" className="auth__label">Email</label>
+            <div className={auth.field}>
+              <div className={auth.labelRow}>
+                <label htmlFor="signup-email" className={auth.label}>Email</label>
               </div>
               <input
                 id="signup-email"
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="auth__input"
+                className={auth.input}
                 placeholder="Enter email"
                 autoComplete="username"
                 aria-invalid={validError.showEmail}
               />
               {validError.showEmail ? (
-                <p className="auth__error">{validError.message}</p>
+                <p className={auth.error}>{validError.message}</p>
               ) : null}
             </div>
 
-            <div className="auth__field">
-              <div className="auth__label__row">
-                <label htmlFor="signup-name" className="auth__label">Full name</label>
+            <div className={auth.field}>
+              <div className={auth.labelRow}>
+                <label htmlFor="signup-name" className={auth.label}>Full name</label>
               </div>
               <input
                 id="signup-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="auth__input"
+                className={auth.input}
                 placeholder="Enter full name"
                 autoComplete="name"
                 aria-invalid={validError.showName}
               />
               {validError.showName ? (
-                <p className="auth__error">{validError.message}</p>
+                <p className={auth.error}>{validError.message}</p>
               ) : null}
             </div>
 
-            <div className="auth__field">
-              <div className="auth__label__row">
-                <label htmlFor="signup-password" className="auth__label">Password</label>
+            <div className={auth.field}>
+              <div className={auth.labelRow}>
+                <label htmlFor="signup-password" className={auth.label}>Password</label>
               </div>
-              <div className="auth__input__wrap">
+              <div className={auth.inputWrap}>
                 <input
                   id="signup-password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="auth__input auth__input--password"
+                  className={auth.inputPassword}
                   placeholder="Enter password"
                   autoComplete="new-password"
                   aria-invalid={validError.showPassword}
                 />
                 <button
                   type="button"
-                  className="auth__toggle"
+                  className={auth.toggle}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
                   onClick={() => setShowPassword(!showPassword)}
@@ -214,41 +213,41 @@ const Signup = () => {
                 </button>
               </div>
               {validError.showPassword ? (
-                <p className="auth__error">{validError.message}</p>
+                <p className={auth.error}>{validError.message}</p>
               ) : null}
             </div>
 
-            <button type="submit" className="auth__btn auth__btn--primary" onClick={handleContinue}>
+            <button type="submit" className={auth.btnPrimary} onClick={handleContinue}>
               Continue
             </button>
           </form>
 
-          <div className="auth__divider">or</div>
+          <div className={auth.divider}>or</div>
 
           {/* Has no handler yet – Google sign-in is listed as "Coming soon" on the landing page */}
-          <button type="button" className="auth__btn auth__btn--google">
-            <img src={googleImage} alt="" />
+          <button type="button" className={auth.btnGoogle}>
+            <img src={googleImage} alt="" className={auth.btnGoogleLogo} />
             <span>Continue with Google</span>
           </button>
 
-          <div className="auth__footer">
-            <Link to="/login">Already have an account? Login</Link>
+          <div className={auth.footer}>
+            <Link to="/login" className={auth.link}>Already have an account? Login</Link>
           </div>
         </div>
       </div>
 
-      <aside className="auth__panel">
-        <div className="auth__panel__inner">
-          <span className="auth__panel__eyebrow">How it works</span>
-          <h2 className="auth__panel__title">Up and running in three steps</h2>
+      <aside className={auth.panel}>
+        <div className={auth.panelInner}>
+          <span className={auth.panelEyebrow}>How it works</span>
+          <h2 className={auth.panelTitle}>Up and running in three steps</h2>
           {/* Same steps as the landing page's "How it works" section */}
-          <ol className="auth__panel__list">
+          <ol className={auth.panelList}>
             {steps.map((step, index) => (
-              <li key={step.title}>
-                <span className="auth__panel__icon">{index + 1}</span>
+              <li key={step.title} className={auth.panelItem}>
+                <span className={auth.panelIcon}>{index + 1}</span>
                 <div>
-                  <h3>{step.title}</h3>
-                  <p>{step.description}</p>
+                  <h3 className={auth.panelItemTitle}>{step.title}</h3>
+                  <p className={auth.panelItemText}>{step.description}</p>
                 </div>
               </li>
             ))}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "features/auth/styles/Auth.css";
+import * as auth from "features/auth/styles/authClasses";
 import image from "shared/assets/images/logo.png";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import type { SnackbarState, ApiError } from "shared/types";
@@ -80,29 +80,29 @@ const ResetPassword = () => {
 
   return (
     <>
-      <div className="auth">
-        <div className="auth__main">
-          <Link to="/" className="auth__brand">
-            <img src={image} alt="" />
-            <span>ProBucket</span>
+      <div className={auth.layout}>
+        <div className={auth.main}>
+          <Link to="/" className={auth.brand}>
+            <img src={image} alt="" className={auth.brandLogo} />
+            <span className={auth.brandName}>ProBucket</span>
           </Link>
 
-          <div className="auth__content">
-            <h1 className="auth__title">Set a new password</h1>
-            <p className="auth__subtitle">Choose a new password for your ProBucket account.</p>
+          <div className={auth.content}>
+            <h1 className={auth.title}>Set a new password</h1>
+            <p className={auth.subtitle}>Choose a new password for your ProBucket account.</p>
 
             {/* The form only lets Enter trigger the Continue button's onClick (handleSubmit calls preventDefault) */}
             <form noValidate>
-              <div className="auth__field">
-                <div className="auth__label__row">
-                  <label htmlFor="reset-password" className="auth__label">New password</label>
+              <div className={auth.field}>
+                <div className={auth.labelRow}>
+                  <label htmlFor="reset-password" className={auth.label}>New password</label>
                 </div>
-                <div className="auth__input__wrap">
+                <div className={auth.inputWrap}>
                   <input
                     id="reset-password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    className="auth__input auth__input--password"
+                    className={auth.inputPassword}
                     placeholder="Enter password"
                     autoComplete="new-password"
                     aria-invalid={error.showPassword}
@@ -110,7 +110,7 @@ const ResetPassword = () => {
                   />
                   <button
                     type="button"
-                    className="auth__toggle"
+                    className={auth.toggle}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
@@ -119,17 +119,17 @@ const ResetPassword = () => {
                   </button>
                 </div>
                 {error.showPassword && (
-                  <p className="auth__error">{error.message}</p>
+                  <p className={auth.error}>{error.message}</p>
                 )}
               </div>
 
-              <button type="submit" className="auth__btn auth__btn--primary" onClick={handleSubmit}>
+              <button type="submit" className={auth.btnPrimary} onClick={handleSubmit}>
                 Continue
               </button>
             </form>
 
-            <div className="auth__footer">
-              <Link to="/login">Return to login</Link>
+            <div className={auth.footer}>
+              <Link to="/login" className={auth.link}>Return to login</Link>
             </div>
           </div>
         </div>

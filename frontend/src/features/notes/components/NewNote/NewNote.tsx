@@ -6,7 +6,7 @@ import { compose } from "redux";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import type { SnackbarState } from "shared/types";
 
-import "./NewNote.css";
+import { divider, formFieldCompact, modalClose, modalHeader } from "shared/styles/sharedClasses";
 import useGetNotesList from "features/notes/hooks/useGetNotesList";
 import { getAllNotes } from "features/notes/store/notesAction";
 import type { AppDispatch, RootState } from "app/store";
@@ -129,13 +129,13 @@ const NewNote = ({
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="new_note_container">
-          <div className="new_task_header">
-            <h4>Add New Task</h4>
-            <i className="fa fa-times-circle-o" onClick={handleNoteClose} />
+        <div className="w-[300px] my-[5%] mx-auto p-4 rounded-[10px] bg-white">
+          <div className={modalHeader}>
+            <h4 className="m-0">Add New Task</h4>
+            <i className={`fa fa-times-circle-o ${modalClose}`} onClick={handleNoteClose} />
           </div>
-          <div className="divider" />
-          <div className="new_task_body">
+          <div className={divider} />
+          <div>
             <TextField
               id="outlined-basic"
               fullWidth
@@ -148,7 +148,7 @@ const NewNote = ({
             />
             <TextField
               fullWidth
-              className="fields"
+              className={formFieldCompact}
               id="outlined-multiline-static"
               label="Description"
               multiline

@@ -1,25 +1,28 @@
 import React from "react";
 
-import "./ComingSoon.css";
+import * as landing from "features/landing/styles/landingClasses";
 
 import { comingSoon } from "features/landing/data";
 
 const ComingSoon = () => {
   return (
-    <section className="landing__section landing__section--alt landing__soon">
-      <div className="landing__container">
-        <div className="landing__section__header">
-          <span className="landing__eyebrow">Coming soon</span>
-          <h2>More on the way</h2>
-          <p>We are working on these next.</p>
+    <section className={landing.sectionAlt}>
+      <div className={landing.container}>
+        <div className={landing.sectionHeaderSoon}>
+          <span className={landing.eyebrow}>Coming soon</span>
+          <h2 className={landing.sectionTitle}>More on the way</h2>
+          <p className={landing.sectionText}>We are working on these next.</p>
         </div>
 
-        <ul className="landing__soon__list">
+        <ul className="flex flex-wrap justify-center gap-3 max-w-[860px] mx-auto p-0 list-none">
           {comingSoon.map((item) => {
             const Icon = item.icon;
             return (
-              <li className="landing__soon__item" key={item.title}>
-                <Icon />
+              <li
+                className="inline-flex items-center gap-2.5 py-3 px-5 border border-dashed border-[#c9c6ec] rounded-[999px] bg-brand-surface text-[15px] font-semibold text-brand-ink"
+                key={item.title}
+              >
+                <Icon className="text-[16px] text-brand-strong" />
                 <span>{item.title}</span>
               </li>
             );

@@ -4,7 +4,7 @@ import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 import type { RootState } from "app/store";
 
-import "./Home.css";
+import * as landing from "features/landing/styles/landingClasses";
 
 import LandingNav from "features/landing/components/LandingNav/LandingNav";
 import Hero from "features/landing/components/Hero/Hero";
@@ -18,7 +18,7 @@ import Footer from "features/landing/components/Footer/Footer";
 
 const Home = ({ isLoggedIn }: Props) => {
   return (
-    <div className="landing">
+    <div className={landing.page}>
       <Helmet>
         <title>ProBucket | Plan, track and ship your projects</title>
       </Helmet>

@@ -12,7 +12,6 @@ import { compose } from "redux";
 import type { AppDispatch } from "app/store";
 import type { TaskDetails as TaskDetailsData, TaskListItem } from "features/tasks/types";
 
-import "./WorkTask.css";
 
 const WorkTask = ({ taskDetails, setTask, removeTask }: { taskDetails: TaskListItem } & Props) => {
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -45,49 +44,49 @@ const WorkTask = ({ taskDetails, setTask, removeTask }: { taskDetails: TaskListI
 
   return (
     <>
-      <div className="task_container">
+      <div className="w-auto mt-5">
         <div
-          className="task_card"
+          className="w-auto mb-5 py-[5px] px-[15px] rounded-[4px] shadow-[1px_1px_4px_#00000080] cursor-move hover:bg-[#efefef]"
           onClick={() => handleTaskModal(taskDetails.taskSequence)}
         >
-          <div className="task">
-            <div className="contents">
-              <span className="task_names">{taskDetails.taskName}</span>
-              <span className="asignee_icon">
+          <div>
+            <div className="flex justify-between">
+              <span>{taskDetails.taskName}</span>
+              <span className="flex justify-center items-center w-[18px] h-[18px] m-0 p-[5px] border border-dashed border-[#888] rounded-[50%] cursor-pointer">
                 <FiUserPlus />
               </span>
             </div>
-            <div className="subtask"></div>
-            <div className="extras">
-              <div className="more_icons">
+            <div></div>
+            <div className="flex justify-between items-center mt-2.5">
+              <div className="flex items-center gap-2.5">
                 {/* <i className="fa fa-calendar-check-o" /> */}
                 {taskDetails.priority === "LOW" && (
-                  <span className="priority_low">
-                    <i className="fa fa-flag" />
+                  <span>
+                    <i className="fa fa-flag text-[#888]" />
                   </span>
                 )}
                 {taskDetails.priority === "MEDIUM" && (
-                  <span className="priority_med">
-                    <i className="fa fa-flag" />
+                  <span>
+                    <i className="fa fa-flag text-[#fbc536]" />
                   </span>
                 )}
                 {taskDetails.priority === "HIGH" && (
-                  <span className="priority_high">
-                    <i className="fa fa-flag" />
+                  <span>
+                    <i className="fa fa-flag text-[#ff8367]" />
                   </span>
                 )}
                 {taskDetails.priority === "" && (
-                  <span className="priority_none">
-                    <i className="fa fa-flag-o" />
+                  <span>
+                    <i className="fa fa-flag-o text-[#9999]" />
                   </span>
                 )}
               </div>
-              {/* <div className="edit_options">
+              {/* <div className="flex items-center gap-2.5">
                 <i className="fa fa-check" />
                 <i className="fa fa-ellipsis-h" />
               </div> */}
-              <div className="task_id">
-                <Link to="#">{taskDetails.taskSequence}</Link>
+              <div>
+                <Link to="#" className="text-[#827ed8]">{taskDetails.taskSequence}</Link>
               </div>
             </div>
           </div>

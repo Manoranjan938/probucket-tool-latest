@@ -4,7 +4,6 @@ import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 import type { RootState } from "app/store";
 
-import "./CommentList.css";
 
 const CommentList = ({ comments }: Props) => {
   function stringToColor(string: string) {
@@ -39,17 +38,17 @@ const CommentList = ({ comments }: Props) => {
   return (
     <>
       {comments.length > 0 && comments.map((item) => (
-        <div className="comment_list_container">
-          <div className="user_avatar">
+        <div className="flex w-auto mt-5">
+          <div className="w-[50px] h-[50px] mr-[15px]">
             <Avatar {...stringAvatar(item.name)} />
           </div>
-          <div className="comments">
-            <div className="comment_header">
-              <h4>{item.name}</h4>
-              <span>{item.commentDate.substr(0, 10)}</span>
+          <div className="w-full">
+            <div className="flex items-center">
+              <h4 className="m-0">{item.name}</h4>
+              <span className="ml-5 text-[14px] font-semibold">{item.commentDate.substr(0, 10)}</span>
             </div>
-            <div className="comment_body">
-              <span>{item.comment}</span>
+            <div className="mt-2.5">
+              <span className="text-[16px]">{item.comment}</span>
             </div>
           </div>
         </div>

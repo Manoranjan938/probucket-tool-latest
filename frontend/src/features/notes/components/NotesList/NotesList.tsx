@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./NotesList.css";
+import { divider } from "shared/styles/sharedClasses";
 
 import { BsThreeDots } from "react-icons/bs";
 import NotesHeader from "features/notes/components/NotesHeader/NotesHeader";
@@ -15,21 +15,21 @@ const NotesList = ({ notes }: Props) => {
 
   return (
     <>
-      <div className="notes_container">
+      <div>
         <NotesHeader />
-        <div className="divider" />
-        <div className="notes__cards">
+        <div className={divider} />
+        <div className="grid grid-cols-[repeat(3,1fr)] gap-2.5 mt-2.5 mr-5">
           {notes &&
             notes.length > 0 &&
             notes.map((item) => (
-              <div className="notes__card" key={item.id}>
-                <div className="notes_title">
+              <div className="w-auto py-[5px] px-[15px] rounded-[5px] shadow-[1px_1px_10px_#0006] hover:cursor-move" key={item.id}>
+                <div className="flex justify-between items-center">
                   <h2>{item.title}</h2>
-                  <span>
+                  <span className="text-[20px] cursor-pointer">
                     <BsThreeDots />
                   </span>
                 </div>
-                <div className="notes__description">
+                <div className="mt-2.5">
                   <span>{truncate(item.description, 30)}</span>
                 </div>
               </div>

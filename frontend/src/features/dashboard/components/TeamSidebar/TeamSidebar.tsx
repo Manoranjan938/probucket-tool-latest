@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 
-import "./TeamSidebar.css";
+import * as sidebar from "features/dashboard/styles/sidebarClasses";
+import { divider } from "shared/styles/sharedClasses";
 
 import avatar1 from "shared/assets/images/avatar1.png";
 import { Link } from "react-router-dom";
@@ -35,144 +36,144 @@ const TeamSidebar = ({ id, getSingleProject, name, currentUser }: OwnProps & Pro
 
   return (
     <>
-      <div className="sidebar__container">
-        <div className="sidebar">
-          <div className="sidebar__contents">
-            <div className="sidebar__project__name">
-              <img src={avatar1} alt="" />
-              <div className="project_sidebar_details">
-                <h4>{project.projectName}</h4>
-                <span>{project.projectType} Project</span>
+      <div className={sidebar.container}>
+        <div className={sidebar.sidebar}>
+          <div className={sidebar.contents}>
+            <div className={sidebar.projectName}>
+              <img src={avatar1} alt="" className={sidebar.projectAvatar} />
+              <div>
+                <h4 className={sidebar.projectTitle}>{project.projectName}</h4>
+                <span className={sidebar.projectType}>{project.projectType} Project</span>
               </div>
             </div>
-            <div className="divider" />
-            <div className="sidebar_link_container">
+            <div className={divider} />
+            <div className={sidebar.linkContainer}>
               {/* {teamSidebarData.map((item) => {
                 return (
-                  <Link className="sidebar_link" to={item.path} key={item.id}>
-                    <div className="icon">{item.icon}</div>
-                    <div className="label">{item.title}</div>
+                  <Link className={sidebar.link} to={item.path} key={item.id}>
+                    <div className={sidebar.icon}>{item.icon}</div>
+                    <div className={sidebar.label}>{item.title}</div>
                     {item.notiCount && (
-                      <div className="notification_icon">{item.notiCount}</div>
+                      <div className={sidebar.notificationCount}>{item.notiCount}</div>
                     )}
                   </Link>
                 );
               })} */}
               <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/home?project=${id}&name=${name}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <MdDashboard />
                 </div>
-                <div className="label">Dashboard</div>
+                <div className={sidebar.label}>Dashboard</div>
               </Link>
               <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/works?project=${id}&name=${name}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <GoProject />
                 </div>
-                <div className="label">Your Work</div>
+                <div className={sidebar.label}>Your Work</div>
               </Link>
-              {/* <Link className="sidebar_link" to={`/project/team/bug?project=${id}`}>
-                <div className="icon"><BsBug /></div>
-                <div className="label">Bug</div>
-                <div className="notification_icon">5</div>
+              {/* <Link className={sidebar.link} to={`/project/team/bug?project=${id}`}>
+                <div className={sidebar.icon}><BsBug /></div>
+                <div className={sidebar.label}>Bug</div>
+                <div className={sidebar.notificationCount}>5</div>
               </Link> */}
               <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/notes?project=${id}&name=${name}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <BiNotepad />
                 </div>
-                <div className="label">Notes</div>
+                <div className={sidebar.label}>Notes</div>
               </Link>
               {/* <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/issues?project=${id}&name=${name}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <GoIssueClosed />
                 </div>
-                <div className="label">Issues</div>
+                <div className={sidebar.label}>Issues</div>
               </Link> */}
               {/* <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/todos?project=${id}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <RiTodoLine />
                 </div>
-                <div className="label">Todo</div>
+                <div className={sidebar.label}>Todo</div>
               </Link> */}
               {currentUser.rolename === "ROLE_TEAM-USER" ? null : (
                 <Link
-                  className="sidebar_link"
+                  className={sidebar.link}
                   to={`/project/team/new-user?project=${id}&name=${name}`}
                 >
-                  <div className="icon">
+                  <div className={sidebar.icon}>
                     <BiUserPlus />
                   </div>
-                  <div className="label">Add Team Member</div>
+                  <div className={sidebar.label}>Add Team Member</div>
                 </Link>
               )}
 
               <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/notifications?project=${id}&name=${name}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <IoNotifications />
                 </div>
-                <div className="label">Notifications</div>
-                <div className="notification_icon">1</div>
+                <div className={sidebar.label}>Notifications</div>
+                <div className={sidebar.notificationCount}>1</div>
               </Link>
             </div>
-            <div className="divider" />
-            <div className="sidebar_link_container">
+            <div className={divider} />
+            <div className={sidebar.linkContainer}>
               <Link
-                className="sidebar_link"
+                className={sidebar.link}
                 to={`/project/team/setting?project=${id}&name=${name}`}
               >
-                <div className="icon">
+                <div className={sidebar.icon}>
                   <AiOutlineSetting />
                 </div>
-                <div className="label">
+                <div className={sidebar.label}>
                   <span>Project Setting</span>
                 </div>
               </Link>
 
-              {/* <Link className="sidebar_link" to="/help">
-                <div className="icon">
+              {/* <Link className={sidebar.link} to="/help">
+                <div className={sidebar.icon}>
                   <FiHelpCircle />
                 </div>
-                <div className="label">
+                <div className={sidebar.label}>
                   <span>Help</span>
                 </div>
               </Link>
 
-              <Link className="sidebar_link" to="/report-or-feedback">
-                <div className="icon">
+              <Link className={sidebar.link} to="/report-or-feedback">
+                <div className={sidebar.icon}>
                   <GoReport />
                 </div>
-                <div className="label">
+                <div className={sidebar.label}>
                   <span>Report / Feedback</span>
                 </div>
               </Link> */}
             </div>
-            <div className="divider" />
-            <Link className="sidebar_link" to={`/project/team/trash?project=${id}&name=${name}`}>
-              <div className="icon">
+            <div className={divider} />
+            <Link className={sidebar.link} to={`/project/team/trash?project=${id}&name=${name}`}>
+              <div className={sidebar.icon}>
                 <FaTrashAlt />
               </div>
-              <div className="label">
+              <div className={sidebar.label}>
                 <span>Trash</span>
               </div>
             </Link>
-            <div className="divider" />
+            <div className={divider} />
           </div>
         </div>
       </div>

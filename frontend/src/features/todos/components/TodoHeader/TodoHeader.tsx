@@ -2,6 +2,7 @@ import TodoForm from "features/todos/components/TodoForm/TodoForm";
 import React, { useEffect, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { TodoItem } from "features/todos/types";
+import { button } from "shared/styles/sharedClasses";
 
 interface TodoHeaderProps {
   todoData: TodoItem[];
@@ -10,7 +11,9 @@ interface TodoHeaderProps {
   setActiveBtn: Dispatch<SetStateAction<string>>;
 }
 
-import "./TodoHeader.css";
+const tab =
+  "py-1.5 px-5 border border-[#827ed8] rounded-[5px] uppercase font-bold text-[#827ed8] hover:cursor-pointer hover:text-white hover:bg-[#827ed8] hover:rounded-[5px] hover:[transition:color_.3s_ease-in]";
+const activeTab = `${tab} cursor-pointer bg-[#827ed8] text-white!`;
 
 const TodoHeader = ({ todoData, setFilteredTodo, activeBtn, setActiveBtn }: TodoHeaderProps) => {
 
@@ -32,30 +35,30 @@ const TodoHeader = ({ todoData, setFilteredTodo, activeBtn, setActiveBtn }: Todo
 
   return (
     <>
-      <div className="todo_header_component">
-        <div className="header_details">
-          <div className="todo_header_tabs">
+      <div className="w-auto px-5">
+        <div className="flex justify-between items-center border-b-2 border-[#777]">
+          <div className="flex items-center gap-5">
             <span
-              className={activeBtn === "all" ? "active_tab" : undefined}
+              className={activeBtn === "all" ? activeTab : tab}
               onClick={() => setActiveBtn("all")}
             >
               All
             </span>
             <span
-              className={activeBtn === "done" ? "active_tab" : undefined}
+              className={activeBtn === "done" ? activeTab : tab}
               onClick={() => setActiveBtn("done")}
             >
               Completed
             </span>
             <span
-              className={activeBtn === "pending" ? "active_tab" : undefined}
+              className={activeBtn === "pending" ? activeTab : tab}
               onClick={() => setActiveBtn("pending")}
             >
               Pending
             </span>
           </div>
-          <div className="todo_header">
-            <button className="btn" onClick={openTodoForm}>Create a Todo</button>
+          <div>
+            <button className={button} onClick={openTodoForm}>Create a Todo</button>
           </div>
         </div>
       </div>

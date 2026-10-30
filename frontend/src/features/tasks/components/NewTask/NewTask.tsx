@@ -15,7 +15,7 @@ import { compose } from "redux";
 import type { RootState } from "app/store";
 import type { ProjectTaskRequest } from "features/tasks/types";
 
-import "./NewTask.css";
+import { divider, formField, modalCard, modalClose, modalHeader } from "shared/styles/sharedClasses";
 
 type OwnProps = {
   open: boolean;
@@ -91,15 +91,15 @@ const NewTask = ({ open, setOpen, currentProject }: OwnProps & Props) => {
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <div className="new_task">
-          <div className="new_task_header">
+        <div className={modalCard}>
+          <div className={modalHeader}>
             <h3>New Task</h3>
-            <i className="fa fa-times-circle-o" onClick={handleClose} />
+            <i className={`fa fa-times-circle-o ${modalClose}`} onClick={handleClose} />
           </div>
-          <div className="divider" />
+          <div className={divider} />
           <TextField
             fullWidth
-            className="input_form"
+            className={formField}
             id="outlined-multiline-static"
             label="About task..."
             multiline
@@ -123,7 +123,7 @@ const NewTask = ({ open, setOpen, currentProject }: OwnProps & Props) => {
               <MenuItem value="HIGH">HIGH</MenuItem>
             </Select>
           </FormControl>
-          <div className="divider" />
+          <div className={divider} />
           <Button
             variant="contained"
             color="primary"

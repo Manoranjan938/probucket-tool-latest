@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import image from 'shared/assets/images/avatar1.png'
 import { Button, TextField } from "@mui/material";
 
-import './ProjectSettings.css';
 import { compose } from "redux";
 import { connect, type ConnectedProps } from "react-redux";
 import type { RootState } from "app/store";
@@ -17,27 +16,27 @@ const ProjectSettings = ({ currentProject }: Props) => {
 
   return (
     <>
-      <div className="project__setting__container">
+      <div className="w-auto px-5">
         <h2>Project Details</h2>
-        <div className="project__setting__details">
-          <div className="project__image">
-            <img src={image} alt="" />
+        <div className="flex items-center gap-2.5 w-[500px] mt-5 mx-auto mb-0 p-2.5 border border-[#888] rounded-[6px]">
+          <div>
+            <img src={image} alt="" className="object-cover w-[170px] h-[170px]" />
           </div>
-          <div className="project__fields">
+          <div>
             <TextField
               id="outlined-multiline-flexible"
               label="Name"
               fullWidth
               value={project.name}
               onChange={(e) => setProject({ ...project, name: e.target.value })}
-              className="text-field"
+              className="rounded-[3px] mb-2.5!"
             />
             <TextField
               id="outlined-multiline-flexible"
               label="Project Lead"
               fullWidth
               value={project.projectLead}
-              className="text-field"
+              className="rounded-[3px] mb-2.5!"
               disabled
             />
             <TextField
@@ -45,7 +44,7 @@ const ProjectSettings = ({ currentProject }: Props) => {
               label="Default Assignee"
               fullWidth
               value={project.defaultAssign}
-              className="text-field"
+              className="rounded-[3px] mb-2.5!"
               disabled
             />
             <Button variant="contained">Save</Button>

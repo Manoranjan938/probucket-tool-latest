@@ -1,7 +1,6 @@
 import { Autocomplete, Button, TextField } from "@mui/material";
 import React from "react";
 
-import "./TeamHomeHeader.css";
 
 const sprints = [
   { label: "Sprint-1" },
@@ -13,8 +12,8 @@ const sprints = [
 const TeamHomeHeader = () => {
   return (
     <>
-      <div className="team_home_header_container">
-        <div className="teams_sprint">
+      <div className="flex justify-between items-center mr-5 p-4 rounded-[10px] bg-[#efefef]">
+        <div className="w-[400px]">
           <Autocomplete
             fullWidth
             disablePortal
@@ -24,7 +23,7 @@ const TeamHomeHeader = () => {
             renderInput={(params) => <TextField {...params} label="Sprint" />}
           />
         </div>
-        <div className="new_sprint">
+        <div>
           <Button variant="contained" color="primary">
             Create New Sprint
           </Button>

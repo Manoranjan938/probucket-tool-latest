@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 
 import { FaSearch } from "react-icons/fa";
 
-import "./TeamWorkHeader.css";
+import { searchField, searchIcon, searchInput } from "shared/styles/sharedClasses";
 import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
@@ -61,15 +61,15 @@ const TeamWorkHeader = ({ currentProject, getTeamList }: Props) => {
 
   return (
     <>
-      <div className="team_work_header_container">
-        <div className="search_task">
-          <div className="search__field">
-            <FaSearch className="search" />
-            <input type="text" placeholder="Search" />
+      <div className="flex items-center mt-5 px-12">
+        <div className="w-[200px]">
+          <div className={searchField}>
+            <FaSearch className={searchIcon} />
+            <input type="text" placeholder="Search" className={searchInput} />
           </div>
         </div>
-        <div className="filter_task">
-          <div className="filter_by_asignee">
+        <div className="ml-[50px]">
+          <div className="flex items-center">
             <AvatarGroup max={6}>
               {teamList != null &&
                 teamList.map((item) => (

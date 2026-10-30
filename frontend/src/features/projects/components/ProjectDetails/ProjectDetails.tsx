@@ -6,7 +6,7 @@ import type { SnackbarState, ApiError } from "shared/types";
 import { data } from "features/projects/components/Template/data";
 import { typeData } from "features/projects/components/ChooseType/data";
 
-import "./ProjectDetails.css";
+import { button, formFieldCompact } from "shared/styles/sharedClasses";
 import Template from "features/projects/components/Template/Template";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
@@ -137,17 +137,20 @@ const ProjectDetails = ({
 
   return (
     <>
-      <div className="project__details_container">
-        <div className="project__details__header">
-          <button onClick={handleProjectDetails} className="btn">
+      <div className="w-[calc(100%_-_400px)] my-[2%] mx-auto">
+        <div>
+          <button
+            onClick={handleProjectDetails}
+            className="flex justify-center w-auto my-5 p-0 border-none rounded-[5px] bg-transparent text-[16px] font-semibold text-[#555] cursor-pointer"
+          >
             <i className="fa fa-arrow-left" /> &nbsp;Back to project type
           </button>
         </div>
-        <div className="project__details__body">
-          <div className="project__details__section">
-            <div className="header_section">
-              <h3>Add project details</h3>
-              <span>
+        <div className="grid grid-cols-[repeat(2,1fr)] gap-20">
+          <div>
+            <div className="mb-5">
+              <h3 className="text-[34px] font-semibold">Add project details</h3>
+              <span className="text-[15px]">
                 You can change these details anytime in your project setting.
               </span>
             </div>
@@ -156,7 +159,7 @@ const ProjectDetails = ({
               required
               id="outlined-required"
               label="Name"
-              className="input-field"
+              className={formFieldCompact}
               value={details.projectName}
               onChange={(e) =>
                 setDetails({ ...details, projectName: e.target.value })
@@ -168,7 +171,7 @@ const ProjectDetails = ({
               fullWidth
               required
               label="Project description"
-              className="input-field"
+              className={formFieldCompact}
               multiline
               rows={4}
               value={details.projectDescription}
@@ -179,30 +182,31 @@ const ProjectDetails = ({
               helperText={error.message}
             />
           </div>
-          <div className="project__details_choose__section">
-            <div className="option_template">
-              <div className="option_template_header">
+          <div className="py-8 px-[1.4rem] rounded-[20px] bg-[#efefef]">
+            <div>
+              <div className="flex justify-between mb-5 text-[15px] text-[#888] cursor-pointer">
                 <h4>Template</h4>
                 <h4>Change Template</h4>
               </div>
-              <div className="option_template_body">
+              <div>
                 <Template items={template!} />
               </div>
             </div>
-            <div className="option_type">
-              <div className="option_type_header">
-                <h4>Type</h4>
-                <h4>Change Type</h4>
+            <div>
+              <div className="flex justify-between">
+                <h4 className="text-[15px] text-[#888] cursor-pointer">Type</h4>
+                <h4 className="text-[15px] text-[#888] cursor-pointer">Change Type</h4>
               </div>
-              <div className="option_type_body">
+              <div>
                 <Template items={type!} />
               </div>
             </div>
           </div>
         </div>
-        <div className="project__details__footer">
-          <button className="cancel_btn btn" onClick={handleGoProjects}>Go to Projects</button>
-          <button className="btn" onClick={handleCreateProject}>
+        <div className="flex justify-end gap-2.5 mt-2.5 border-t-2 border-[#888]">
+          {/* Same look as the other buttons – the old .cancel_btn colours were always overridden by .btn */}
+          <button className={button} onClick={handleGoProjects}>Go to Projects</button>
+          <button className={button} onClick={handleCreateProject}>
             Create Project
           </button>
         </div>

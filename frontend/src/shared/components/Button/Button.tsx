@@ -1,9 +1,9 @@
 import React from "react";
 
-import "./Button.css";
+import { button } from "shared/styles/sharedClasses";
 
 const Button = ({ title }: { title: string }) => {
-  return <button className="btn">{title}</button>;
+  return <button className={button}>{title}</button>;
 };
 
 export default Button;
