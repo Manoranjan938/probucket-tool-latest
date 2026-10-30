@@ -1,5 +1,5 @@
 #Build the react app
-FROM node:18-alpine as projecttool
+FROM node:24-alpine as projecttool
 WORKDIR /tool
 COPY package.json package-lock.json ./
 RUN npm ci
