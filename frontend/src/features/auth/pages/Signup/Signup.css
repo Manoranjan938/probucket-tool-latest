@@ -1,5 +1,5 @@
-/* Legacy signup styles. Forgot imports this file and ResetPassword uses some of
-   these classes, so they are kept unchanged.
+/* Legacy signup styles. Profile still uses .input__email from here (it is also
+   defined in Login.css), so this file is kept unchanged.
    The redesigned signup page uses features/auth/styles/Auth.css. */
 
 .signin_container{

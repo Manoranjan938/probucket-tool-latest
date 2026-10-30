@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
+import "features/auth/styles/Auth.css";
 import image from "shared/assets/images/logo.png";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import type { SnackbarState, ApiError } from "shared/types";
 import { Snackbar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import useResetPassword from "features/auth/hooks/useResetPassword";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState({
     showPassword: false,
     message: "",
@@ -76,41 +80,62 @@ const ResetPassword = () => {
 
   return (
     <>
-      <div className="login_container">
-        <div className="login__wrapper">
-          <div className="login__header">
+      <div className="auth">
+        <div className="auth__main">
+          <Link to="/" className="auth__brand">
             <img src={image} alt="" />
             <span>ProBucket</span>
-          </div>
-          <div className="login__body">
-            <div className="login__body__header">
-              <span>Update your password</span>
-              <h5>Probucket</h5>
-            </div>
-            <div className="login__body__content">
-              <input
-                type="password"
-                value={password}
-                className="input__email"
-                placeholder="Enter password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              {error.showPassword && (
-                <div className="error_msg">
-                  <span>{error.message}</span>
-                </div>
-              )}
+          </Link>
 
-              <button className="signin__btn" onClick={handleSubmit}>
+          <div className="auth__content">
+            <h1 className="auth__title">Set a new password</h1>
+            <p className="auth__subtitle">Choose a new password for your ProBucket account.</p>
+
+            {/* The form only lets Enter trigger the Continue button's onClick (handleSubmit calls preventDefault) */}
+            <form noValidate>
+              <div className="auth__field">
+                <div className="auth__label__row">
+                  <label htmlFor="reset-password" className="auth__label">New password</label>
+                </div>
+                <div className="auth__input__wrap">
+                  <input
+                    id="reset-password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    className="auth__input auth__input--password"
+                    placeholder="Enter password"
+                    autoComplete="new-password"
+                    aria-invalid={error.showPassword}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="auth__toggle"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {error.showPassword && (
+                  <p className="auth__error">{error.message}</p>
+                )}
+              </div>
+
+              <button type="submit" className="auth__btn auth__btn--primary" onClick={handleSubmit}>
                 Continue
               </button>
-              <hr />
-              <div className="signin_links">
-                <Link to="/login">Return to login</Link>
-              </div>
+            </form>
+
+            <div className="auth__footer">
+              <Link to="/login">Return to login</Link>
             </div>
           </div>
         </div>
+
+        <AuthPanel />
+
         <Snackbar
           open={statusBar.open}
           autoHideDuration={6000}

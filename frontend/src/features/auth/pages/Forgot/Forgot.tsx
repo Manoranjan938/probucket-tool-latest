@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import "features/auth/pages/Signup/Signup.css";
+import "features/auth/styles/Auth.css";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
 import type { SnackbarState, ApiError } from "shared/types";
 
@@ -9,6 +9,7 @@ import image from "shared/assets/images/logo.png";
 import { Snackbar } from "@mui/material";
 
 import useResetPassRequest from 'features/auth/hooks/useResetPassRequest';
+import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
@@ -77,38 +78,53 @@ const Forgot = () => {
   };
 
   return (
-    <div className="signin_container">
-      <div className="signin__wrapper">
-        <div className="signin__header">
+    <div className="auth">
+      <div className="auth__main">
+        <Link to="/" className="auth__brand">
           <img src={image} alt="" />
           <span>ProBucket</span>
-        </div>
-        <div className="signin__body">
-          <div className="signin__body__header">
-            <span>Can't login or forgot password</span>
-          </div>
-          <div className="signin__body__content">
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input__email"
-              placeholder="Enter email"
-            />
-            {error.show ? (
-              <div className="error_msg">
-                <span>{error.message}</span>
-              </div>
-            ) : null}
+        </Link>
 
-            <button className="signin__btn" onClick={handleContinue}>Continue</button>
-            <hr />
-            <div className="signin_links">
-              <Link to="/login">Return to login</Link>
+        <div className="auth__content">
+          <h1 className="auth__title">Forgot your password?</h1>
+          <p className="auth__subtitle">
+            Enter your email and we'll send you a link to reset your password.
+          </p>
+
+          {/* The form only lets Enter trigger the Continue button's onClick (handleContinue calls preventDefault) */}
+          <form noValidate>
+            <div className="auth__field">
+              <div className="auth__label__row">
+                <label htmlFor="forgot-email" className="auth__label">Email</label>
+              </div>
+              <input
+                id="forgot-email"
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="auth__input"
+                placeholder="Enter email"
+                autoComplete="username"
+                aria-invalid={error.show}
+              />
+              {error.show ? (
+                <p className="auth__error">{error.message}</p>
+              ) : null}
             </div>
+
+            <button type="submit" className="auth__btn auth__btn--primary" onClick={handleContinue}>
+              Continue
+            </button>
+          </form>
+
+          <div className="auth__footer">
+            <Link to="/login">Return to login</Link>
           </div>
         </div>
       </div>
+
+      <AuthPanel />
+
       <Snackbar
         open={statusBar.open}
         autoHideDuration={6000}
