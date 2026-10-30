@@ -1,5 +1,5 @@
 /* Shared styles for the redesigned auth pages (Login, Signup, Forgot,
-   ResetPassword, Logout). Uses the same palette as the landing page. */
+   ResetPassword, Logout, EmailVerify). Uses the same palette as the landing page. */
 
 .auth {
   /* Same palette as the landing page */
@@ -284,6 +284,24 @@
   background: var(--auth-surface);
   box-shadow: 0 1px 2px rgba(31, 29, 58, 0.06),
     0 8px 24px rgba(31, 29, 58, 0.06);
+}
+
+.auth__card--center {
+  text-align: center;
+}
+
+/* Large round icon at the top of a status card */
+.auth__status__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: var(--auth-primary-soft);
+  font-size: 30px;
+  color: var(--auth-primary-strong);
 }
 
 /* Signed-in user summary */
