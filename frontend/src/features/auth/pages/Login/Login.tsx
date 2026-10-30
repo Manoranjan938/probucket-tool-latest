@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Login.css";
+import "features/auth/styles/Auth.css";
 
 import image from "shared/assets/images/logo.png";
 import googleImage from "shared/assets/images/google-logo.png";

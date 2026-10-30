@@ -1,3 +1,7 @@
+/* Legacy signup styles. Forgot imports this file and ResetPassword uses some of
+   these classes, so they are kept unchanged.
+   The redesigned signup page uses features/auth/styles/Auth.css. */
+
 .signin_container{
     width: 100%;
 }

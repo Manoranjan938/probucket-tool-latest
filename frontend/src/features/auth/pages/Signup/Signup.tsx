@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Signup.css";
+import "features/auth/styles/Auth.css";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import type { SnackbarState, ApiError } from "shared/types";
 
 import image from "shared/assets/images/logo.png";
+import googleImage from "shared/assets/images/google-logo.png";
 import { Snackbar } from "@mui/material";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import useSignUpRequest from "features/auth/hooks/useSignUpRequest";
 import type { UserRequest } from "features/auth/types";
+import { steps } from "features/landing/data";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -17,6 +21,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [validError, setValidError] = useState<{
     showEmail: boolean;
     showName: boolean;
@@ -132,73 +137,124 @@ const Signup = () => {
   }, [registerRequest]);
 
   return (
-    <div className="signin_container">
-      <div className="signin__wrapper">
-        <div className="signin__header">
+    <div className="auth">
+      <div className="auth__main">
+        <Link to="/" className="auth__brand">
           <img src={image} alt="" />
           <span>ProBucket</span>
-        </div>
-        <div className="signin__body">
-          <div className="signin__body__header">
-            <span>Sign up for your account</span>
-          </div>
-          <div className="signin__body__content">
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input__email"
-              placeholder="Enter email"
-            />
+        </Link>
 
-            {validError.showEmail ? (
-              <div className="error_msg">
-                <span>{validError.message}</span>
+        <div className="auth__content">
+          <h1 className="auth__title">Create your account</h1>
+          <p className="auth__subtitle">Sign up for your account.</p>
+
+          {/* The form only lets Enter trigger the Continue button's onClick (handleContinue calls preventDefault) */}
+          <form noValidate>
+            <div className="auth__field">
+              <div className="auth__label__row">
+                <label htmlFor="signup-email" className="auth__label">Email</label>
               </div>
-            ) : null}
+              <input
+                id="signup-email"
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="auth__input"
+                placeholder="Enter email"
+                autoComplete="username"
+                aria-invalid={validError.showEmail}
+              />
+              {validError.showEmail ? (
+                <p className="auth__error">{validError.message}</p>
+              ) : null}
+            </div>
 
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input__email"
-              placeholder="Enter full name"
-            />
-
-            {validError.showName ? (
-              <div className="error_msg">
-                <span>{validError.message}</span>
+            <div className="auth__field">
+              <div className="auth__label__row">
+                <label htmlFor="signup-name" className="auth__label">Full name</label>
               </div>
-            ) : null}
+              <input
+                id="signup-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="auth__input"
+                placeholder="Enter full name"
+                autoComplete="name"
+                aria-invalid={validError.showName}
+              />
+              {validError.showName ? (
+                <p className="auth__error">{validError.message}</p>
+              ) : null}
+            </div>
 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input__email"
-              placeholder="Enter password"
-            />
-
-            {validError.showPassword ? (
-              <div className="error_msg">
-                <span>{validError.message}</span>
+            <div className="auth__field">
+              <div className="auth__label__row">
+                <label htmlFor="signup-password" className="auth__label">Password</label>
               </div>
-            ) : null}
+              <div className="auth__input__wrap">
+                <input
+                  id="signup-password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="auth__input auth__input--password"
+                  placeholder="Enter password"
+                  autoComplete="new-password"
+                  aria-invalid={validError.showPassword}
+                />
+                <button
+                  type="button"
+                  className="auth__toggle"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {validError.showPassword ? (
+                <p className="auth__error">{validError.message}</p>
+              ) : null}
+            </div>
 
-            <button className="signin__btn" onClick={handleContinue}>
+            <button type="submit" className="auth__btn auth__btn--primary" onClick={handleContinue}>
               Continue
             </button>
-            <span className="signin_or">OR</span>
-            <button className="signin__btn__google">
-              Continue with Google
-            </button>
-            <hr />
-            <div className="signin_links">
-              <Link to="/login">Already have an account? Login</Link>
-            </div>
+          </form>
+
+          <div className="auth__divider">or</div>
+
+          {/* Has no handler yet – Google sign-in is listed as "Coming soon" on the landing page */}
+          <button type="button" className="auth__btn auth__btn--google">
+            <img src={googleImage} alt="" />
+            <span>Continue with Google</span>
+          </button>
+
+          <div className="auth__footer">
+            <Link to="/login">Already have an account? Login</Link>
           </div>
         </div>
       </div>
+
+      <aside className="auth__panel">
+        <div className="auth__panel__inner">
+          <span className="auth__panel__eyebrow">How it works</span>
+          <h2 className="auth__panel__title">Up and running in three steps</h2>
+          {/* Same steps as the landing page's "How it works" section */}
+          <ol className="auth__panel__list">
+            {steps.map((step, index) => (
+              <li key={step.title}>
+                <span className="auth__panel__icon">{index + 1}</span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </aside>
 
       <Snackbar
         open={notiBar.open}
