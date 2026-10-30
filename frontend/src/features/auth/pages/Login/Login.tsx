@@ -13,6 +13,8 @@ import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 import useLoginRequest from "features/auth/hooks/useLoginRequest";
 import type { AppDispatch, RootState } from "app/store";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { features } from "features/landing/data";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
@@ -21,6 +23,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props,
 const Login = ({getUsers}: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState({
     showEmail: false,
     showPassword: false,
@@ -124,59 +127,110 @@ const Login = ({getUsers}: Props) => {
 
   return (
     <>
-      <div className="login_container">
-        <div className="login__wrapper">
-          <div className="login__header">
+      <div className="auth">
+        <div className="auth__main">
+          <Link to="/" className="auth__brand">
             <img src={image} alt="" />
             <span>ProBucket</span>
-          </div>
-          <div className="login__body">
-            <div className="login__body__header">
-              <span>Login to continue to:</span>
-              <h5>Probucket</h5>
-            </div>
-            <div className="login__body__content">
-              <input
-                type="text"
-                value={email}
-                className="input__email"
-                placeholder="Enter email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {error.showEmail && (
-                <div className="error_msg">
-                  <span>{error.message}</span>
-                </div>
-              )}
-              <input
-                type="password"
-                value={password}
-                className="input__email"
-                placeholder="Enter password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              {error.showPassword && (
-                <div className="error_msg">
-                  <span>{error.message}</span>
-                </div>
-              )}
+          </Link>
 
-              <button className="login__btn" onClick={handleSubmit}>
+          <div className="auth__content">
+            <h1 className="auth__title">Welcome back</h1>
+            <p className="auth__subtitle">Log in to continue to ProBucket.</p>
+
+            {/* The form only lets Enter trigger the Continue button's onClick (handleSubmit calls preventDefault) */}
+            <form noValidate>
+              <div className="auth__field">
+                <div className="auth__label__row">
+                  <label htmlFor="login-email" className="auth__label">Email</label>
+                </div>
+                <input
+                  id="login-email"
+                  type="text"
+                  value={email}
+                  className="auth__input"
+                  placeholder="Enter email"
+                  autoComplete="username"
+                  aria-invalid={error.showEmail}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {error.showEmail && (
+                  <p className="auth__error">{error.message}</p>
+                )}
+              </div>
+
+              <div className="auth__field">
+                <div className="auth__label__row">
+                  <label htmlFor="login-password" className="auth__label">Password</label>
+                  <Link to="/resetpassword">Can't login?</Link>
+                </div>
+                <div className="auth__input__wrap">
+                  <input
+                    id="login-password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    className="auth__input auth__input--password"
+                    placeholder="Enter password"
+                    autoComplete="current-password"
+                    aria-invalid={error.showPassword}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="auth__toggle"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {error.showPassword && (
+                  <p className="auth__error">{error.message}</p>
+                )}
+              </div>
+
+              <button type="submit" className="auth__btn auth__btn--primary" onClick={handleSubmit}>
                 Continue
               </button>
-              <span className="login_or">OR</span>
-              <a className="login__btn__google" href={GOOGLE_AUTH_URL}>
-                <img src={googleImage} alt="" />
-                <span>Continue with Google</span>
-              </a>
-              <hr />
-              <div className="links">
-                <Link to="/resetpassword">Can't login?</Link>
-                <Link to="/signup">Sign up for an account</Link>
-              </div>
+            </form>
+
+            <div className="auth__divider">or</div>
+
+            <a className="auth__btn auth__btn--google" href={GOOGLE_AUTH_URL}>
+              <img src={googleImage} alt="" />
+              <span>Continue with Google</span>
+            </a>
+
+            <div className="auth__footer">
+              <Link to="/signup">Sign up for an account</Link>
             </div>
           </div>
         </div>
+
+        <aside className="auth__panel">
+          <div className="auth__panel__inner">
+            <h2 className="auth__panel__title">Plan, track and ship your projects in one place.</h2>
+            <p className="auth__panel__text">
+              ProBucket brings your projects, tasks and team together.
+            </p>
+            <ul className="auth__panel__list">
+              {/* Task board, Priorities & assignees and Subtasks – same copy as the landing page */}
+              {features.slice(1, 4).map((feature) => (
+                <li key={feature.title}>
+                  <span className="auth__panel__icon">
+                    <feature.icon />
+                  </span>
+                  <div>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+
         <Snackbar
           open={statusBar.open}
           autoHideDuration={6000}
