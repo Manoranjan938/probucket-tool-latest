@@ -1,4 +1,4 @@
-import { SET_NOTES_LIST } from "apis/Actions/types";
+import { SET_NOTES_LIST } from "shared/store/types";
 
 const initialState = {
   allNotes: [],

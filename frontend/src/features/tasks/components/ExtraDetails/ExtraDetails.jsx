@@ -6,8 +6,8 @@ import {
   Modal,
   TextField,
 } from "@mui/material";
-import TaskStatusCompletion from "Components/TaskCompletionStatus/TaskStatusCompletion";
-import useUpdateTask from "hooks/useUpdateTask";
+import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion/TaskStatusCompletion";
+import useUpdateTask from "features/tasks/hooks/useUpdateTask";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { connect } from "react-redux";

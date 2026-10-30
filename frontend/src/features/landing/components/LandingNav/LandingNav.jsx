@@ -4,8 +4,8 @@ import { FaBars, FaTimes } from "react-icons/fa";
 
 import "./LandingNav.css";
 
-import logo from "Images/logo.png";
-import { navLinks } from "../data";
+import logo from "shared/assets/images/logo.png";
+import { navLinks } from "features/landing/data";
 
 const LandingNav = ({ isLoggedIn }) => {
   const [menuOpen, setMenuOpen] = useState(false);

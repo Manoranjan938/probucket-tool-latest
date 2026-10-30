@@ -1,4 +1,4 @@
-import NewUser from 'Components/NewUser/NewUser'
+import NewUser from 'features/team/components/NewUser/NewUser'
 import React from 'react'
 import Helmet from 'react-helmet'
 

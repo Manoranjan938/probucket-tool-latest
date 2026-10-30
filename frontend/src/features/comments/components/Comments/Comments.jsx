@@ -5,11 +5,11 @@ import "./Comments.css";
 
 import { connect } from "react-redux";
 import { compose } from "redux";
-import useAddComment from "hooks/useAddComment";
+import useAddComment from "features/comments/hooks/useAddComment";
 import MuiAlert from "@mui/material/Alert";
-import CommentList from "Components/CommentList/CommentList";
-import useGetComments from "hooks/useGetComments";
-import { setAllComments } from "apis/Actions/commentAction";
+import CommentList from "features/comments/components/CommentList/CommentList";
+import useGetComments from "features/comments/hooks/useGetComments";
+import { setAllComments } from "features/comments/store/commentAction";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

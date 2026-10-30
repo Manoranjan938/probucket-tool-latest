@@ -1,4 +1,4 @@
-import { SET_ALL_PROJECTS, SET_PROJECT_DETAILS } from "./types";
+import { SET_ALL_PROJECTS, SET_PROJECT_DETAILS } from "shared/store/types";
 
 export const getAllProjects = (projectData) => async (dispatch) => {
   try {

@@ -1,5 +1,5 @@
-import axios from "Services/axios";
-import setJWTToken from "Security/setJWTToken";
+import axios from "shared/services/axios";
+import setJWTToken from "features/auth/utils/setJWTToken";
 import { useState } from "react";
 
 const useLoginRequest = () => {

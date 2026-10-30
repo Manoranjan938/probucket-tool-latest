@@ -2,20 +2,20 @@ import React, { useEffect } from "react";
 
 import "./Projects.css";
 
-import image1 from "Images/Personal-Project.png";
-import avatar from "Images/avatar1.png";
-import NoProjects from "Components/NoProject/NoProjects";
+import image1 from "shared/assets/images/Personal-Project.png";
+import avatar from "shared/assets/images/avatar1.png";
+import NoProjects from "features/projects/components/NoProjects/NoProjects";
 import { connect } from "react-redux";
 import { compose } from "redux";
 
-import { getAllProjects } from "apis/Actions/projectsAction";
+import { getAllProjects } from "features/projects/store/projectsAction";
 import { Link, useNavigate } from "react-router-dom";
-import useGetAllProjects from "hooks/useGetAllProjects";
-import useGetProjectsByTeamMembrs from "hooks/useGetProjectsByTeamMembrs";
+import useGetAllProjects from "features/projects/hooks/useGetAllProjects";
+import useGetProjectsByTeamMembers from "features/projects/hooks/useGetProjectsByTeamMembers";
 
 const Projects = ({ getProjects, currentUser, myProjects }) => {
   const [projects, getAllProjectDetails] = useGetAllProjects();
-  const [teamProjects, getProjectsByTeam] = useGetProjectsByTeamMembrs()
+  const [teamProjects, getProjectsByTeam] = useGetProjectsByTeamMembers()
   const navigate = useNavigate();
 
   const callGetAllProjects = async () => {

@@ -3,11 +3,11 @@ import React from "react";
 
 import "./TodoForm.css";
 
-import image1 from "Images/avatar1.png";
-import image2 from "Images/avatar2.png";
-import image3 from "Images/avatar3.png";
-import image4 from "Images/avatar4.png";
-import image5 from "Images/avatar5.png";
+import image1 from "shared/assets/images/avatar1.png";
+import image2 from "shared/assets/images/avatar2.png";
+import image3 from "shared/assets/images/avatar3.png";
+import image4 from "shared/assets/images/avatar4.png";
+import image5 from "shared/assets/images/avatar5.png";
 
 const projectData = [
   {

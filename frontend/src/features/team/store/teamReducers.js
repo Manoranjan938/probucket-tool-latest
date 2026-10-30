@@ -1,4 +1,4 @@
-import { SET_ONE_TEAM_MEMBER, SET_TEAM_MEMBER_LIST } from "apis/Actions/types";
+import { SET_ONE_TEAM_MEMBER, SET_TEAM_MEMBER_LIST } from "shared/store/types";
 
 const initialState = {
   allTeamMember: [],

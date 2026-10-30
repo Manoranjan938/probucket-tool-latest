@@ -1,10 +1,10 @@
-import NotesList from "Components/NoteList/NotesList";
-import useGetNotesList from "hooks/useGetNotesList";
+import NotesList from "features/notes/components/NotesList/NotesList";
+import useGetNotesList from "features/notes/hooks/useGetNotesList";
 import React, { useEffect } from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import { getAllNotes } from "apis/Actions/notesAction";
+import { getAllNotes } from "features/notes/store/notesAction";
 
 const Notes = ({ currentProject, currentUser, setNote }) => {
   const [notes, getNotesList] = useGetNotesList();

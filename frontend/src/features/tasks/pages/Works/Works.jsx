@@ -1,17 +1,17 @@
-import { getAllTask } from "apis/Actions/taskAction";
-import Button from "Components/Button/Button";
-import DataNotFound from "Components/DataError/DataNotFound";
-import NewTask from "Components/NewTask/NewTask";
-import TeamWorkHeader from "Components/TeamWorkHeader/TeamWorkHeader";
-import ProjectWorks from "Components/Works/ProjectWorks";
-import useGetTaskLists from "hooks/useGetTaskLists";
+import { getAllTask } from "features/tasks/store/taskAction";
+import Button from "shared/components/Button/Button";
+import DataNotFound from "shared/components/DataNotFound/DataNotFound";
+import NewTask from "features/tasks/components/NewTask/NewTask";
+import TeamWorkHeader from "features/tasks/components/TeamWorkHeader/TeamWorkHeader";
+import ProjectWorks from "features/tasks/components/ProjectWorks/ProjectWorks";
+import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
 import React, { useEffect, useState } from "react";
 import Helmet from "react-helmet";
 import { connect } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { compose } from "redux";
 
-import "./works.css";
+import "./Works.css";
 
 const Works = ({ title, currentProject, getTaskList, myTasks }) => {
   const [tasks, getTaskLists] = useGetTaskLists();

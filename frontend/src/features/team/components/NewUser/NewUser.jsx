@@ -1,8 +1,8 @@
 import { Avatar, Button, FormControl, InputLabel, MenuItem, Modal, Select, Snackbar, TextField } from "@mui/material";
-import { getAllTeamMembers } from "apis/Actions/teamActions";
-import CreateUser from "Components/CreateUser/CreateUser";
-import useGetTeamMembersList from "hooks/useGetTeamMembersList";
-import useUpdateTeamMember from "hooks/useUpdateTeamMember";
+import { getAllTeamMembers } from "features/team/store/teamActions";
+import CreateUser from "features/team/components/CreateUser/CreateUser";
+import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
+import useUpdateTeamMember from "features/team/hooks/useUpdateTeamMember";
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useLocation } from "react-router-dom";

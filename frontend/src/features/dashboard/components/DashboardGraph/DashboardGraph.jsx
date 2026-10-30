@@ -9,10 +9,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { data } from "./Data/BarData";
-import { data1 } from "./Data/PieData";
+import { data } from "features/dashboard/components/DashboardGraph/Data/BarData";
+import { data1 } from "features/dashboard/components/DashboardGraph/Data/PieData";
 
-import './Graph.css'
+import './DashboardGraph.css'
 
 const DashboardGraph = () => {
   return (

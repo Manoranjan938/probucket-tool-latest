@@ -1,4 +1,4 @@
-import { SET_ERRORS } from "apis/Actions/types";
+import { SET_ERRORS } from "./types";
 
 const initialState = {};
 

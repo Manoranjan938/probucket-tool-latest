@@ -1,8 +1,8 @@
 import React from "react";
 
-import "./Verify.css";
-import image from "Images/logo.png";
-import mail from "Images/mail.png";
+import "./EmailVerify.css";
+import image from "shared/assets/images/logo.png";
+import mail from "shared/assets/images/mail.png";
 import { Link } from "react-router-dom";
 
 const EmailVerify = () => {

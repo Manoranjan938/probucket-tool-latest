@@ -12,15 +12,15 @@ import { VscTypeHierarchySub } from "react-icons/vsc";
 
 import "./TaskDetails.css";
 import { Button, Menu, MenuItem } from "@mui/material";
-import SubTask from "Components/SubTask/SubTask";
-import ExtraDetails from "Components/ExtraTaskDetails/ExtraDetails";
-import TaskActivity from "Components/Activity/TaskActivity";
-import useUpdateTask from "hooks/useUpdateTask";
-import useGetSubTasks from "hooks/useGetSubTasks";
+import SubTask from "features/tasks/components/SubTask/SubTask";
+import ExtraDetails from "features/tasks/components/ExtraDetails/ExtraDetails";
+import TaskActivity from "features/tasks/components/TaskActivity/TaskActivity";
+import useUpdateTask from "features/tasks/hooks/useUpdateTask";
+import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import { setSubtaskList } from "apis/Actions/taskAction";
-import NewSubTask from "Components/NewSubTask/NewSubTask";
+import { setSubtaskList } from "features/tasks/store/taskAction";
+import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
 
 const TaskDetails = ({ close, task, setSubtasks, allSubtask }) => {
   const [type] = useState("task");

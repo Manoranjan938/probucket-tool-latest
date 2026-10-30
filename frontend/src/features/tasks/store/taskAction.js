@@ -4,7 +4,7 @@ import {
   SET_SINGLE_TASK,
   SET_SUBTASK_LIST,
   SET_TASK_LISTS,
-} from "./types";
+} from "shared/store/types";
 
 export const getAllTask = (taskList) => (dispatch) => {
   dispatch({

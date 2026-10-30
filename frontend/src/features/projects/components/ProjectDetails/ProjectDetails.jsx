@@ -2,15 +2,15 @@ import { Snackbar, TextField } from "@mui/material";
 import React, { useState } from "react";
 import MuiAlert from "@mui/material/Alert";
 
-import { data } from "Components/TemplateProject/data";
-import { typeData } from "Components/ChooseType/data";
+import { data } from "features/projects/components/Template/data";
+import { typeData } from "features/projects/components/ChooseType/data";
 
 import "./ProjectDetails.css";
-import Template from "Components/TemplateProject/Template";
+import Template from "features/projects/components/Template/Template";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { useEffect } from "react";
-import useCreateNewProject from "hooks/useCreateNewProject";
+import useCreateNewProject from "features/projects/hooks/useCreateNewProject";
 import { useNavigate } from "react-router-dom";
 
 const Alert = React.forwardRef(function Alert(props, ref) {

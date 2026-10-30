@@ -5,15 +5,15 @@ import { compose } from "redux";
 
 import "./Home.css";
 
-import LandingNav from "./sections/LandingNav";
-import Hero from "./sections/Hero";
-import Features from "./sections/Features";
-import ProjectTypes from "./sections/ProjectTypes";
-import HowItWorks from "./sections/HowItWorks";
-import ComingSoon from "./sections/ComingSoon";
-import Pricing from "./sections/Pricing";
-import CallToAction from "./sections/CallToAction";
-import Footer from "./sections/Footer";
+import LandingNav from "features/landing/components/LandingNav/LandingNav";
+import Hero from "features/landing/components/Hero/Hero";
+import Features from "features/landing/components/Features/Features";
+import ProjectTypes from "features/landing/components/ProjectTypes/ProjectTypes";
+import HowItWorks from "features/landing/components/HowItWorks/HowItWorks";
+import ComingSoon from "features/landing/components/ComingSoon/ComingSoon";
+import Pricing from "features/landing/components/Pricing/Pricing";
+import CallToAction from "features/landing/components/CallToAction/CallToAction";
+import Footer from "features/landing/components/Footer/Footer";
 
 const Home = ({ isLoggedIn }) => {
   return (

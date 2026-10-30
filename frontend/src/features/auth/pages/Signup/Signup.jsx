@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "./Signin.css";
+import "./Signup.css";
 import MuiAlert from "@mui/material/Alert";
 
-import image from "Images/logo.png";
+import image from "shared/assets/images/logo.png";
 import { Snackbar } from "@mui/material";
-import useSignUpRequest from "hooks/useSignUpRequest";
+import useSignUpRequest from "features/auth/hooks/useSignUpRequest";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

@@ -1,4 +1,4 @@
-import Todo from 'Components/TodoCard/Todo'
+import Todo from 'features/todos/components/Todo/Todo'
 import React from 'react'
 
 import './TodoList.css'

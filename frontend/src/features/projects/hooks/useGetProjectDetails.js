@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "Services/axios";
+import axios from "shared/services/axios";
 
 const useGetProjectDetails = () => {
   const [project, setProject] = useState({});

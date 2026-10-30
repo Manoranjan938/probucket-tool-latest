@@ -1,9 +1,9 @@
-//import DashboardGraph from "Components/DashboardGraph/DashboardGraph";
-import TeamTaskCards from "Components/TeamTaskCards/TeamTaskCards";
+//import DashboardGraph from "features/dashboard/components/DashboardGraph/DashboardGraph";
+import TeamTaskCards from "features/dashboard/components/TeamTaskCards/TeamTaskCards";
 import React from "react";
 import Helmet from "react-helmet";
 
-const DasboardHome = ({ title }) => {
+const DashboardHome = ({ title }) => {
   return (
     <>
       <Helmet>
@@ -17,4 +17,4 @@ const DasboardHome = ({ title }) => {
   );
 };
 
-export default DasboardHome;
+export default DashboardHome;

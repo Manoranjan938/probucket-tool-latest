@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 
 import "./Sidebar.css";
-import avatar1 from "Images/avatar1.png";
+import avatar1 from "shared/assets/images/avatar1.png";
 import { Link } from "react-router-dom";
 
 import { AiOutlineSetting } from "react-icons/ai";
@@ -15,8 +15,8 @@ import { BiNotepad } from "react-icons/bi";
 //import { RiTodoLine } from "react-icons/ri";
 import { compose } from "redux";
 import { connect } from "react-redux";
-import { getProjectDetails } from "apis/Actions/projectsAction";
-import useGetProjectDetails from "hooks/useGetProjectDetails";
+import { getProjectDetails } from "features/projects/store/projectsAction";
+import useGetProjectDetails from "features/projects/hooks/useGetProjectDetails";
 
 const Sidebar = ({ myProject, id, getSingleProject, name }) => {
   const [project, getProjectDetails] = useGetProjectDetails();

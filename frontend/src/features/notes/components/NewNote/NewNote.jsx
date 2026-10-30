@@ -1,13 +1,13 @@
 import { Button, Modal, Snackbar, TextField } from "@mui/material";
-import useAddNote from "hooks/useAddNote";
+import useAddNote from "features/notes/hooks/useAddNote";
 import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import MuiAlert from "@mui/material/Alert";
 
 import "./NewNote.css";
-import useGetNotesList from "hooks/useGetNotesList";
-import { getAllNotes } from "apis/Actions/notesAction";
+import useGetNotesList from "features/notes/hooks/useGetNotesList";
+import { getAllNotes } from "features/notes/store/notesAction";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

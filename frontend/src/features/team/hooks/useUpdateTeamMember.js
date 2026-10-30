@@ -1,4 +1,4 @@
-import axios from "Services/axios";
+import axios from "shared/services/axios";
 
 const useUpdateTeamMember = () => {
   const updateTeamMember = async (updateTeam) => {

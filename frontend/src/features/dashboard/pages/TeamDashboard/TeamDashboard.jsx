@@ -1,5 +1,5 @@
-import DashboardHeader from "Components/DashboardHeader/DashboardHeader";
-import TeamSidebar from "Components/TeamSidebar/TeamSidebar";
+import DashboardHeader from "features/dashboard/components/DashboardHeader/DashboardHeader";
+import TeamSidebar from "features/dashboard/components/TeamSidebar/TeamSidebar";
 import React from "react";
 import { useLocation } from "react-router-dom";
 

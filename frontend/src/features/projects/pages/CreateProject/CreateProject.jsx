@@ -1,4 +1,4 @@
-import NewProject from 'Components/NewProject/NewProject';
+import NewProject from 'features/projects/components/NewProject/NewProject';
 import React from 'react'
 
 const CreateProject = () => {

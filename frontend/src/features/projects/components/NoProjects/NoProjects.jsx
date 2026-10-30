@@ -1,9 +1,9 @@
-import Button from "Components/Button/Button";
+import Button from "shared/components/Button/Button";
 import React from "react";
 
-import "./NoProject.css";
+import "./NoProjects.css";
 
-import image from "Images/projects.png";
+import image from "shared/assets/images/projects.png";
 import { useNavigate } from "react-router-dom";
 
 const NoProjects = () => {

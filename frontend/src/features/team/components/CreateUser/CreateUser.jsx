@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 
-import "./CreatUser.css";
+import "./CreateUser.css";
 
-import image1 from "Images/new_user.png";
+import image1 from "shared/assets/images/new_user.png";
 import { Button, Modal, Snackbar, TextField } from "@mui/material";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { useEffect } from "react";
-import useAddTeamMember from "hooks/useAddTeamMember";
+import useAddTeamMember from "features/team/hooks/useAddTeamMember";
 import MuiAlert from "@mui/material/Alert";
-import useGetTeamMembersList from "hooks/useGetTeamMembersList";
-import { getAllTeamMembers } from "apis/Actions/teamActions";
+import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
+import { getAllTeamMembers } from "features/team/store/teamActions";
 import { useLocation } from "react-router-dom";
 
 const Alert = React.forwardRef(function Alert(props, ref) {

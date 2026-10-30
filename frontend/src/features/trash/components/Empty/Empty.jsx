@@ -2,7 +2,7 @@ import React from "react";
 
 import './Empty.css'
 
-import image from "Images/trash.png";
+import image from "shared/assets/images/trash.png";
 
 const Empty = () => {
   return (

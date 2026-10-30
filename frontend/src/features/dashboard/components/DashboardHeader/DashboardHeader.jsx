@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./DashboardHeader.css";
 
-import image from "Images/logo.png";
-import user from 'Images/user.png'
+import image from "shared/assets/images/logo.png";
+import user from 'shared/assets/images/user.png'
 
 import { FaSearch } from "react-icons/fa";
 import { MdNotifications } from "react-icons/md";

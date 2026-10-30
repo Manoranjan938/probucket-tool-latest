@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import "./TeamSidebar.css";
 
-import avatar1 from "Images/avatar1.png";
+import avatar1 from "shared/assets/images/avatar1.png";
 import { Link } from "react-router-dom";
 import { AiOutlineSetting } from "react-icons/ai";
 //import { FiHelpCircle } from "react-icons/fi";
@@ -13,10 +13,10 @@ import { IoNotifications } from "react-icons/io5";
 import { GoProject, GoIssueClosed } from "react-icons/go";
 import { BiNotepad, BiUserPlus } from "react-icons/bi";
 //import { RiTodoLine } from "react-icons/ri";
-import useGetProjectDetails from "hooks/useGetProjectDetails";
+import useGetProjectDetails from "features/projects/hooks/useGetProjectDetails";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import { getProjectDetails } from "apis/Actions/projectsAction";
+import { getProjectDetails } from "features/projects/store/projectsAction";
 
 const TeamSidebar = ({ id, getSingleProject, name, currentUser }) => {
   const [project, getProjectDetails] = useGetProjectDetails();

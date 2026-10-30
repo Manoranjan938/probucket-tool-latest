@@ -3,8 +3,8 @@ import React, { useEffect } from "react";
 import { MdPendingActions, MdOutlineTask } from "react-icons/md";
 import { BiTask, BiTaskX } from "react-icons/bi";
 
-import './TaskCard.css'
-import useGetHomeCountDatas from "hooks/useGetHomeCountDatas";
+import './TeamTaskCards.css'
+import useGetHomeCountDatas from "features/dashboard/hooks/useGetHomeCountDatas";
 import { useLocation } from "react-router-dom";
 
 const TeamTaskCards = () => {

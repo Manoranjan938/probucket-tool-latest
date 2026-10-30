@@ -2,8 +2,8 @@ import React from "react";
 
 import "./New.css";
 
-import download from "Images/download.jpg";
-import learn from "Images/learning.jpg";
+import download from "shared/assets/images/download.jpg";
+import learn from "shared/assets/images/learning.jpg";
 
 const New = () => {
   return (

@@ -1,7 +1,7 @@
 import { Modal } from "@mui/material";
-import { getSingleTask, removeSelectedTask } from "apis/Actions/taskAction";
-import TaskDetails from "Components/TaskDetails/TaskDetails";
-import useGetTaskDetails from "hooks/useGetTaskDetails";
+import { getSingleTask, removeSelectedTask } from "features/tasks/store/taskAction";
+import TaskDetails from "features/tasks/components/TaskDetails/TaskDetails";
+import useGetTaskDetails from "features/tasks/hooks/useGetTaskDetails";
 import React, { useState } from "react";
 import { useEffect } from "react";
 

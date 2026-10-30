@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import "./Pricing.css";
 
-import { plans } from "../data";
+import { plans } from "features/landing/data";
 
 const Pricing = () => {
   return (

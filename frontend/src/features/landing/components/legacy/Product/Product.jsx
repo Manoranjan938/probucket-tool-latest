@@ -2,9 +2,9 @@ import React from "react";
 
 import "./Product.css";
 
-import personal from "Images/personal.png";
-import team from "Images/team.png";
-import enterprise from "Images/enterprise.png";
+import personal from "shared/assets/images/personal.png";
+import team from "shared/assets/images/team.png";
+import enterprise from "shared/assets/images/enterprise.png";
 
 const Product = () => {
   return (

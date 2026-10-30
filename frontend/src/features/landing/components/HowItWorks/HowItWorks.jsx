@@ -2,7 +2,7 @@ import React from "react";
 
 import "./HowItWorks.css";
 
-import { steps } from "../data";
+import { steps } from "features/landing/data";
 
 const HowItWorks = () => {
   return (

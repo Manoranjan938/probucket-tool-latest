@@ -2,7 +2,7 @@ import React from "react";
 
 import "./ComingSoon.css";
 
-import { comingSoon } from "../data";
+import { comingSoon } from "features/landing/data";
 
 const ComingSoon = () => {
   return (

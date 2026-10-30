@@ -3,7 +3,7 @@ import React from "react";
 import "./NotesList.css";
 
 import { BsThreeDots } from "react-icons/bs";
-import NotesHeader from "Components/NotesHeader/NotesHeader";
+import NotesHeader from "features/notes/components/NotesHeader/NotesHeader";
 import { connect } from "react-redux";
 import { compose } from "redux";
 

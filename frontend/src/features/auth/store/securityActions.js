@@ -1,6 +1,6 @@
 import jwt_decode from "jwt-decode";
-import setJWTToken from "Security/setJWTToken";
-import { SET_CURRENT_USER } from "./types";
+import setJWTToken from "features/auth/utils/setJWTToken";
+import { SET_CURRENT_USER } from "shared/store/types";
 
 export const login = (token) => async (dispatch) => {
   try {

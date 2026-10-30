@@ -1,6 +1,6 @@
-import image1 from 'Images/new-personal.png'
-import image2 from 'Images/new-team.png'
-import image3 from 'Images/new-organisation.png'
+import image1 from 'shared/assets/images/new-personal.png'
+import image2 from 'shared/assets/images/new-team.png'
+import image3 from 'shared/assets/images/new-organisation.png'
 
 export const typeData = [
     {

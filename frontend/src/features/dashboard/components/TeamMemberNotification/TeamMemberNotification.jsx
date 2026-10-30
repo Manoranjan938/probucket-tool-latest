@@ -2,7 +2,7 @@ import { Button } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-import "./TeamMemNotification.css";
+import "./TeamMemberNotification.css";
 
 const TeamMemberNotification = () => {
   const navigate = useNavigate();

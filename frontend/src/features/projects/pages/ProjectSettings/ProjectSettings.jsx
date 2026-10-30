@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
-import image from 'Images/avatar1.png'
+import image from 'shared/assets/images/avatar1.png'
 import { Button, TextField } from "@mui/material";
 
-import './ProjectSetting.css';
+import './ProjectSettings.css';
 import { compose } from "redux";
 import { connect } from "react-redux";
 

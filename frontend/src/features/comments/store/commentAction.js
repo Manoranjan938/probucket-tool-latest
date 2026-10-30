@@ -1,4 +1,4 @@
-import { SET_COMMENT_LIST } from "./types";
+import { SET_COMMENT_LIST } from "shared/store/types";
 
 export const setAllComments = (commentData) => async (dispatch) => {
   try {

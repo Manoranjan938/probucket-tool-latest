@@ -5,7 +5,7 @@ import './NotesHeader.css'
 
 import { FaSearch } from "react-icons/fa";
 import { useState } from 'react';
-import NewNote from 'Components/NewNote/NewNote';
+import NewNote from 'features/notes/components/NewNote/NewNote';
 
 const NotesHeader = () => {
 

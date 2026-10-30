@@ -1,4 +1,4 @@
-import { SET_CURRENT_USER } from "apis/Actions/types";
+import { SET_CURRENT_USER } from "shared/store/types";
 
 const initialState = {
   user: {},

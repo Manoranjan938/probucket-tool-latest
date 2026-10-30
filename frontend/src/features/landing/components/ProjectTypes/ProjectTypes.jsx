@@ -3,9 +3,9 @@ import { FaCheck } from "react-icons/fa";
 
 import "./ProjectTypes.css";
 
-import personal from "Images/new-personal.png";
-import team from "Images/new-team.png";
-import { projectTypes } from "../data";
+import personal from "shared/assets/images/new-personal.png";
+import team from "shared/assets/images/new-team.png";
+import { projectTypes } from "features/landing/data";
 
 const images = { personal, team };
 

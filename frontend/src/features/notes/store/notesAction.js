@@ -1,4 +1,4 @@
-import { SET_NOTES_LIST } from "./types";
+import { SET_NOTES_LIST } from "shared/store/types";
 
 export const getAllNotes = (noteData) => async (dispatch) => {
   try {

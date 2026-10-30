@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import image from "Images/logo.png";
+import image from "shared/assets/images/logo.png";
 import MuiAlert from "@mui/material/Alert";
 import { Snackbar } from "@mui/material";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { useEffect } from "react";
-import useUpdatePassword from "hooks/useUpdatePassword";
+import useUpdatePassword from "features/profile/hooks/useUpdatePassword";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

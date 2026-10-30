@@ -1,4 +1,4 @@
-import Empty from "Components/EmptyTrash/Empty";
+import Empty from "features/trash/components/Empty/Empty";
 import React from "react";
 import Helmet from "react-helmet";
 

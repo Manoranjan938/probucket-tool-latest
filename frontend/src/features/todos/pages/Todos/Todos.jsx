@@ -1,6 +1,6 @@
-import TodoHeader from "Components/TodoHeader/TodoHeader";
+import TodoHeader from "features/todos/components/TodoHeader/TodoHeader";
 import React, { useState } from "react";
-import TodoList from "Components/TodoList/TodoList";
+import TodoList from "features/todos/components/TodoList/TodoList";
 import { TodoData } from "./TodoData";
 import Helmet from "react-helmet";
 

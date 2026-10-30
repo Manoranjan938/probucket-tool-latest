@@ -1,4 +1,4 @@
-import { SET_ALL_PROJECTS, SET_PROJECT_DETAILS } from "apis/Actions/types";
+import { SET_ALL_PROJECTS, SET_PROJECT_DETAILS } from "shared/store/types";
 
 const initialState = {
   allProjects: [],

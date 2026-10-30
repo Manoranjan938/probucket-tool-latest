@@ -1,5 +1,5 @@
-import NewTask from "Components/NewTask/NewTask";
-import WorkTask from "Components/WorkTask/WorkTask";
+import NewTask from "features/tasks/components/NewTask/NewTask";
+import WorkTask from "features/tasks/components/WorkTask/WorkTask";
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import { compose } from "redux";

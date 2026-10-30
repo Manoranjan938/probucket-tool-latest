@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./TaskAndBug.css";
+import "./TeamTaskAndBugList.css";
 
 const TeamTaskAndBugList = () => {
   return (

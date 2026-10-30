@@ -1,4 +1,4 @@
-import Button from "Components/Button/Button";
+import Button from "shared/components/Button/Button";
 import React from "react";
 
 import "./Hero.css";

@@ -1,5 +1,5 @@
-import Comments from "Components/Comments/Comments";
-import TaskHistory from "Components/TaskHistory/TaskHistory";
+import Comments from "features/comments/components/Comments/Comments";
+import TaskHistory from "features/tasks/components/TaskHistory/TaskHistory";
 import React, { useState } from "react";
 
 import "./TaskActivity.css";

@@ -2,7 +2,7 @@ import React from "react";
 
 import "./Error.css";
 
-import image from "Images/error-page.png";
+import image from "shared/assets/images/error-page.png";
 
 const Error = () => {
   return (

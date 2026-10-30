@@ -1,7 +1,7 @@
-import Button from "Components/Button/Button";
+import Button from "shared/components/Button/Button";
 import React from "react";
 
-import "./DataNot.css";
+import "./DataNotFound.css";
 
 const DataNotFound = ({text}) => {
   return (

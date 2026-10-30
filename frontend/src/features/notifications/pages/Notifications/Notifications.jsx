@@ -1,4 +1,4 @@
-import Notification from "Components/Notification/Notification";
+import Notification from "features/notifications/components/Notification/Notification";
 import React from "react";
 import Helmet from "react-helmet";
 

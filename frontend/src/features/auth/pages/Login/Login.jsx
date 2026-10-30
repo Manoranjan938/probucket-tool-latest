@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import "./Login.css";
 
-import image from "Images/logo.png";
-import googleImage from "Images/google-logo.png";
+import image from "shared/assets/images/logo.png";
+import googleImage from "shared/assets/images/google-logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import { GOOGLE_AUTH_URL } from "Constant/constant";
+import { GOOGLE_AUTH_URL } from "shared/constants/constant";
 import MuiAlert from '@mui/material/Alert'
 import { Snackbar } from "@mui/material";
-import { login } from "apis/Actions/securityActions";
+import { login } from "features/auth/store/securityActions";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import useLoginRequest from "hooks/useLoginRequest";
+import useLoginRequest from "features/auth/hooks/useLoginRequest";
 
 const Alert = React.forwardRef(function Alert(props, ref){
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />

@@ -1,6 +1,6 @@
-import image1 from 'Images/project.png'
-import image2 from 'Images/bug.png'
-import image3 from 'Images/all.png'
+import image1 from 'shared/assets/images/project.png'
+import image2 from 'shared/assets/images/bug.png'
+import image3 from 'shared/assets/images/all.png'
 
 export const data = [
     {

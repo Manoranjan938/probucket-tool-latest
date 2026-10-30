@@ -8,14 +8,14 @@ import {
   Snackbar,
   TextField,
 } from "@mui/material";
-import useCreateNewSubtask from "hooks/useCreateNewSubtask";
+import useCreateNewSubtask from "features/tasks/hooks/useCreateNewSubtask";
 import React, { useState } from "react";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import MuiAlert from "@mui/material/Alert";
 import { useEffect } from "react";
-import useGetSubTasks from "hooks/useGetSubTasks";
-import { setSubtaskList } from "apis/Actions/taskAction";
+import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
+import { setSubtaskList } from "features/tasks/store/taskAction";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

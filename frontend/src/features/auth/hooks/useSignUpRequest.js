@@ -1,4 +1,4 @@
-import axios from "Services/axios";
+import axios from "shared/services/axios";
 
 const useSignUpRequest = () => {
   const register = async (RegisterRequest) => {

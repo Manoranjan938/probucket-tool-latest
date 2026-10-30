@@ -13,10 +13,10 @@ import {
   FaGoogle,
 } from "react-icons/fa";
 
-import avatar1 from "Images/avatar1.png";
-import avatar2 from "Images/avatar2.png";
-import avatar3 from "Images/avatar3.png";
-import avatar4 from "Images/avatar4.png";
+import avatar1 from "shared/assets/images/avatar1.png";
+import avatar2 from "shared/assets/images/avatar2.png";
+import avatar3 from "shared/assets/images/avatar3.png";
+import avatar4 from "shared/assets/images/avatar4.png";
 
 export const navLinks = [
   { id: "features", title: "Features" },

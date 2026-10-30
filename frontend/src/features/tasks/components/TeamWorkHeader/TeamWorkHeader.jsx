@@ -4,10 +4,10 @@ import React, { useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 
 import "./TeamWorkHeader.css";
-import useGetTeamMembersList from "hooks/useGetTeamMembersList";
+import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import { getAllTeamMembers } from "apis/Actions/teamActions";
+import { getAllTeamMembers } from "features/team/store/teamActions";
 
 const TeamWorkHeader = ({ currentProject, getTeamList }) => {
   const [teamList, getTeamLists] = useGetTeamMembersList();

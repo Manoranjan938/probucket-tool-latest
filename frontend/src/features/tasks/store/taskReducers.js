@@ -4,7 +4,7 @@ import {
   SET_SUBTASK_LIST,
   SET_SELECTED_SUBTASK,
   REMOVE_TASK_DETAILS,
-} from "apis/Actions/types";
+} from "shared/store/types";
 
 const initialState = {
   allTask: [],

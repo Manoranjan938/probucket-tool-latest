@@ -1,4 +1,4 @@
-import { SET_COMMENT_LIST } from "apis/Actions/types";
+import { SET_COMMENT_LIST } from "shared/store/types";
 
 const initialState = {
   commentList: [],

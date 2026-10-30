@@ -1,6 +1,6 @@
-import ChooseTemplate from "Components/ChooseTemplate/TemplateChoose";
-import ChooseType from "Components/ChooseType/Type";
-import ProjectDetails from "Components/ProjectDetails/ProjectDetails";
+import ChooseTemplate from "features/projects/components/ChooseTemplate/ChooseTemplate";
+import ChooseType from "features/projects/components/ChooseType/ChooseType";
+import ProjectDetails from "features/projects/components/ProjectDetails/ProjectDetails";
 import React, { useState } from "react";
 
 import "./NewProject.css";

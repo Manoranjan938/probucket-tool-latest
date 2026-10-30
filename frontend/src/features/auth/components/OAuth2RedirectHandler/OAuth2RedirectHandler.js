@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN } from "Constant/constant";
+import { ACCESS_TOKEN } from "shared/constants/constant";
 import React from "react";
 import { Redirect } from "react-router-dom";
 

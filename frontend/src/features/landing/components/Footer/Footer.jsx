@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 
 import "./Footer.css";
 
-import logo from "Images/logo.png";
-import { navLinks } from "../data";
+import logo from "shared/assets/images/logo.png";
+import { navLinks } from "features/landing/data";
 
 const Footer = () => {
   return (

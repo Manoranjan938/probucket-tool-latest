@@ -1,8 +1,8 @@
-import Template from "Components/TemplateProject/Template.jsx";
+import Template from "features/projects/components/Template/Template.jsx";
 import React from "react";
 
 import './ChooseTemplate.css'
-import { data } from '../TemplateProject/data'
+import { data } from 'features/projects/components/Template/data'
 
 const ChooseTemplate = ({title, details, setDetails, currentPage, setCurrentPage}) => {
   return (

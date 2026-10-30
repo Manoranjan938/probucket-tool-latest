@@ -1,11 +1,11 @@
 import { combineReducers } from "redux";
-import errorReducer from "./errorReducer";
-import securityReducers from "./securityReducers";
-import projectReducers from "./projectReducers";
-import taskReducers from "./taskReducers";
-import teamMembers from "./teamReducers";
-import commentReducer from "./commentReducers";
-import notesReducers from "./notesReducers";
+import errorReducer from "shared/store/errorReducer";
+import securityReducers from "features/auth/store/securityReducers";
+import projectReducers from "features/projects/store/projectReducers";
+import taskReducers from "features/tasks/store/taskReducers";
+import teamMembers from "features/team/store/teamReducers";
+import commentReducer from "features/comments/store/commentReducers";
+import notesReducers from "features/notes/store/notesReducers";
 
 export default combineReducers({
   error: errorReducer,

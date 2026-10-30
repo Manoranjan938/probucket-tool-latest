@@ -1,7 +1,7 @@
-import axios from "Services/axios";
+import axios from "shared/services/axios";
 import { useState } from "react";
 
-const useGetProjectsByTeamMembrs = () => {
+const useGetProjectsByTeamMembers = () => {
   const [teamProjects, setTeamProjects] = useState([]);
 
   const getProjectsByTeam = async (userId) => {
@@ -17,4 +17,4 @@ const useGetProjectsByTeamMembrs = () => {
   return [teamProjects, getProjectsByTeam];
 };
 
-export default useGetProjectsByTeamMembrs;
+export default useGetProjectsByTeamMembers;

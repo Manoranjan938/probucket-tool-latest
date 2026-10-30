@@ -4,7 +4,7 @@ import { FaArrowRight } from "react-icons/fa";
 
 import "./Hero.css";
 
-import BoardPreview from "./BoardPreview";
+import BoardPreview from "features/landing/components/BoardPreview/BoardPreview";
 
 const Hero = ({ isLoggedIn }) => {
   return (

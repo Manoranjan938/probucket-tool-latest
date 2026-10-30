@@ -3,7 +3,7 @@ import { FaListUl } from "react-icons/fa";
 
 import "./BoardPreview.css";
 
-import { boardColumns } from "../data";
+import { boardColumns } from "features/landing/data";
 
 const BoardPreview = () => {
   return (

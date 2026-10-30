@@ -2,7 +2,7 @@ import React from "react";
 
 import "./Features.css";
 
-import { features } from "../data";
+import { features } from "features/landing/data";
 
 const Features = () => {
   return (

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import image from "Images/logo.png";
+import image from "shared/assets/images/logo.png";
 import MuiAlert from "@mui/material/Alert";
 import { Snackbar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
-import useResetPassword from "hooks/useResetPassword";
+import useResetPassword from "features/auth/hooks/useResetPassword";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

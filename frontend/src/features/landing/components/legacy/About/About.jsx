@@ -2,7 +2,7 @@ import React from "react";
 
 import "./About.css";
 
-import about from "Images/about.png";
+import about from "shared/assets/images/about.png";
 
 const About = () => {
   return (

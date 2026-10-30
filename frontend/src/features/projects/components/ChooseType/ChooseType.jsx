@@ -1,12 +1,12 @@
 import React from "react";
 
-import "./Type.css";
+import "./ChooseType.css";
 
-import image from "Images/project.png";
+import image from "shared/assets/images/project.png";
 
 import { typeData } from "./data";
-import { data } from "Components/TemplateProject/data";
-import Template from "Components/TemplateProject/Template";
+import { data } from "features/projects/components/Template/data";
+import Template from "features/projects/components/Template/Template";
 import { Alert } from "@mui/material";
 
 const ChooseType = ({ title, details, setDetails, currentPage, setCurrentPage }) => {

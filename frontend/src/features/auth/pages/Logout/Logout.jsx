@@ -3,11 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./Logout.css";
 
-import image from "Images/logo.png";
-import user from "Images/user.png";
+import image from "shared/assets/images/logo.png";
+import user from "shared/assets/images/user.png";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import { logout } from "apis/Actions/securityActions";
+import { logout } from "features/auth/store/securityActions";
 
 const Logout = ({ logout, currentUser }) => {
   const navigate = useNavigate();

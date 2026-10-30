@@ -1,9 +1,9 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import useGetTaskStatistics from "hooks/useGetTaskStatistics";
+import useGetTaskStatistics from "features/tasks/hooks/useGetTaskStatistics";
 import React from "react";
 import { useEffect } from "react";
 
-import "./TaskStatus.css";
+import "./TaskStatusCompletion.css";
 
 const TaskStatusCompletion = ({ task }) => {
   const [stats, getTaskStats] = useGetTaskStatistics();
