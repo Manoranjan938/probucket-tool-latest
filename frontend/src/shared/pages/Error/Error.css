@@ -1,50 +1,167 @@
-.error__container{
-    width: 700px;
-    margin: 2% auto;
+.error {
+  /* Same palette as the landing page */
+  --error-primary: #827ed8;
+  --error-primary-strong: #5f59c9;
+  --error-primary-soft: #f1f0fc;
+  --error-ink: #1f1d3a;
+  --error-text: #55536e;
+  --error-border: #e7e6f2;
+  --error-surface: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 32px 48px;
+  background: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      var(--error-primary-soft) 0%,
+      rgba(241, 240, 252, 0) 70%
+    ),
+    var(--error-surface);
+  color: var(--error-text);
+  line-height: 1.5;
 }
 
-.error__image{
-    width: 100%;
-    height: 500px;
+.error *,
+.error *::before,
+.error *::after {
+  box-sizing: border-box;
 }
 
-.error__image > img{
-    width: 100%;
-    height: 100%;
+.error__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--error-ink);
 }
 
-.error__content{
-    text-align: center;
+.error__brand > img {
+  width: 34px;
+  height: 34px;
 }
 
-.error__content > h1{
-    font-size: 60px;
-    margin: 0;
+.error__brand > span {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
-.error__content > h5{
-    width: 70%;
-    margin: 10px auto;
-    font-size: 18px;
-    text-align: center;
-    font-weight: 500;
+.error__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 560px;
+  margin: auto;
+  padding: 32px 0;
+  text-align: center;
 }
 
-.error__footer{
-    display: flex;
-    justify-content: center;
-    gap: 20px;
+.error__image {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin-bottom: 24px;
+  /* The PNG has a white background; this blends it into the page gradient */
+  mix-blend-mode: multiply;
 }
 
-.error_page_btn{
-    width: auto;
-    padding: 5px 15px;
-    border: none;
-    outline: none;
-    background: #827ed8;
+.error__eyebrow {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--error-primary-strong);
+}
+
+.error__title {
+  margin-bottom: 12px;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--error-ink);
+}
+
+.error__text {
+  max-width: 460px;
+  font-size: 17px;
+}
+
+.error__actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+/* Same shape as the landing page buttons */
+.error__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.error__btn:focus-visible {
+  outline: 3px solid var(--error-primary);
+  outline-offset: 2px;
+}
+
+.error__btn--primary {
+  background: var(--error-primary-strong);
+  color: #fff;
+}
+
+.error__btn--primary:hover {
+  background: #4f49b8;
+}
+
+.error__btn--ghost {
+  border-color: var(--error-border);
+  background: var(--error-surface);
+  color: var(--error-ink);
+}
+
+.error__btn--ghost:hover {
+  border-color: var(--error-primary);
+  color: var(--error-primary-strong);
+}
+
+@media (max-width: 480px) {
+  .error {
+    padding: 24px 16px;
+  }
+
+  .error__title {
+    font-size: 34px;
+  }
+
+  .error__text {
     font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
+  }
+
+  .error__actions {
+    flex-direction: column;
+    align-self: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .error__btn {
+    transition: none;
+  }
 }
