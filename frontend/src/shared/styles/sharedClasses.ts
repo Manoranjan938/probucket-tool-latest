@@ -8,7 +8,7 @@ export const searchField = "flex justify-center w-full mr-2.5 p-1.5 border-2 bor
 export const searchInput = "border-none outline-none font-bold text-[#929191]";
 export const searchIcon = "text-[#929191]";
 
-// Purple button (shared/components/Button and plain <button>s that use the same look)
+// Purple button (plain <button>s on the pages that aren't redesigned yet)
 export const button =
   "flex justify-center w-auto my-2.5 py-2 px-5 border-none rounded-[5px] bg-[#827ed8] text-[16px] font-semibold text-white cursor-pointer";
 

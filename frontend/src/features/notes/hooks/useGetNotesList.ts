@@ -6,12 +6,13 @@ const useGetNotesList = () => {
   const [notes, setNotes] = useState<NoteListItem[]>([]);
 
   const getNotesList = async (
-    projectId: string | undefined,
+    projectId: string | null | undefined,
     userid: string | undefined
   ) => {
     const resp = await axios.get<NoteListItem[]>(`/note/getNoteList/${userid}/${projectId}`);
 
     setNotes(resp.data);
+    return resp;
   };
 
   return [notes, getNotesList] as const;

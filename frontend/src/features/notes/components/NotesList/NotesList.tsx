@@ -1,42 +1,36 @@
 import React from "react";
-
-import { divider } from "shared/styles/sharedClasses";
-
-import { BsThreeDots } from "react-icons/bs";
-import NotesHeader from "features/notes/components/NotesHeader/NotesHeader";
+import { FiMoreHorizontal } from "react-icons/fi";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
+
+import * as note from "features/notes/styles/noteClasses";
+
 import type { RootState } from "app/store";
+import type { NoteListItem } from "features/notes/types";
 
-const NotesList = ({ notes }: Props) => {
-  const truncate = (string: string, n: number) => {
-    return string?.length > n ? string.substr(0, n - 1) + "..." : string;
-  };
-
+// The user's notes as cards; clicking a card opens the whole note
+const NotesList = ({ notes, onOpen }: { onOpen: (item: NoteListItem) => void } & Props) => {
   return (
-    <>
-      <div>
-        <NotesHeader />
-        <div className={divider} />
-        <div className="grid grid-cols-[repeat(3,1fr)] gap-2.5 mt-2.5 mr-5">
-          {notes &&
-            notes.length > 0 &&
-            notes.map((item) => (
-              <div className="w-auto py-[5px] px-[15px] rounded-[5px] shadow-[1px_1px_10px_#0006] hover:cursor-move" key={item.id}>
-                <div className="flex justify-between items-center">
-                  <h2>{item.title}</h2>
-                  <span className="text-[20px] cursor-pointer">
-                    <BsThreeDots />
-                  </span>
-                </div>
-                <div className="mt-2.5">
-                  <span>{truncate(item.description, 30)}</span>
-                </div>
-              </div>
-            ))}
-        </div>
-      </div>
-    </>
+    <ul className={note.grid}>
+      {notes.map((item) => (
+        <li key={item.id}>
+          <article className={note.card}>
+            <button type="button" className={note.cardButton} onClick={() => onOpen(item)}>
+              <h2 className={note.cardTitle}>{item.title}</h2>
+              {item.description ? (
+                <p className={note.cardText}>{item.description}</p>
+              ) : (
+                <p className={note.cardTextEmpty}>No text</p>
+              )}
+            </button>
+            {/* Note options (e.g. delete) aren't wired up yet */}
+            <button type="button" className={note.cardMenu} aria-label={`Options for ${item.title}`}>
+              <FiMoreHorizontal />
+            </button>
+          </article>
+        </li>
+      ))}
+    </ul>
   );
 };
 

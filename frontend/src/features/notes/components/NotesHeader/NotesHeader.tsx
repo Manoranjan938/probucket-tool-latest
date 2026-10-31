@@ -1,42 +1,23 @@
-import { Button } from '@mui/material'
-import React from 'react'
+import React from "react";
+import { FiPlus, FiSearch } from "react-icons/fi";
 
-import { searchField, searchIcon, searchInput } from "shared/styles/sharedClasses";
+import * as note from "features/notes/styles/noteClasses";
 
-import { FaSearch } from "react-icons/fa";
-import { useState } from 'react';
-import NewNote from 'features/notes/components/NewNote/NewNote';
-
-const NotesHeader = () => {
-
-  const [open, setOpen] = useState(false);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleClick = () => {
-    setOpen(true)
-  }
-
+// Toolbar of the Notes page: search and "New note"
+const NotesHeader = ({ onNewNote }: { onNewNote: () => void }) => {
   return (
-    <>
-      <div className="flex justify-between items-center mt-2.5 mr-5">
-        <div className="text-[#929191]">
-          <div className={searchField}>
-            <FaSearch className={searchIcon} />
-            <input type="text" placeholder="Search" className={searchInput} />
-          </div>
-        </div>
-        <div>
-          <Button variant="contained" color="primary" onClick={handleClick}>
-            Create New Note
-          </Button>
-        </div>
-      </div>
-      <NewNote open={open} handleNoteClose={handleClose} />
-    </>
+    <div className={note.toolbar}>
+      {/* Not wired up yet – kept so the toolbar looks complete */}
+      <label className={note.search}>
+        <FiSearch aria-hidden="true" />
+        <input type="search" placeholder="Search notes" aria-label="Search notes" className={note.searchInput} />
+      </label>
+      <button type="button" className={`${note.btnPrimary} ml-auto`} onClick={onNewNote}>
+        <FiPlus aria-hidden="true" />
+        New note
+      </button>
+    </div>
   );
-}
+};
 
-export default NotesHeader
+export default NotesHeader;

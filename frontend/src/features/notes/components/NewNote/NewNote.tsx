@@ -1,203 +1,131 @@
-import { Button, Modal, Snackbar, TextField } from "@mui/material";
-import useAddNote from "features/notes/hooks/useAddNote";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { Dialog } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { FiX } from "react-icons/fi";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
-import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState } from "shared/types";
 
-import { divider, formFieldCompact, modalClose, modalHeader } from "shared/styles/sharedClasses";
-import useGetNotesList from "features/notes/hooks/useGetNotesList";
-import { getAllNotes } from "features/notes/store/notesAction";
-import type { AppDispatch, RootState } from "app/store";
-import type { NoteListItem, NotesRequest } from "features/notes/types";
+import * as note from "features/notes/styles/noteClasses";
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import useAddNote from "features/notes/hooks/useAddNote";
+import { toastOptions } from "features/tasks/data";
+import type { RootState } from "app/store";
 
-const NewNote = ({
-  open,
-  handleNoteClose,
-  currentProject,
-  currentUser,
-  setNote,
-}: { open: boolean; handleNoteClose: () => void } & Props) => {
-  const [data, setData] = useState({
-    title: "",
-    description: "",
-    showTitle: false,
-    showDesc: false,
-    message: "",
-  });
-  const [statusBar, setStatusBar] = useState<SnackbarState>({
-    open: false,
-    vertical: "bottom",
-    horizontal: "right",
-    type: "",
-    message: "",
-  });
-  const [noteRequest, setNoteRequest] = useState<NotesRequest>({
-    title: "",
-    noteDescription: "",
-    userId: "",
-    projectId: "",
-  });
+type OwnProps = {
+  open: boolean;
+  onClose: () => void;
+  /** Called after the note is saved, to reload the list */
+  onCreated: () => void;
+  /** The "project" query parameter */
+  projectId: string | null;
+};
+
+// Dialog that adds a note to the project; notes are private to the user who writes them
+const NewNote = ({ open, onClose, onCreated, projectId, currentUser }: OwnProps & Props) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [createNote] = useAddNote();
-  const [notes, getNotesList] = useGetNotesList();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const handleClose = (event: unknown, reason?: string) => {
-    if (reason === "clickaway") {
+  const handleClose = () => {
+    setTitle("");
+    setDescription("");
+    setError("");
+    onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const noteTitle = title.trim();
+    if (!noteTitle) {
+      setError("Please give the note a title");
       return;
     }
-    setStatusBar({ open: false });
-  };
 
-  const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (!data.title && !data.description) {
-      setData({
-        ...data,
-        showTitle: true,
-        showDesc: true,
-        message: "Please fillout this field",
-      });
-    } else if (!data.title) {
-      setData({
-        ...data,
-        showTitle: true,
-        message: "Please fillout this field",
-      });
-    } else if (!data.description) {
-      setData({
-        ...data,
-        showDesc: true,
-        message: "Please fillout this field",
-      });
-    } else {
-      setNoteRequest({
-        title: data.title,
-        noteDescription: data.description,
-        userId: currentUser.id!,
-        projectId: currentProject.projectId!,
-      });
-      setData({
-        ...data,
-        title: "",
-        description: "",
-      });
-      handleNoteClose();
-    }
-  };
-
-  useEffect(() => {
-    if (
-      noteRequest.title &&
-      noteRequest.noteDescription &&
-      noteRequest.projectId &&
-      noteRequest.userId
-    ) {
-      callAddNote();
-    }
-  }, [noteRequest]);
-
-  useEffect(() => {
-    setNote(notes);
-  }, [notes]);
-
-  const callAddNote = async () => {
+    setSaving(true);
     try {
-      const res = await createNote(noteRequest);
-      if (res.status === 201) {
-        setStatusBar({
-          open: true,
-          type: "success",
-          message: res.data,
-        });
-        getNotesList(currentProject.projectId, currentUser.id);
-      }
+      const res = await createNote({
+        title: noteTitle,
+        noteDescription: description.trim(),
+        userId: currentUser.id!,
+        projectId: projectId!,
+      });
+      enqueueSnackbar(res.data || "Note added", { ...toastOptions, variant: "success" });
+      onCreated();
+      handleClose();
     } catch (err) {
       console.log(err);
+      enqueueSnackbar("Couldn't save the note. Please try again.", { ...toastOptions, variant: "error" });
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
-      >
-        <div className="w-[300px] my-[5%] mx-auto p-4 rounded-[10px] bg-white">
-          <div className={modalHeader}>
-            <h4 className="m-0">Add New Task</h4>
-            <i className={`fa fa-times-circle-o ${modalClose}`} onClick={handleNoteClose} />
-          </div>
-          <div className={divider} />
+    <Dialog open={open} onClose={handleClose} PaperProps={{ className: note.dialogPaper }} aria-labelledby="new-note-title">
+      <form onSubmit={handleSubmit} noValidate>
+        <div className={note.dialogHeader}>
           <div>
-            <TextField
-              id="outlined-basic"
-              fullWidth
-              label="Add Title"
-              variant="outlined"
-              value={data.title}
-              onChange={(e) => setData({ ...data, title: e.target.value })}
-              error={data.showTitle}
-              helperText={data.showTitle && data.message}
+            <h2 id="new-note-title" className={note.dialogTitle}>New note</h2>
+            <p className={note.dialogSubtitle}>Only you can see your notes.</p>
+          </div>
+          <button type="button" className={note.iconButton} onClick={handleClose} aria-label="Close">
+            <FiX />
+          </button>
+        </div>
+
+        <div className={note.dialogBody}>
+          <div className={note.field}>
+            <label htmlFor="new-note-title-input" className={note.label}>Title</label>
+            <input
+              id="new-note-title-input"
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setError("");
+              }}
+              className={note.input}
+              placeholder="e.g. Release checklist"
+              autoComplete="off"
+              autoFocus
+              aria-invalid={!!error}
+              aria-describedby={error ? "new-note-error" : undefined}
             />
-            <TextField
-              fullWidth
-              className={formFieldCompact}
-              id="outlined-multiline-static"
-              label="Description"
-              multiline
-              rows={4}
-              value={data.description}
-              onChange={(e) =>
-                setData({ ...data, description: e.target.value })
-              }
-              error={data.showDesc}
-              helperText={data.showDesc && data.message}
+            {error ? <p id="new-note-error" className={note.error}>{error}</p> : null}
+          </div>
+          <div className={note.field}>
+            <label htmlFor="new-note-text" className={note.label}>
+              Note <span className={note.labelHint}>(optional)</span>
+            </label>
+            <textarea
+              id="new-note-text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className={note.textarea}
+              placeholder="Write something…"
             />
-            <Button variant="contained" color="primary" onClick={handleAdd}>
-              Add
-            </Button>
           </div>
         </div>
-      </Modal>
-      <Snackbar
-        open={statusBar.open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        // TODO(ts-migration): the setStatusBar calls drop vertical/horizontal, so this key changes on the first update and the Snackbar remounts
-        key={`${statusBar.vertical}${statusBar.horizontal}`}
-      >
-        <Alert
-          onClose={handleClose}
-          severity={statusBar.type || undefined}
-          sx={{ width: "100%" }}
-        >
-          {statusBar.message}
-        </Alert>
-      </Snackbar>
-    </>
+
+        <div className={note.dialogFooter}>
+          <button type="button" className={note.btnGhost} onClick={handleClose}>Cancel</button>
+          <button type="submit" className={note.btnPrimary} disabled={saving}>
+            {saving ? "Saving…" : "Save note"}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setNote: (data: NoteListItem[]) => dispatch(getAllNotes(data)),
-  };
-}
-
 const mapStateToProps = (state: RootState) => ({
-  currentProject: state.project.project,
   currentUser: state.security.user,
 });
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(mapStateToProps, null);
 
 type Props = ConnectedProps<typeof withConnect>;
 
