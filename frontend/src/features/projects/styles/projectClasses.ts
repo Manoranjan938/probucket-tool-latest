@@ -115,3 +115,22 @@ export const summaryIcon =
   "flex shrink-0 items-center justify-center w-9 h-9 rounded-lg bg-brand-soft text-[16px] text-brand-strong";
 export const summaryLabel = "text-[13px] text-brand-muted";
 export const summaryValue = "truncate text-[15px] font-semibold text-brand-ink";
+
+/* Project settings (inside the dashboard) */
+export const settings = "flex flex-col gap-5 max-w-[720px] text-brand-text leading-[1.5] [&_*]:box-border";
+export const settingsCard = "border border-brand-border rounded-brand bg-brand-surface";
+export const settingsCardHeader = "px-6 pt-5 pb-1 max-[480px]:px-4";
+export const settingsCardTitle = "text-[16px] font-bold text-brand-ink";
+export const settingsCardText = "text-[14px]";
+export const settingsForm = "flex items-end gap-4 px-6 py-5 max-[480px]:flex-wrap max-[480px]:px-4";
+export const settingsAvatar =
+  "flex shrink-0 items-center justify-center w-14 h-14 rounded-xl bg-brand-soft text-[24px] font-bold text-brand-strong uppercase";
+export const settingsField = "flex flex-col gap-1.5 flex-1 min-w-[200px]";
+export const settingsButton =
+  "inline-flex shrink-0 items-center justify-center h-[46px] px-5 border border-transparent rounded-[10px] bg-brand-strong [font-family:inherit] text-[15px] font-semibold text-white cursor-pointer transition-[background-color] duration-150 ease-[ease] hover:bg-[#4f49b8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-primary motion-reduce:transition-none max-[480px]:w-full";
+export const detailList = "m-0 px-6 pb-2 border-t border-brand-border max-[480px]:px-4";
+export const detailRow =
+  "grid grid-cols-[140px_minmax(0,1fr)] items-center gap-4 py-3.5 text-[14px] [&+&]:border-t [&+&]:border-brand-border max-[480px]:grid-cols-[100px_minmax(0,1fr)]";
+export const detailLabel = "text-brand-muted";
+export const detailValue = "m-0 font-semibold text-brand-ink capitalize truncate";
+export const detailKey = "inline-flex px-2 py-0.5 rounded-md bg-brand-surface-alt border border-brand-border font-mono text-[13px] uppercase";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
-import { Divider, Menu, MenuItem } from "@mui/material";
+import { Divider, Menu, MenuItem, Skeleton } from "@mui/material";
 import { FiCheck, FiChevronDown, FiFolder } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
@@ -64,12 +64,20 @@ const ProjectSwitcher = ({ project, currentUser, myProjects, getProjects }: OwnP
         <span className={dashboard.projectAvatar} aria-hidden="true">
           {project.projectName?.substring(0, 1)}
         </span>
-        <span className={dashboard.triggerText}>
-          <span className={`block ${dashboard.triggerTitle}`}>{project.projectName}</span>
-          <span className={`block ${dashboard.triggerSubtitle}`}>
-            {project.projectType ? `${project.projectType} project` : null}
+        {/* Placeholder text until the sidebar has loaded the project */}
+        {project.projectName ? (
+          <span className={dashboard.triggerText}>
+            <span className={`block ${dashboard.triggerTitle}`}>{project.projectName}</span>
+            <span className={`block ${dashboard.triggerSubtitle}`}>
+              {project.projectType ? `${project.projectType} project` : null}
+            </span>
           </span>
-        </span>
+        ) : (
+          <span className={dashboard.triggerText} aria-busy="true">
+            <Skeleton variant="text" width="70%" sx={{ fontSize: 15 }} />
+            <Skeleton variant="text" width="50%" sx={{ fontSize: 13 }} />
+          </span>
+        )}
         <FiChevronDown className={dashboard.triggerChevron} aria-hidden="true" />
       </button>
 

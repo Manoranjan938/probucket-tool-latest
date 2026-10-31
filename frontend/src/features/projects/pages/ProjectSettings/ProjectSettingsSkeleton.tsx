@@ -1,19 +1,32 @@
 import React from "react";
 import { Skeleton } from "@mui/material";
 
-// Shown in the dashboard content area while the Project settings page's code is loading
+import * as project from "features/projects/styles/projectClasses";
+
+// Shown in the dashboard content area while the Project settings page's code or the project is loading
 const ProjectSettingsSkeleton = () => {
   return (
-    <div className="w-auto px-5" aria-busy="true">
-      <Skeleton variant="text" width={180} sx={{ fontSize: 24 }} />
-      <div className="flex items-center gap-2.5 w-[500px] mt-5 mx-auto mb-0 p-2.5 border border-[#888] rounded-[6px]">
-        <Skeleton variant="rectangular" width={170} height={170} className="shrink-0" />
-        <div className="flex-1">
-          {/* Name, Project Lead and Default Assignee fields, then Save */}
+    <div className={project.settings} aria-busy="true">
+      <div className={project.settingsCard}>
+        <div className={project.settingsCardHeader}>
+          <Skeleton variant="text" width={90} sx={{ fontSize: 16 }} />
+          <Skeleton variant="text" width={220} sx={{ fontSize: 14, maxWidth: "100%" }} />
+        </div>
+        <div className={project.settingsForm}>
+          <Skeleton variant="rounded" width={56} height={56} sx={{ borderRadius: "12px" }} className="shrink-0" />
+          <div className={project.settingsField}>
+            <Skeleton variant="text" width={100} sx={{ fontSize: 14 }} />
+            <Skeleton variant="rounded" height={46} sx={{ borderRadius: "10px" }} />
+          </div>
+          <Skeleton variant="rounded" width={80} height={46} sx={{ borderRadius: "10px" }} />
+        </div>
+        <div className={project.detailList}>
           {[0, 1, 2].map((item) => (
-            <Skeleton key={item} variant="rounded" height={56} sx={{ mb: "10px" }} />
+            <div key={item} className={project.detailRow}>
+              <Skeleton variant="text" width={50} sx={{ fontSize: 14 }} />
+              <Skeleton variant="text" width={140} sx={{ fontSize: 14 }} />
+            </div>
           ))}
-          <Skeleton variant="rounded" width={64} height={36} />
         </div>
       </div>
     </div>
