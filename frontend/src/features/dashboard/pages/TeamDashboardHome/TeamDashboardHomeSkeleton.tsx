@@ -1,15 +1,10 @@
 import React from "react";
 
-import TeamTaskCardsSkeleton from "features/dashboard/components/TeamTaskCards/TeamTaskCardsSkeleton";
+import HomeOverviewSkeleton from "features/dashboard/components/HomeOverview/HomeOverviewSkeleton";
 
-// Shown in the dashboard content area while the team dashboard home page's code is loading
-// (the cards only – the "no team members" banner depends on fetched data)
+// Shown in the dashboard content area while the home page's code is loading
 const TeamDashboardHomeSkeleton = () => {
-  return (
-    <div aria-busy="true">
-      <TeamTaskCardsSkeleton />
-    </div>
-  );
+  return <HomeOverviewSkeleton />;
 };
 
 export default TeamDashboardHomeSkeleton;

@@ -1,14 +1,10 @@
 import React from "react";
 
-import TeamTaskCardsSkeleton from "features/dashboard/components/TeamTaskCards/TeamTaskCardsSkeleton";
+import HomeOverviewSkeleton from "features/dashboard/components/HomeOverview/HomeOverviewSkeleton";
 
-// Shown in the dashboard content area while the personal dashboard home page's code is loading
+// Shown in the dashboard content area while the home page's code is loading
 const DashboardHomeSkeleton = () => {
-  return (
-    <div aria-busy="true">
-      <TeamTaskCardsSkeleton />
-    </div>
-  );
+  return <HomeOverviewSkeleton />;
 };
 
 export default DashboardHomeSkeleton;

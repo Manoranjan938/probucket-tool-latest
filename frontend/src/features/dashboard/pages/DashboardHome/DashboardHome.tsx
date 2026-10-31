@@ -1,7 +1,7 @@
-//import DashboardGraph from "features/dashboard/components/DashboardGraph/DashboardGraph";
-import TeamTaskCards from "features/dashboard/components/TeamTaskCards/TeamTaskCards";
 import React from "react";
 import Helmet from "react-helmet";
+
+import HomeOverview from "features/dashboard/components/HomeOverview/HomeOverview";
 
 const DashboardHome = ({ title }: { title: string }) => {
   return (
@@ -9,10 +9,7 @@ const DashboardHome = ({ title }: { title: string }) => {
       <Helmet>
         <title>{title} | Home</title>
       </Helmet>
-      {/* <DashboardGraph /> */}
-      {/* <HomePersonalTask />
-      <HomeSubTask /> */}
-      <TeamTaskCards />
+      <HomeOverview type="personal" />
     </>
   );
 };

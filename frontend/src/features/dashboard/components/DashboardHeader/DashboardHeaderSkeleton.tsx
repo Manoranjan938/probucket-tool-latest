@@ -1,19 +1,23 @@
 import React from "react";
 import { Skeleton } from "@mui/material";
 
-// Loading state of DashboardHeader: logo + name, search box, notification and profile icons
+import * as dashboard from "features/dashboard/styles/dashboardClasses";
+
+// Loading state of DashboardHeader: menu button (below 1024px), page title, search and notifications
 const DashboardHeaderSkeleton = () => {
   return (
-    <div className="fixed top-0 left-0 right-0 z-1000 flex justify-between items-center py-[15px] px-[2%] bg-white shadow-[0_.5rem_1.5rem_rgba(0,0,0,.1)]">
-      <div className="flex items-center gap-[5px]">
-        <Skeleton variant="circular" width={40} height={40} />
-        <Skeleton variant="text" width={150} sx={{ fontSize: 28 }} />
+    <div className={dashboard.topBar}>
+      {/* Wrapped, as MUI's own display style would win over a hidden class on the Skeleton */}
+      <span className="min-[1024px]:hidden">
+        <Skeleton variant="rounded" width={40} height={40} sx={{ borderRadius: "10px" }} />
+      </span>
+      <div className="flex-1">
+        <Skeleton variant="text" width={140} sx={{ fontSize: 20 }} />
       </div>
-      <div className="flex items-center gap-2">
-        <Skeleton variant="rounded" width={200} height={37} sx={{ mr: "10px", borderRadius: "5px" }} />
-        <Skeleton variant="circular" width={30} height={30} />
-        <Skeleton variant="circular" width={30} height={30} />
-      </div>
+      <span className="max-[768px]:hidden">
+        <Skeleton variant="rounded" width={260} height={40} sx={{ borderRadius: "10px" }} />
+      </span>
+      <Skeleton variant="rounded" width={40} height={40} sx={{ borderRadius: "10px" }} />
     </div>
   );
 };

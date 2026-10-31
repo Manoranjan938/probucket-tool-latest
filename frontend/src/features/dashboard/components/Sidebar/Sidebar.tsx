@@ -1,149 +1,84 @@
 import React, { useEffect } from "react";
-
-import * as sidebar from "features/dashboard/styles/sidebarClasses";
-import { divider } from "shared/styles/sharedClasses";
-import avatar1 from "shared/assets/images/avatar1.png";
-import { Link } from "react-router-dom";
-
-import { AiOutlineSetting } from "react-icons/ai";
-//import { FiHelpCircle } from "react-icons/fi";
-//import { GoReport } from "react-icons/go";
-import { FaTrashAlt } from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
-import { IoNotifications } from "react-icons/io5";
-import { GoProject } from "react-icons/go";
-import { BiNotepad } from "react-icons/bi";
-//import { RiTodoLine } from "react-icons/ri";
-import { compose } from "redux";
+import { Link, NavLink } from "react-router-dom";
 import { connect, type ConnectedProps } from "react-redux";
+import { compose } from "redux";
+import { FiX } from "react-icons/fi";
+
+import * as dashboard from "features/dashboard/styles/dashboardClasses";
+
+import logo from "shared/assets/images/logo.png";
+import ProjectSwitcher from "features/dashboard/components/ProjectSwitcher/ProjectSwitcher";
+import AccountMenu from "features/dashboard/components/AccountMenu/AccountMenu";
+import { dashboardLink, mainNav, manageNav, visibleNav, type DashboardType, type NavItem } from "features/dashboard/data";
 import { getProjectDetails } from "features/projects/store/projectsAction";
-import type { AppDispatch } from "app/store";
-import type { Project } from "features/projects/types";
 import useGetProjectDetails from "features/projects/hooks/useGetProjectDetails";
+import type { AppDispatch, RootState } from "app/store";
+import type { Project } from "features/projects/types";
 
-type OwnProps = { id: string | null; name: string | null };
+type OwnProps = {
+  type: DashboardType;
+  id: string | null;
+  name: string | null;
+  /** Drawer state below 1024px; the sidebar is always shown above that */
+  open: boolean;
+  onClose: () => void;
+};
 
-const Sidebar = ({ id, getSingleProject, name }: OwnProps & Props) => {
+// Sidebar of the personal and team dashboards: project switcher, page links and the account menu
+const Sidebar = ({ type, id, name, open, onClose, getSingleProject, currentUser }: OwnProps & Props) => {
   const [project, getProjectDetails] = useGetProjectDetails();
 
+  // Again when the project switcher opens another project of the same type
   useEffect(() => {
-    getProjectDetails(id);
-  }, []);
+    getProjectDetails(id).catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     getSingleProject(project);
   }, [project]);
 
+  const renderLinks = (items: NavItem[]) => (
+    <ul className={dashboard.navList}>
+      {visibleNav(items, type, currentUser.rolename).map((item) => (
+        <li key={item.path}>
+          <NavLink
+            to={dashboardLink(type, item.path, id, name)}
+            className={({ isActive }) => (isActive ? dashboard.navLinkActive : dashboard.navLink)}
+          >
+            <item.icon className={dashboard.navIcon} aria-hidden="true" />
+            {item.title}
+          </NavLink>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
-    <>
-      <div className={sidebar.container}>
-        <div className={sidebar.sidebar}>
-          <div className={sidebar.contents}>
-            <div className={sidebar.projectName}>
-              <img src={avatar1} alt="" className={sidebar.projectAvatar} />
-              <div>
-                <h4 className={sidebar.projectTitle}>{project.projectName}</h4>
-                <span className={sidebar.projectType}>{project.projectType} Project</span>
-              </div>
-            </div>
-            <div className={divider} />
-            <div className={sidebar.linkContainer}>
-              <Link
-                className={sidebar.link}
-                to={`/project/personal/home?project=${id}&name=${name}`}
-              >
-                <div className={sidebar.icon}>
-                  <MdDashboard />
-                </div>
-                <div className={sidebar.label}>Dashboard</div>
-              </Link>
-              <Link
-                className={sidebar.link}
-                to={`/project/personal/works?project=${id}&name=${name}`}
-              >
-                <div className={sidebar.icon}>
-                  <GoProject />
-                </div>
-                <div className={sidebar.label}>Your Work</div>
-              </Link>
-              <Link
-                className={sidebar.link}
-                to={`/project/personal/notes?project=${id}&name=${name}`}
-              >
-                <div className={sidebar.icon}>
-                  <BiNotepad />
-                </div>
-                <div className={sidebar.label}>Notes</div>
-              </Link>
-              {/* <Link
-                className={sidebar.link}
-                to={`/project/personal/todos?project=${id}`}
-              >
-                <div className={sidebar.icon}>
-                  <RiTodoLine />
-                </div>
-                <div className={sidebar.label}>Todo</div>
-              </Link> */}
-              <Link
-                className={sidebar.link}
-                to={`/project/personal/notifications?project=${id}&name=${name}`}
-              >
-                <div className={sidebar.icon}>
-                  <IoNotifications />
-                </div>
-                <div className={sidebar.label}>Notifications</div>
-                <div className={sidebar.notificationCount}>1</div>
-              </Link>
-            </div>
-            <div className={divider} />
-            <div className={sidebar.linkContainer}>
-              <Link
-                className={sidebar.link}
-                to={`/project/personal/setting?project=${id}&name=${name}`}
-              >
-                <div className={sidebar.icon}>
-                  <AiOutlineSetting />
-                </div>
-                <div className={sidebar.label}>
-                  <span>Project Setting</span>
-                </div>
-              </Link>
-
-              {/* <Link className={sidebar.link} to="/help">
-                <div className={sidebar.icon}>
-                  <FiHelpCircle />
-                </div>
-                <div className={sidebar.label}>
-                  <span>Help</span>
-                </div>
-              </Link>
-
-              <Link className={sidebar.link} to="/report-or-feedback">
-                <div className={sidebar.icon}>
-                  <GoReport />
-                </div>
-                <div className={sidebar.label}>
-                  <span>Report / Feedback</span>
-                </div>
-              </Link> */}
-            </div>
-            <div className={divider} />
-            <Link
-              className={sidebar.link}
-              to={`/project/personal/trash?project=${id}&name=${name}`}
-            >
-              <div className={sidebar.icon}>
-                <FaTrashAlt />
-              </div>
-              <div className={sidebar.label}>
-                <span>Trash</span>
-              </div>
-            </Link>
-            <div className={divider} />
-          </div>
-        </div>
+    <aside className={open ? dashboard.sidebarOpen : dashboard.sidebar} aria-label="Project navigation">
+      <div className={dashboard.sidebarBrandRow}>
+        <Link to="/projects" className={dashboard.brand}>
+          <img src={logo} alt="" className={dashboard.brandLogo} />
+          <span className={dashboard.brandName}>ProBucket</span>
+        </Link>
+        <button type="button" className={dashboard.menuButton} onClick={onClose} aria-label="Close menu">
+          <FiX />
+        </button>
       </div>
-    </>
+
+      <div className={dashboard.sidebarSection}>
+        <ProjectSwitcher project={project} />
+      </div>
+
+      <nav className={dashboard.nav}>
+        {renderLinks(mainNav)}
+        <p className={dashboard.navLabel}>Manage</p>
+        {renderLinks(manageNav)}
+      </nav>
+
+      <div className={dashboard.sidebarFooter}>
+        <AccountMenu />
+      </div>
+    </aside>
   );
 };
 
@@ -153,11 +88,11 @@ function mapDispatchToProps(dispatch: AppDispatch) {
   };
 }
 
-// const mapStateToProps = (state) => ({
-//   myProject: state.project.project,
-// });
+const mapStateToProps = (state: RootState) => ({
+  currentUser: state.security.user,
+});
 
-const withConnect = connect(null, mapDispatchToProps);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 type Props = ConnectedProps<typeof withConnect>;
 

@@ -1,30 +1,22 @@
-import { Button } from "@mui/material";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { FiUserPlus } from "react-icons/fi";
 
+import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
-const TeamMemberNotification = () => {
-  const navigate = useNavigate();
-
-  const newMember = () => {
-    navigate("/project/team/new-user");
-  };
-
+// Team dashboard home: shown to admins while the project has no team members
+const TeamMemberNotification = ({ teamMembersLink }: { teamMembersLink: string }) => {
   return (
-    <>
-      <div className="flex justify-between mt-5 mb-2.5 mr-5 p-4 rounded-[10px] bg-[#fee8c8]">
-        <div className="flex items-center gap-2.5 text-[18px]">
-          <i className="fa fa-exclamation-circle" />
-          <span className="text-[18px] font-semibold">
-            You don't have any team members. To work with team add some team
-            members.
-          </span>
-        </div>
-        <Button variant="contained" color="primary" onClick={newMember}>
-          Add Team Member
-        </Button>
-      </div>
-    </>
+    <div className={dashboard.banner}>
+      <span className={dashboard.bannerIcon} aria-hidden="true">
+        <FiUserPlus />
+      </span>
+      <p className={dashboard.bannerText}>
+        <span className={dashboard.bannerTitle}>Your team is empty.</span> Add team members to assign them
+        tasks and work on this project together.
+      </p>
+      <Link to={teamMembersLink} className={dashboard.btnPrimary}>Add team members</Link>
+    </div>
   );
 };
 
