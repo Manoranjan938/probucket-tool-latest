@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { IconType } from "react-icons";
 
 /** model/response/ProjectResponse.java */
 export interface Project {
@@ -27,40 +27,20 @@ export interface ProjectState {
 
 /** Values collected by the create-project wizard */
 export interface ProjectDraft {
+  /** One of the template values in features/projects/data.ts */
   projectTemplate: string;
+  /** One of the project type values in features/projects/data.ts */
   projectType: string;
   projectName: string;
   projectDescription: string;
-  projectTemplateId: number;
-  projectTypeId: number;
 }
 
-/** Props every step of the create-project wizard receives */
-export interface WizardStepProps {
-  title: string;
-  details: ProjectDraft;
-  setDetails: Dispatch<SetStateAction<ProjectDraft>>;
-  currentPage: number;
-  setCurrentPage: Dispatch<SetStateAction<number>>;
-}
-
-export interface TemplateOption {
-  templateId: number;
-  title: string;
-  image: string;
-  description: string;
-  type: string;
-}
-
-export interface TypeOption {
-  typeId: number;
-  image: string;
+/** A template or project type the wizard offers (features/projects/data.ts) */
+export interface ProjectOption {
+  value: string;
   title: string;
   description: string;
-  type: string;
+  icon: IconType;
+  /** Shown but can't be picked yet */
+  comingSoon?: boolean;
 }
-
-/** What the Template card renders – a template or a type option */
-export type TemplateCard = Omit<TemplateOption, "templateId"> & {
-  templateId?: number;
-};

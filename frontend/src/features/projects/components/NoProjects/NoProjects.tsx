@@ -1,30 +1,38 @@
-import Button from "shared/components/Button/Button";
 import React from "react";
+import { Link } from "react-router-dom";
+import { FaFolderOpen, FaPlus } from "react-icons/fa";
 
+import * as project from "features/projects/styles/projectClasses";
 
-import image from "shared/assets/images/projects.png";
-import { useNavigate } from "react-router-dom";
+interface NoProjectsProps {
+  /** Team members can't create projects, they are added to them by a team admin */
+  canCreate: boolean;
+}
 
-const NoProjects = () => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate("/create-project");
-  };
-
+// Shown on the Projects page when the user has no projects
+const NoProjects = ({ canCreate }: NoProjectsProps) => {
   return (
-    <>
-      <div className="w-auto overflow-y-hidden h-screen max-[1400px]:my-[5%] max-[1400px]:mx-auto">
-        <div className="w-[400px] my-[13%] mx-auto text-center">
-          <img src={image} alt="" className="flex w-[200px] h-[200px] my-2.5 mx-auto" />
-          <h2 className="text-center text-[22px] font-medium">You don't have any projects</h2>
-          <p className="text-center text-[16px]">Create a new project to plan, track and release great softwares</p>
-          <div className="flex justify-center mt-5" onClick={handleClick}>
-            <Button title="Create Project" />
-          </div>
-        </div>
-      </div>
-    </>
+    <div className={project.empty}>
+      <span className={project.emptyIcon} aria-hidden="true">
+        <FaFolderOpen />
+      </span>
+      <h1 className={project.emptyTitle}>No projects yet</h1>
+      {canCreate ? (
+        <>
+          <p className={project.emptyText}>
+            Create your first project to plan, track and ship your work.
+          </p>
+          <Link to="/create-project" className={project.btnPrimary}>
+            <FaPlus />
+            Create project
+          </Link>
+        </>
+      ) : (
+        <p className={project.emptyText}>
+          You haven't been added to a project yet. Ask your team admin to invite you to one.
+        </p>
+      )}
+    </div>
   );
 };
 

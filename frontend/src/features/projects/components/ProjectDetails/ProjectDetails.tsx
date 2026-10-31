@@ -1,241 +1,104 @@
-import { Snackbar, TextField } from "@mui/material";
-import React, { useState } from "react";
-import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState, ApiError } from "shared/types";
+import React from "react";
 
-import { data } from "features/projects/components/Template/data";
-import { typeData } from "features/projects/components/ChooseType/data";
+import * as project from "features/projects/styles/projectClasses";
 
-import { button, formFieldCompact } from "shared/styles/sharedClasses";
-import Template from "features/projects/components/Template/Template";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
-import { useEffect } from "react";
-import useCreateNewProject from "features/projects/hooks/useCreateNewProject";
-import { useNavigate } from "react-router-dom";
-import type { RootState } from "app/store";
-import type { ProjectRequest, WizardStepProps } from "features/projects/types";
+import { projectTypes, templates } from "features/projects/data";
+import type { ProjectDraft, ProjectOption } from "features/projects/types";
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+interface SummaryRowProps {
+  label: string;
+  option: ProjectOption | undefined;
+  onChange: () => void;
+}
 
-const ProjectDetails = ({
-  currentPage,
-  setCurrentPage,
-  details,
-  setDetails,
-  currentUser,
-}: WizardStepProps & ConnectedProps<typeof withConnect>) => {
-  const [projectRequest, setProjectRequest] = useState<ProjectRequest>({
-    projectName: "",
-    projectTemplate: "",
-    projectType: "",
-    projectDesc: "",
-    userId: "",
-  });
-  const [error, setError] = useState({
-    showNameError: false,
-    showDescError: false,
-    message: "",
-  });
-  const [createNewProject] = useCreateNewProject();
-  const [notiBar, setNotiBar] = useState<SnackbarState>({
-    open: false,
-    vertical: "bottom",
-    horizontal: "right",
-    type: "",
-    message: "",
-  });
-
-  const navigate = useNavigate();
-
-  const template = data.find(
-    (item) => item.templateId === details?.projectTemplateId
-  );
-  const type = typeData.find(
-    (items) => items.typeId === details?.projectTypeId
-  );
-
-  const handleProjectDetails = () => {
-    setCurrentPage(currentPage - 1);
-  };
-
-  const handleGoProjects = () => {
-    navigate("/projects")
+// A choice from an earlier step, with a button that goes back to that step
+const SummaryRow = ({ label, option, onChange }: SummaryRowProps) => {
+  if (!option) {
+    return null;
   }
-
-  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setNotiBar({ open: false });
-  };
-
-  const handleCreateProject = () => {
-    if (!details.projectName && !details.projectDescription) {
-      setError({
-        showNameError: true,
-        showDescError: true,
-        message: "Please fillout this field",
-      });
-    }
-    if (!details.projectName) {
-      setError({
-        showNameError: true,
-        showDescError: false,
-        message: "Please fillout this field",
-      });
-    }
-    if (!details.projectDescription) {
-      setError({
-        showNameError: false,
-        showDescError: true,
-        message: "Please fillout this field",
-      });
-    } else {
-      setProjectRequest({
-        projectName: details.projectName,
-        projectDesc: details.projectDescription,
-        projectTemplate: details.projectTemplate,
-        projectType: details.projectType,
-        userId: currentUser.id!,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (
-      projectRequest.projectName &&
-      projectRequest.projectDesc &&
-      projectRequest.projectTemplate &&
-      projectRequest.projectType
-    ) {
-      callCreateProject();
-    }
-  }, [projectRequest]);
-
-  const callCreateProject = async () => {
-    try {
-      const resp = await createNewProject(projectRequest);
-      if(resp.status === 201){
-        setNotiBar({
-          open: true,
-          type: "success",
-          message: "Project created successfully",
-        });
-      }
-    } catch (err) {
-      console.log((err as ApiError).response);
-      // setNotiBar({
-      //   open: true,
-      //   type: "error",
-      //   message: err.response.data.message,
-      // });
-    }
-  };
+  const Icon = option.icon;
 
   return (
-    <>
-      <div className="w-[calc(100%_-_400px)] my-[2%] mx-auto">
-        <div>
-          <button
-            onClick={handleProjectDetails}
-            className="flex justify-center w-auto my-5 p-0 border-none rounded-[5px] bg-transparent text-[16px] font-semibold text-[#555] cursor-pointer"
-          >
-            <i className="fa fa-arrow-left" /> &nbsp;Back to project type
-          </button>
-        </div>
-        <div className="grid grid-cols-[repeat(2,1fr)] gap-20">
-          <div>
-            <div className="mb-5">
-              <h3 className="text-[34px] font-semibold">Add project details</h3>
-              <span className="text-[15px]">
-                You can change these details anytime in your project setting.
-              </span>
-            </div>
-            <TextField
-              fullWidth
-              required
-              id="outlined-required"
-              label="Name"
-              className={formFieldCompact}
-              value={details.projectName}
-              onChange={(e) =>
-                setDetails({ ...details, projectName: e.target.value })
-              }
-              error={error.showNameError}
-              helperText={error.message}
-            />
-            <TextField
-              fullWidth
-              required
-              label="Project description"
-              className={formFieldCompact}
-              multiline
-              rows={4}
-              value={details.projectDescription}
-              onChange={(e) =>
-                setDetails({ ...details, projectDescription: e.target.value })
-              }
-              error={error.showDescError}
-              helperText={error.message}
-            />
-          </div>
-          <div className="py-8 px-[1.4rem] rounded-[20px] bg-[#efefef]">
-            <div>
-              <div className="flex justify-between mb-5 text-[15px] text-[#888] cursor-pointer">
-                <h4>Template</h4>
-                <h4>Change Template</h4>
-              </div>
-              <div>
-                <Template items={template!} />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between">
-                <h4 className="text-[15px] text-[#888] cursor-pointer">Type</h4>
-                <h4 className="text-[15px] text-[#888] cursor-pointer">Change Type</h4>
-              </div>
-              <div>
-                <Template items={type!} />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2.5 mt-2.5 border-t-2 border-[#888]">
-          {/* Same look as the other buttons – the old .cancel_btn colours were always overridden by .btn */}
-          <button className={button} onClick={handleGoProjects}>Go to Projects</button>
-          <button className={button} onClick={handleCreateProject}>
-            Create Project
-          </button>
-        </div>
+    <div className={project.summaryRow}>
+      <span className={project.summaryIcon} aria-hidden="true">
+        <Icon />
+      </span>
+      <div className="flex-1 min-w-0">
+        <p className={project.summaryLabel}>{label}</p>
+        <p className={project.summaryValue}>{option.title}</p>
       </div>
-
-      <Snackbar
-        open={notiBar.open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        // TODO(ts-migration): the setNotiBar calls drop vertical/horizontal, so this key changes on the first update and the Snackbar remounts
-        key={`${notiBar.vertical}${notiBar.horizontal}`}
+      <button
+        type="button"
+        className={project.linkButton}
+        onClick={onChange}
+        aria-label={`Change ${label.toLowerCase()}`}
       >
-        <Alert
-          onClose={handleClose}
-          severity={notiBar.type || undefined}
-          sx={{ width: "100%" }}
-        >
-          {notiBar.message}
-        </Alert>
-      </Snackbar>
-    </>
+        Change
+      </button>
+    </div>
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
+interface ProjectDetailsProps {
+  details: ProjectDraft;
+  nameError: string;
+  onChange: (changes: Partial<ProjectDraft>) => void;
+  /** Goes back to an earlier step of the wizard */
+  onChangeStep: (step: number) => void;
+}
 
-const withConnect = connect(mapStateToProps, null);
+// Step 3 of the Create project wizard: name and description, next to a summary of steps 1 and 2
+const ProjectDetails = ({ details, nameError, onChange, onChangeStep }: ProjectDetailsProps) => {
+  const template = templates.find((item) => item.value === details.projectTemplate);
+  const type = projectTypes.find((item) => item.value === details.projectType);
 
-export default compose(withConnect)(ProjectDetails);
+  return (
+    <div className={project.detailsGrid}>
+      <div>
+        <h2 className={project.stepTitle}>Add project details</h2>
+        <p className={project.stepText}>Name your project and add a short description.</p>
+
+        <div className={project.field}>
+          <label htmlFor="project-name" className={project.label}>Project name</label>
+          <input
+            id="project-name"
+            type="text"
+            value={details.projectName}
+            onChange={(e) => onChange({ projectName: e.target.value })}
+            className={project.input}
+            placeholder="e.g. Website redesign"
+            autoComplete="off"
+            autoFocus
+            aria-invalid={!!nameError}
+            aria-describedby={nameError ? "project-name-error" : undefined}
+          />
+          {nameError ? (
+            <p id="project-name-error" className={project.error}>{nameError}</p>
+          ) : null}
+        </div>
+
+        <div className={project.field}>
+          <label htmlFor="project-description" className={project.label}>
+            Description <span className={project.labelHint}>(optional)</span>
+          </label>
+          <textarea
+            id="project-description"
+            rows={4}
+            value={details.projectDescription}
+            onChange={(e) => onChange({ projectDescription: e.target.value })}
+            className={project.textarea}
+            placeholder="What is this project about?"
+          />
+        </div>
+      </div>
+
+      <aside className={project.summary}>
+        <h3 className={project.summaryTitle}>Summary</h3>
+        <SummaryRow label="Template" option={template} onChange={() => onChangeStep(0)} />
+        <SummaryRow label="Managed by" option={type} onChange={() => onChangeStep(1)} />
+      </aside>
+    </div>
+  );
+};
+
+export default ProjectDetails;

@@ -10,6 +10,7 @@ const useGetProjectsByTeamMembers = () => {
       const resp = await axios.get<Project[]>(`/team/getProjectsByTeam/${userId}`);
 
       setTeamProjects(resp.data);
+      return resp;
     } catch (err) {
       throw err;
     }
