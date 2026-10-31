@@ -1,69 +1,105 @@
-import { getAllTask } from "features/tasks/store/taskAction";
-import Button from "shared/components/Button/Button";
-import DataNotFound from "shared/components/DataNotFound/DataNotFound";
-import NewTask from "features/tasks/components/NewTask/NewTask";
-import TeamWorkHeader from "features/tasks/components/TeamWorkHeader/TeamWorkHeader";
-import ProjectWorks from "features/tasks/components/ProjectWorks/ProjectWorks";
-import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
 import React, { useEffect, useState } from "react";
 import Helmet from "react-helmet";
 import { connect, type ConnectedProps } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { compose } from "redux";
+import { FiInbox, FiPlus } from "react-icons/fi";
+
+import * as task from "features/tasks/styles/taskClasses";
+
+import { getAllTask } from "features/tasks/store/taskAction";
+import NewTask from "features/tasks/components/NewTask/NewTask";
+import TeamWorkHeader from "features/tasks/components/TeamWorkHeader/TeamWorkHeader";
+import ProjectWorks from "features/tasks/components/ProjectWorks/ProjectWorks";
+import TaskDetailsView from "features/tasks/components/TaskDetailsView/TaskDetailsView";
+import { BoardSkeleton } from "features/tasks/pages/Works/WorksSkeleton";
+import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
 import type { AppDispatch, RootState } from "app/store";
 import type { TaskListItem } from "features/tasks/types";
 
+const Works = ({ title, getTaskList, myTasks }: { title: string } & Props) => {
+  const [, getTaskLists] = useGetTaskLists();
+  const [loading, setLoading] = useState(true);
+  const [showNewTask, setShowNewTask] = useState(false);
+  const [openTask, setOpenTask] = useState<string | null>(null);
 
-const Works = ({ title, currentProject, getTaskList, myTasks }: { title: string } & Props) => {
-  const [tasks, getTaskLists] = useGetTaskLists();
-  const [show, setShow] = useState(false);
-
-  let { search } = useLocation();
-
+  const { pathname, search } = useLocation();
   const query = new URLSearchParams(search);
+  const projectId = query.get("project");
   const name = query.get("name");
+  const isTeam = pathname.startsWith("/project/team/");
 
-  const callGetTaskLists = async () => {
+  const loadTasks = async () => {
     try {
-      await getTaskLists(name);
-    } catch (err) {
-      //console.log(err);
+      const resp = await getTaskLists(name);
+      getTaskList(resp.data);
+    } catch {
+      // The backend answers 400 "Task not found" when the project has no tasks
+      getTaskList([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    callGetTaskLists();
+    loadTasks();
   }, []);
 
-  const handleOpenTask = () => {
-    setShow(!show);
-  };
-
-  useEffect(() => {
-    getTaskList(tasks);
-  }, [tasks]);
+  const tasks = myTasks ?? [];
 
   return (
-    <>
+    <div className={task.page}>
       <Helmet>
         <title>{title} | Tasks</title>
       </Helmet>
-      {myTasks ? (
-        <>
-          {currentProject.projectType === "team" && <TeamWorkHeader />}
-          <ProjectWorks />
-        </>
+
+      <div className={task.toolbar}>
+        <div className={task.toolbarStart}>
+          {isTeam ? (
+            <TeamWorkHeader projectId={projectId} />
+          ) : (
+            <p className={task.taskCount}>
+              {tasks.length > 0 ? `${tasks.length} ${tasks.length === 1 ? "task" : "tasks"}` : ""}
+            </p>
+          )}
+        </div>
+        <button type="button" className={`${task.btnPrimary} ${task.toolbarButton}`} onClick={() => setShowNewTask(true)}>
+          <FiPlus aria-hidden="true" />
+          New task
+        </button>
+      </div>
+
+      {loading ? (
+        <BoardSkeleton />
+      ) : tasks.length > 0 ? (
+        <ProjectWorks
+          tasks={tasks}
+          selectedTask={openTask}
+          onOpenTask={setOpenTask}
+          onNewTask={() => setShowNewTask(true)}
+        />
       ) : (
-        <>
-          <DataNotFound text="No Tasks are there... Click the Button below to create a task." />
-          <div className="flex justify-center" onClick={handleOpenTask}>
-            <Button title="Create Task" />
-          </div>
-        </>
+        <div className={task.empty}>
+          <span className={task.emptyIcon} aria-hidden="true">
+            <FiInbox />
+          </span>
+          <h2 className={task.emptyTitle}>No tasks yet</h2>
+          <p className={task.emptyText}>Create your first task to start planning the work on this project.</p>
+          <button type="button" className={task.btnPrimary} onClick={() => setShowNewTask(true)}>
+            <FiPlus aria-hidden="true" />
+            Create task
+          </button>
+        </div>
       )}
 
-      {show && <NewTask open={show} setOpen={setShow} />}
-    </>
+      <NewTask
+        open={showNewTask}
+        onClose={() => setShowNewTask(false)}
+        onCreated={loadTasks}
+        projectIdentifier={name}
+      />
+      <TaskDetailsView sequence={openTask} onClose={() => setOpenTask(null)} onTaskChanged={loadTasks} />
+    </div>
   );
 };
 
@@ -74,8 +110,7 @@ function mapDispatchToProps(dispatch: AppDispatch) {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  currentProject: state.project.project,
-  myTasks: state.tasks.allTask
+  myTasks: state.tasks.allTask,
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

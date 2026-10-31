@@ -1,218 +1,126 @@
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  Snackbar,
-  TextField,
-} from "@mui/material";
-import useCreateNewSubtask from "features/tasks/hooks/useCreateNewSubtask";
 import React, { useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
+import { Dialog } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { FiX } from "react-icons/fi";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
-import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState } from "shared/types";
-import { useEffect } from "react";
-import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
-import { setSubtaskList } from "features/tasks/store/taskAction";
-import type { AppDispatch, RootState } from "app/store";
-import { divider, formField, modalCard, modalClose, modalHeader } from "shared/styles/sharedClasses";
-import type { CreateSubtaskRequest, Subtask } from "features/tasks/types";
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import * as task from "features/tasks/styles/taskClasses";
+
+import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
+import useCreateNewSubtask from "features/tasks/hooks/useCreateNewSubtask";
+import { toastOptions } from "features/tasks/data";
+import type { ApiError } from "shared/types";
+import type { RootState } from "app/store";
 
 type OwnProps = {
   open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+  onClose: () => void;
+  /** Called after the subtask is created, to reload the subtasks */
+  onCreated: () => void;
 };
 
-const NewSubTask = ({ open, setOpen, currentProject, currentTask, setSubtasks }: OwnProps & Props) => {
+// Dialog that adds a subtask to the open task
+const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: OwnProps & Props) => {
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
-  const [error, setError] = useState({
-    showNameError: false,
-    message: "",
-  });
-  const [taskRequest, setTaskRequest] = useState<CreateSubtaskRequest>({
-    projectId: "",
-    parentTaskId: "",
-    taskName: "",
-    priority: "",
-    status: "",
-  });
-  const [statusBar, setStatusBar] = useState<SnackbarState>({
-    open: false,
-    vertical: "bottom",
-    horizontal: "right",
-    type: "",
-    message: "",
-  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [createNewSubtask] = useCreateNewSubtask();
-  const [subtasks, getSubtaskList] = useGetSubTasks();
-  
-  const handleSubTaskClose = () => {
-    setOpen(false);
+  const { enqueueSnackbar } = useSnackbar();
+
+  const handleClose = () => {
+    setTaskName("");
+    setPriority("LOW");
+    setError("");
+    onClose();
   };
 
-  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if(reason === 'clickaway'){
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const name = taskName.trim();
+    if (!name) {
+      setError("Please describe the subtask");
       return;
     }
-    setStatusBar({open: false});
-  }
 
-  const handleCreateSubTask = () => {
-    if (!taskName) {
-      setError({
-        showNameError: true,
-        message: "Please fill out this field",
-      });
-    } else {
-      setTaskRequest({
+    setSaving(true);
+    try {
+      const resp = await createNewSubtask({
         projectId: currentProject.projectIdentifier!,
         parentTaskId: currentTask.taskSequence!,
-        taskName: taskName,
-        priority: priority,
+        taskName: name,
+        priority,
         status: "",
       });
-      setTaskName("");
-      setPriority("LOW");
-    }
-  };
-
-  useEffect(() => {
-    if (
-      taskRequest.projectId &&
-      taskRequest.parentTaskId &&
-      taskRequest.taskName &&
-      taskRequest.priority
-    ) {
-      callCreateSubTask();
-    }
-  }, [taskRequest]);
-
-  const callCreateSubTask = async () => {
-    try {
-      const resp = await createNewSubtask(taskRequest);
-      if (resp.status === 201) {
-        callGetSubtaskLists();
-        setStatusBar({
-          open: true,
-          type: "success",
-          message: resp.data,
-        });
-      }
+      enqueueSnackbar(resp.data || "Subtask created", { ...toastOptions, variant: "success" });
+      onCreated();
+      handleClose();
     } catch (err) {
-      console.log(err);
-    }
-  };
-
-  useEffect(() => {
-    callGetSubtaskLists();
-  }, []);
-
-  useEffect(() => {
-    setSubtasks(subtasks);
-  }, [subtasks]);
-
-  const callGetSubtaskLists = async () => {
-    try {
-      await getSubtaskList(currentTask.taskSequence);
-    } catch (err) {
-      console.log(err);
+      console.log((err as ApiError).response);
+      enqueueSnackbar("Couldn't create the subtask. Please try again.", { ...toastOptions, variant: "error" });
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={handleSubTaskClose}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
-      >
-        <div className={modalCard}>
-          <div className={modalHeader}>
-            <h3>New SubTask</h3>
-            <i className={`fa fa-times-circle-o ${modalClose}`} onClick={handleSubTaskClose} />
+    <Dialog open={open} onClose={handleClose} PaperProps={{ className: task.dialogPaper }} aria-labelledby="new-subtask-title">
+      <form onSubmit={handleSubmit} noValidate>
+        <div className={task.dialogHeader}>
+          <div>
+            <h2 id="new-subtask-title" className={task.dialogTitle}>New subtask</h2>
+            <p className="text-[13px] text-brand-muted">
+              in <span className="font-semibold uppercase">{currentTask.taskSequence}</span>
+            </p>
           </div>
-          <div className={divider} />
-          <TextField
-            fullWidth
-            className={formField}
-            id="outlined-multiline-static"
-            label="About subtask..."
-            multiline
-            rows={4}
-            // TODO(ts-migration): stray "q" prop (typo) – not a TextField prop, it ends up on the DOM
-            // @ts-expect-error "q" is not a TextField prop
-            q
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-            error={error.showNameError}
-            helperText={error.message}
-          />
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Priority</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              label="Priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <MenuItem value="LOW">LOW</MenuItem>
-              <MenuItem value="MEDIUM">MEDIUM</MenuItem>
-              <MenuItem value="HIGH">HIGH</MenuItem>
-            </Select>
-          </FormControl>
-          <div className={divider} />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCreateSubTask}
-          >
-            Add
-          </Button>
+          <button type="button" className={task.iconButton} onClick={handleClose} aria-label="Close">
+            <FiX />
+          </button>
         </div>
-      </Modal>
-      <Snackbar
-        open={statusBar.open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        // TODO(ts-migration): the setStatusBar calls drop vertical/horizontal, so this key changes on the first update and the Snackbar remounts
-        key={`${statusBar.vertical}${statusBar.horizontal}`}
-      >
-        <Alert
-          onClose={handleClose}
-          severity={statusBar.type || undefined}
-          sx={{ width: "100%" }}
-        >
-          {statusBar.message}
-        </Alert>
-      </Snackbar>
-    </>
+
+        <div className={task.dialogBody}>
+          <div className={task.field}>
+            <label htmlFor="new-subtask-name" className={task.label}>Subtask</label>
+            <textarea
+              id="new-subtask-name"
+              rows={3}
+              value={taskName}
+              onChange={(e) => {
+                setTaskName(e.target.value);
+                setError("");
+              }}
+              className={task.textarea}
+              placeholder="What needs to be done?"
+              autoFocus
+              aria-invalid={!!error}
+              aria-describedby={error ? "new-subtask-error" : undefined}
+            />
+            {error ? <p id="new-subtask-error" className={task.error}>{error}</p> : null}
+          </div>
+          <div className={task.field}>
+            <span className={task.label}>Priority</span>
+            <PriorityPicker name="new-subtask-priority" value={priority} onChange={setPriority} />
+          </div>
+        </div>
+
+        <div className={task.dialogFooter}>
+          <button type="button" className={task.btnGhost} onClick={handleClose}>Cancel</button>
+          <button type="submit" className={task.btnPrimary} disabled={saving}>
+            {saving ? "Adding…" : "Add subtask"}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 };
-
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setSubtasks: (data: Subtask[]) => dispatch(setSubtaskList(data)),
-  };
-}
 
 const mapStateToProps = (state: RootState) => ({
   currentProject: state.project.project,
   currentTask: state.tasks.selectedTask,
 });
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(mapStateToProps, null);
 
 type Props = ConnectedProps<typeof withConnect>;
 

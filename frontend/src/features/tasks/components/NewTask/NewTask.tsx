@@ -1,148 +1,111 @@
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-} from "@mui/material";
+import React, { useState } from "react";
+import { Dialog } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { FiX } from "react-icons/fi";
+
+import * as task from "features/tasks/styles/taskClasses";
+
+import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
 import useCreateTask from "features/tasks/hooks/useCreateTask";
-import React, { useState, useEffect } from "react";
-import type { Dispatch, SetStateAction } from "react";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
-import type { RootState } from "app/store";
-import type { ProjectTaskRequest } from "features/tasks/types";
+import { toastOptions } from "features/tasks/data";
 
-import { divider, formField, modalCard, modalClose, modalHeader } from "shared/styles/sharedClasses";
-
-type OwnProps = {
+interface NewTaskProps {
   open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-};
+  onClose: () => void;
+  /** Called after the task is created, to reload the board */
+  onCreated: () => void;
+  /** projectIdentifier – the "name" query parameter */
+  projectIdentifier: string | null;
+}
 
-const NewTask = ({ open, setOpen, currentProject }: OwnProps & Props) => {
+// Dialog that creates a task in the To do column
+const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) => {
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
-  const [error, setError] = useState({
-    showNameError: false,
-    message: "",
-  });
-  const [taskRequest, setTaskRequest] = useState<ProjectTaskRequest>({
-    projectIdentifier: "",
-    taskName: "",
-    priority: "",
-    sprintId: "",
-    status: "",
-  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [createProjectTask] = useCreateTask();
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleClose = () => {
-    setOpen(false);
+    setTaskName("");
+    setPriority("LOW");
+    setError("");
+    onClose();
   };
 
-  const handleCreateTask = () => {
-    if (!taskName) {
-      setError({
-        showNameError: true,
-        message: "Please fill out this field",
-      });
-    } else {
-      setTaskRequest({
-        projectIdentifier: currentProject.projectIdentifier!,
-        taskName: taskName,
-        priority: priority,
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const name = taskName.trim();
+    if (!name) {
+      setError("Please describe the task");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await createProjectTask({
+        projectIdentifier: projectIdentifier!,
+        taskName: name,
+        priority,
         sprintId: "",
         status: "",
       });
-      setTaskName("");
-      setPriority("LOW");
-    }
-  };
-
-  useEffect(() => {
-    if (
-      taskRequest.taskName &&
-      taskRequest.priority &&
-      taskRequest.projectIdentifier
-    ) {
-      callCreateTask();
-    }
-  }, [taskRequest]);
-
-  const callCreateTask = async () => {
-    try {
-      const resp = await createProjectTask(taskRequest);
-      if (resp.status === 201) {
-        console.log("Task Created");
-        setOpen(!open)
-      }
+      enqueueSnackbar("Task created", { ...toastOptions, variant: "success" });
+      onCreated();
+      handleClose();
     } catch (err) {
       console.log(err);
+      enqueueSnackbar("Couldn't create the task. Please try again.", { ...toastOptions, variant: "error" });
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
-      >
-        <div className={modalCard}>
-          <div className={modalHeader}>
-            <h3>New Task</h3>
-            <i className={`fa fa-times-circle-o ${modalClose}`} onClick={handleClose} />
-          </div>
-          <div className={divider} />
-          <TextField
-            fullWidth
-            className={formField}
-            id="outlined-multiline-static"
-            label="About task..."
-            multiline
-            rows={4}
-            value={taskName}
-            onChange={(e) => setTaskName(e.target.value)}
-            error={error.showNameError}
-            helperText={error.message}
-          />
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Priority</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              label="Priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-            >
-              <MenuItem value="LOW">LOW</MenuItem>
-              <MenuItem value="MEDIUM">MEDIUM</MenuItem>
-              <MenuItem value="HIGH">HIGH</MenuItem>
-            </Select>
-          </FormControl>
-          <div className={divider} />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCreateTask}
-          >
-            Add
-          </Button>
+    <Dialog open={open} onClose={handleClose} PaperProps={{ className: task.dialogPaper }} aria-labelledby="new-task-title">
+      <form onSubmit={handleSubmit} noValidate>
+        <div className={task.dialogHeader}>
+          <h2 id="new-task-title" className={task.dialogTitle}>New task</h2>
+          <button type="button" className={task.iconButton} onClick={handleClose} aria-label="Close">
+            <FiX />
+          </button>
         </div>
-      </Modal>
-    </>
+
+        <div className={task.dialogBody}>
+          <div className={task.field}>
+            <label htmlFor="new-task-name" className={task.label}>Task</label>
+            <textarea
+              id="new-task-name"
+              rows={3}
+              value={taskName}
+              onChange={(e) => {
+                setTaskName(e.target.value);
+                setError("");
+              }}
+              className={task.textarea}
+              placeholder="What needs to be done?"
+              autoFocus
+              aria-invalid={!!error}
+              aria-describedby={error ? "new-task-error" : undefined}
+            />
+            {error ? <p id="new-task-error" className={task.error}>{error}</p> : null}
+          </div>
+          <div className={task.field}>
+            <span className={task.label}>Priority</span>
+            <PriorityPicker name="new-task-priority" value={priority} onChange={setPriority} />
+          </div>
+        </div>
+
+        <div className={task.dialogFooter}>
+          <button type="button" className={task.btnGhost} onClick={handleClose}>Cancel</button>
+          <button type="submit" className={task.btnPrimary} disabled={saving}>
+            {saving ? "Creating…" : "Create task"}
+          </button>
+        </div>
+      </form>
+    </Dialog>
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentProject: state.project.project,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(NewTask);
+export default NewTask;

@@ -2,42 +2,41 @@ import Comments from "features/comments/components/Comments/Comments";
 import TaskHistory from "features/tasks/components/TaskHistory/TaskHistory";
 import React, { useState } from "react";
 
-const tabBase = "py-[3px] px-2.5 rounded-[3px] cursor-pointer";
-const tabClass = `${tabBase} bg-[#efefef] text-[#777]`;
-const activeTabClass = `${tabBase} bg-[#585151] text-white!`;
+import * as task from "features/tasks/styles/taskClasses";
 
 const TaskActivity = () => {
   const [showTab, setShowTab] = useState(1);
 
-  const handleTab = (tab: number) => {
-    setShowTab(tab);
-  };
-
   return (
-    <>
-      <div>
-        <h5>Activity</h5>
-        <div className="flex items-center gap-2.5 mt-2.5">
-          <span>Show:</span>
-          <div
-            className={showTab === 1 ? activeTabClass : tabClass}
-            onClick={() => handleTab(1)}
+    <section className={task.section} aria-labelledby="activity-title">
+      <div className={task.sectionHeader}>
+        <h3 id="activity-title" className={task.sectionTitle}>Activity</h3>
+        <div className={task.tabs} role="tablist" aria-label="Show">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={showTab === 1}
+            className={showTab === 1 ? task.tabActive : task.tab}
+            onClick={() => setShowTab(1)}
           >
-            <span className="font-semibold">Comments</span>
-          </div>
-          {/* <div
-            className={showTab === 2 ? activeTabClass : tabClass}
-            onClick={() => handleTab(2)}
+            Comments
+          </button>
+          {/* <button
+            type="button"
+            role="tab"
+            aria-selected={showTab === 2}
+            className={showTab === 2 ? task.tabActive : task.tab}
+            onClick={() => setShowTab(2)}
           >
-            <span className="font-semibold">History</span>
-          </div> */}
-        </div>
-        <div>
-          {showTab === 1 && <Comments />}
-          {showTab === 2 && <TaskHistory />}
+            History
+          </button> */}
         </div>
       </div>
-    </>
+      <div>
+        {showTab === 1 && <Comments />}
+        {showTab === 2 && <TaskHistory />}
+      </div>
+    </section>
   );
 };
 

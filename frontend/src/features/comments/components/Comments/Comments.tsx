@@ -1,58 +1,30 @@
-import { Avatar, Button, Snackbar } from "@mui/material";
 import React, { useState, useEffect } from "react";
-
-
+import { useSnackbar } from "notistack";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
+
+import * as task from "features/tasks/styles/taskClasses";
+
 import useAddComment from "features/comments/hooks/useAddComment";
-import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState, ApiError } from "shared/types";
 import CommentList from "features/comments/components/CommentList/CommentList";
 import useGetComments from "features/comments/hooks/useGetComments";
 import { setAllComments } from "features/comments/store/commentAction";
+import { toastOptions } from "features/tasks/data";
+import type { ApiError } from "shared/types";
 import type { AppDispatch, RootState } from "app/store";
-import type { Comment, CommentRequest } from "features/comments/types";
+import type { Comment } from "features/comments/types";
 
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
+// Comment box and the comments of the open task
 const Comments = ({ currentTask, currentUser, setComments }: Props) => {
   const [comment, setComment] = useState("");
-  const [commentRequest, setCommentRequest] = useState<CommentRequest>({
-    taskId: "",
-    userId: "",
-    comment: "",
-  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [addNewComment] = useAddComment();
-  const [statusBar, setStatusBar] = useState<SnackbarState>({
-    open: false,
-    vertical: "bottom",
-    horizontal: "right",
-    type: "",
-    message: "",
-  });
   const [comments, getComments] = useGetComments();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const handleComment = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    if (!comment) {
-      alert("Please add some comment");
-    } else {
-      setCommentRequest({
-        taskId: currentTask.taskSequence!,
-        userId: currentUser.id!,
-        comment: comment,
-      });
-      setComment("");
-    }
-  };
-
-  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setStatusBar({ open: false });
+  const loadComments = () => {
+    getComments(currentTask.taskSequence).catch((err) => console.log(err));
   };
 
   useEffect(() => {
@@ -60,119 +32,71 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (
-      commentRequest.taskId &&
-      commentRequest.userId &&
-      commentRequest.comment
-    ) {
-      callAddComment();
-    }
-  }, [commentRequest]);
-
-  const callAddComment = async () => {
-    try {
-      const resp = await addNewComment(commentRequest);
-      if (resp.status === 201) {
-        setStatusBar({
-          open: true,
-          type: "success",
-          message: resp.data,
-        });
-        getComments(currentTask.taskSequence);
-      }
-    } catch (err) {
-      setStatusBar({
-        open: true,
-        type: "error",
-        // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
-        message: (err as ApiError).response!.data.message,
-      });
-    }
-  };
-
-  useEffect(() => {
-    getComments(currentTask.taskSequence);
+    loadComments();
   }, [currentTask.taskSequence]);
 
   useEffect(() => {
     setComments(comments);
   }, [comments]);
 
-  function stringToColor(string: string) {
-    let hash = 0;
-    let i;
-
-    /* eslint-disable no-bitwise */
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const text = comment.trim();
+    if (!text) {
+      setError("Write a comment first");
+      return;
     }
 
-    let color = "#";
-
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
+    setSaving(true);
+    try {
+      const resp = await addNewComment({
+        taskId: currentTask.taskSequence!,
+        userId: currentUser.id!,
+        comment: text,
+      });
+      setComment("");
+      enqueueSnackbar(resp.data || "Comment added", { ...toastOptions, variant: "success" });
+      loadComments();
+    } catch (err) {
+      const message = (err as ApiError).response?.data?.message;
+      enqueueSnackbar(message || "Couldn't add the comment. Please try again.", { ...toastOptions, variant: "error" });
+    } finally {
+      setSaving(false);
     }
-    /* eslint-enable no-bitwise */
-
-    return color;
-  }
-
-  function stringAvatar(name: string) {
-    return {
-      sx: {
-        bgcolor: stringToColor(name),
-      },
-      children: `${name.split(" ")[0][0]}`,
-    };
-  }
+  };
 
   return (
-    <>
-      <div className="flex w-auto mt-5">
-        <div className="w-[50px] h-[50px] mr-[15px]">
-          <Avatar {...stringAvatar(currentUser.fullName!)} />
-        </div>
-        <div className="w-full">
-          <div className="py-[.7rem] px-[1.2rem] border border-[#b7acac] rounded-[3px]">
-            <input
-              className="w-full bg-transparent border-none outline-none text-[18px]"
-              type="text"
-              name=""
-              id=""
-              placeholder="Add a comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
+    <div className="flex flex-col gap-5">
+      <form className={task.comment} onSubmit={handleSubmit} noValidate>
+        <span className={task.avatarLarge} aria-hidden="true">
+          {currentUser.fullName?.substring(0, 1)}
+        </span>
+        <div className={`${task.commentBody} flex flex-col gap-2`}>
+          <textarea
+            rows={2}
+            className={`${task.textarea} min-h-[72px]!`}
+            placeholder="Add a comment…"
+            aria-label="Add a comment"
+            value={comment}
+            onChange={(e) => {
+              setComment(e.target.value);
+              setError("");
+            }}
+            aria-invalid={!!error}
+            aria-describedby={error ? "comment-error" : undefined}
+          />
+          {error ? <p id="comment-error" className={task.error}>{error}</p> : null}
+          <div className={task.formActions}>
+            <button type="submit" className={`${task.btnPrimary} ${task.btnSmall}`} disabled={saving}>
+              {saving ? "Saving…" : "Save"}
+            </button>
+            {/* Not wired up yet */}
+            <button type="button" className={`${task.btnGhost} ${task.btnSmall}`}>Cancel</button>
           </div>
-          <div className="flex gap-2.5 mt-2.5">
-            <Button variant="contained" color="primary" onClick={handleComment}>
-              Save
-            </Button>
-            <Button variant="contained" color="inherit">
-              Cancel
-            </Button>
-          </div>
         </div>
-        <Snackbar
-          open={statusBar.open}
-          autoHideDuration={6000}
-          onClose={handleClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-          // TODO(ts-migration): the setStatusBar calls drop vertical/horizontal, so this key changes on the first update and the Snackbar remounts
-          key={`${statusBar.vertical}${statusBar.horizontal}`}
-        >
-          <Alert
-            onClose={handleClose}
-            severity={statusBar.type || undefined}
-            sx={{ width: "100%" }}
-          >
-            {statusBar.message}
-          </Alert>
-        </Snackbar>
-      </div>
+      </form>
       <CommentList />
-    </>
+    </div>
   );
 };
 

@@ -1,122 +1,44 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
-import useGetTaskStatistics from "features/tasks/hooks/useGetTaskStatistics";
-import React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
+import * as task from "features/tasks/styles/taskClasses";
+
+import useGetTaskStatistics from "features/tasks/hooks/useGetTaskStatistics";
+import { taskStatuses } from "features/tasks/data";
 import type { TaskDetails } from "features/tasks/types";
 
-const TaskStatusCompletion = ({ task }: { task: Partial<TaskDetails> }) => {
+// Share of the task's subtasks per status. The backend sends percentages (0 when there are no subtasks).
+const TaskStatusCompletion = ({ task: currentTask }: { task: Partial<TaskDetails> }) => {
   const [stats, getTaskStats] = useGetTaskStatistics();
 
+  // Again after the task is reloaded, e.g. when a subtask was added
   useEffect(() => {
-    getTaskStats(task.taskSequence);
-  }, [task.taskSequence]);
+    getTaskStats(currentTask.taskSequence).catch((err) => console.log(err));
+  }, [currentTask]);
+
+  const rows = [
+    { status: taskStatuses.COMPLETED, value: stats.completed ?? 0 },
+    { status: taskStatuses.INPROGRESS, value: stats.inprogress ?? 0 },
+    { status: taskStatuses.TODO, value: stats.pending ?? 0 },
+  ];
+  const hasSubtasks = rows.some((row) => row.value > 0);
 
   return (
-    <>
-      <div className="w-auto mt-2.5 border border-[#999] rounded-[10px]">
-        <div className="p-4 border-b border-[#999]">
-          <h5 className="text-[16px]">Task Progress</h5>
-        </div>
-        <div className="flex justify-around p-4">
-          <div>
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
-              <CircularProgress
-                variant="determinate"
-                value={stats.inprogress}
-              />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: "absolute",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  component="div"
-                  color="text.secondary"
-                >
-                  {`${Math.round(Number(stats.inprogress))}%`}
-                </Typography>
-              </Box>
-            </Box>
-            <div>
-              <span className="text-[16px] font-semibold text-[#777]">In Progress</span>
-            </div>
+    <div className={task.sideCard}>
+      <h3 className={task.sideCardTitle}>Subtask progress</h3>
+      {hasSubtasks ? (
+        rows.map((row) => (
+          <div key={row.status.label} className={task.progressRow}>
+            <span className={task.progressLabel}>{row.status.label}</span>
+            <span className={task.progressTrack}>
+              <span className={`block h-full rounded-full ${row.status.solid}`} style={{ width: `${row.value}%` }} />
+            </span>
+            <span className={task.progressValue}>{Math.round(row.value)}%</span>
           </div>
-          <div>
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
-              <CircularProgress
-                variant="determinate"
-                color="success"
-                value={stats.completed}
-              />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: "absolute",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  component="div"
-                  color="text.secondary"
-                >
-                  {`${Math.round(Number(stats.completed))}%`}
-                </Typography>
-              </Box>
-            </Box>
-            <div>
-              <span className="text-[16px] font-semibold text-[#777]">Completed</span>
-            </div>
-          </div>
-          <div>
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
-              <CircularProgress
-                variant="determinate"
-                color="secondary"
-                value={stats.pending}
-              />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: "absolute",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  component="div"
-                  color="text.secondary"
-                >
-                  {`${Math.round(Number(stats.pending))}%`}
-                </Typography>
-              </Box>
-            </Box>
-            <div>
-              <span className="text-[16px] font-semibold text-[#777]">Not Started</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+        ))
+      ) : (
+        <p className="text-[14px] text-brand-muted">Add subtasks to track progress here.</p>
+      )}
+    </div>
   );
 };
 

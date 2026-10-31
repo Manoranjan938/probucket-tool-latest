@@ -1,251 +1,253 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
+import { useSnackbar } from "notistack";
+import {
+  FiCheck,
+  FiChevronDown,
+  FiEye,
+  FiGitMerge,
+  FiMaximize2,
+  FiMinimize2,
+  FiMoreHorizontal,
+  FiPaperclip,
+  FiShare2,
+  FiX,
+} from "react-icons/fi";
+import { connect, type ConnectedProps } from "react-redux";
+import { compose } from "redux";
 
-import { AiFillEye, AiOutlineClose } from "react-icons/ai";
-import { FiShare2 } from "react-icons/fi";
-import { BsThreeDots } from "react-icons/bs";
-import { GiElectric } from "react-icons/gi";
-import { GoPrimitiveDot, GoCheck } from "react-icons/go";
-import { IoMdArrowDropup, IoMdArrowDropdown } from "react-icons/io";
-import { GrAttachment } from "react-icons/gr";
-import { VscTypeHierarchySub } from "react-icons/vsc";
+import * as task from "features/tasks/styles/taskClasses";
 
-import { Button, Menu, MenuItem, type ButtonProps } from "@mui/material";
 import SubTask from "features/tasks/components/SubTask/SubTask";
 import ExtraDetails from "features/tasks/components/ExtraDetails/ExtraDetails";
 import TaskActivity from "features/tasks/components/TaskActivity/TaskActivity";
+import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion/TaskStatusCompletion";
+import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
 import useUpdateTask from "features/tasks/hooks/useUpdateTask";
 import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { setSubtaskList } from "features/tasks/store/taskAction";
-import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
+import { taskStatuses, toastOptions } from "features/tasks/data";
 import type { AppDispatch, RootState } from "app/store";
-import type { Subtask, UpdateTaskRequest } from "features/tasks/types";
+import type { Subtask } from "features/tasks/types";
 
-const TaskDetails = ({ close, task, setSubtasks, allSubtask }: { close: () => void } & Props) => {
-  const [type] = useState("task");
-  const [taskStatus, setTaskStatus] = useState<{ title: string; type: ButtonProps["color"] }>({
-    title: "TODO",
-    type: "inherit",
-  });
+export type DetailsView = "panel" | "modal";
+
+type OwnProps = {
+  /** The task to show; the store may still hold the previously opened task while this one loads */
+  sequence: string;
+  view: DetailsView;
+  onToggleView: () => void;
+  onClose: () => void;
+  /** Called after the task changed, to reload it and the board */
+  onChanged: () => void;
+};
+
+// Content of the task details side panel / modal
+const TaskDetails = ({
+  sequence,
+  view,
+  onToggleView,
+  onClose,
+  onChanged,
+  task: currentTask,
+  setSubtasks,
+  allSubtask,
+}: OwnProps & Props) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [details, setDetails] = useState({
-    description: "",
-    priority: "",
-    assignee: "",
-  });
-  const [updateRequest, setUpdateRequest] = useState<UpdateTaskRequest>({
-    taskId: "",
-    status: "",
-    assignee: "",
-    priority: "",
-    description: "",
-  });
-  const [updateTask] = useUpdateTask();
-  const [subtasks, getSubtaskList] = useGetSubTasks();
+  const [description, setDescription] = useState("");
+  const [savingStatus, setSavingStatus] = useState(false);
   const [openSubtask, setOpenSubtask] = useState(false);
+  const [updateTask] = useUpdateTask();
+  const [, getSubtaskList] = useGetSubTasks();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const loaded = currentTask.taskSequence === sequence;
+  const status = taskStatuses[currentTask.status ?? ""] ?? taskStatuses.TODO;
 
-  const handleOpenSubtask = () => {
-    setOpenSubtask(!openSubtask);
-  }
-
-  useEffect(() => {
-    if (task.status === "INPROGRESS") {
-      setTaskStatus({ title: task.status, type: "primary" });
-    } else if (task.status === "COMPLETED") {
-      setTaskStatus({ title: task.status, type: "success" });
-    } else if (task.status === "TODO") {
-      setTaskStatus({ title: task.status, type: "inherit" });
-    }
-  }, [task.status]);
-
-  useEffect(() => {
-    callGetSubtaskLists();
-  }, [task.taskSequence]);
-
-  useEffect(() => {
-    setSubtasks(subtasks);
-  }, [subtasks]);
-
-  useEffect(() => {
-    callUpdateTask();
-  }, [updateRequest]);
-
-  const changeStatus = (status: string) => {
-    const st = status;
-    if (st === "INPROGRESS") {
-      setTaskStatus({ title: st, type: "primary" });
-      setUpdateRequest({
-        taskId: task.taskSequence!,
-        status: st,
-        assignee: task.assignee!,
-        priority: task.priority!,
-        description: task.taskDesc!,
-      });
-      setAnchorEl(null);
-    } else if (st === "COMPLETED") {
-      setTaskStatus({ title: st, type: "success" });
-      setUpdateRequest({
-        taskId: task.taskSequence!,
-        status: st,
-        assignee: task.assignee!,
-        priority: task.priority!,
-        description: task.taskDesc!,
-      });
-      setAnchorEl(null);
-    } else if (st === "TODO") {
-      setTaskStatus({ title: st, type: "inherit" });
-      setUpdateRequest({
-        taskId: task.taskSequence!,
-        status: st,
-        assignee: task.assignee!,
-        priority: task.priority!,
-        description: task.taskDesc!,
-      });
-      setAnchorEl(null);
-    }
-  };
-
-  const callUpdateTask = async () => {
+  const loadSubtasks = async () => {
     try {
-      const resp = await updateTask(updateRequest);
-
-      if (resp.status === 200) {
-        console.log("Updated successfully");
-      }
+      const resp = await getSubtaskList(sequence);
+      setSubtasks(resp.data);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const callGetSubtaskLists = async () => {
+  // The previous task's subtasks are cleared first, so they never show under this task
+  useEffect(() => {
+    setSubtasks([]);
+    loadSubtasks();
+  }, [sequence]);
+
+  useEffect(() => {
+    setDescription(currentTask.taskDesc ?? "");
+  }, [currentTask.taskSequence, currentTask.taskDesc]);
+
+  const changeStatus = async (newStatus: string) => {
+    setAnchorEl(null);
+    if (newStatus === currentTask.status) {
+      return;
+    }
+    setSavingStatus(true);
     try {
-      await getSubtaskList(task.taskSequence);
+      await updateTask({
+        taskId: currentTask.taskSequence!,
+        status: newStatus,
+        assignee: currentTask.assignee!,
+        priority: currentTask.priority!,
+        description: currentTask.taskDesc!,
+      });
+      onChanged();
     } catch (err) {
       console.log(err);
+      enqueueSnackbar("Couldn't change the status. Please try again.", { ...toastOptions, variant: "error" });
+    } finally {
+      setSavingStatus(false);
     }
   };
+
+  const handleSubtaskCreated = () => {
+    loadSubtasks();
+    onChanged();
+  };
+
+  const statusControl = (
+    <>
+      <button
+        type="button"
+        className={`${task.statusButton} ${status.soft} ${status.text}`}
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        disabled={savingStatus}
+        aria-haspopup="menu"
+        aria-expanded={Boolean(anchorEl)}
+        aria-label={`Status: ${status.label}`}
+      >
+        {status.label}
+        <FiChevronDown aria-hidden="true" />
+      </button>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
+        {Object.entries(taskStatuses).map(([value, style]) => (
+          <MenuItem key={value} onClick={() => changeStatus(value)} selected={value === currentTask.status}>
+            <span className={`mr-2.5 w-2.5 h-2.5 rounded-[50%] ${style.solid}`} aria-hidden="true" />
+            {style.label}
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+
+  const actions = (
+    <div className={task.actionsRow}>
+      {view === "panel" ? statusControl : null}
+      {/* Attachments aren't wired up yet */}
+      <button type="button" className={`${task.btnGhost} ${task.btnSmall}`}>
+        <FiPaperclip aria-hidden="true" />
+        Attach
+      </button>
+      <button type="button" className={`${task.btnGhost} ${task.btnSmall}`} onClick={() => setOpenSubtask(true)}>
+        <FiGitMerge aria-hidden="true" />
+        Create subtask
+      </button>
+    </div>
+  );
+
+  const descriptionSection = (
+    <section className={task.section}>
+      <label htmlFor="task-description" className={task.sectionTitle}>Description</label>
+      <textarea
+        id="task-description"
+        className={task.textarea}
+        placeholder="Add a description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      {/* Saving the description isn't wired up yet */}
+      <div className={task.formActions}>
+        <button type="button" className={`${task.btnPrimary} ${task.btnSmall}`}>Save</button>
+        <button type="button" className={`${task.btnGhost} ${task.btnSmall}`}>Cancel</button>
+      </div>
+    </section>
+  );
+
+  const details = <ExtraDetails onChanged={onChanged} />;
+  const progress = <TaskStatusCompletion task={currentTask} />;
+  const subtasks = <SubTask subtask={allSubtask} onAdd={() => setOpenSubtask(true)} />;
 
   return (
-    <>
-      <div className="w-[80%] h-[80%] my-[3%] mx-auto py-6 px-8 rounded-xl bg-white">
-        <div className="flex justify-between">
-          <div className="flex items-center gap-[5px]">
-            <div>
-              {type === "epic" && (
-                <span>
-                  <GiElectric />
-                </span>
-              )}
-              {type === "bug" && (
-                <span>
-                  <GoPrimitiveDot />
-                </span>
-              )}
-              {type === "task" && (
-                <span className="p-px rounded-[2px] bg-[#2cceb8] text-[14px] text-white">
-                  <GoCheck />
-                </span>
-              )}
-            </div>
-            <Link to="#" className="text-[15px]">
-              {task.taskSequence}
-            </Link>
-          </div>
-          <div className="flex gap-[30px] text-[26px] cursor-pointer">
-            <AiFillEye />
-            <FiShare2 />
-            <BsThreeDots />
-            <AiOutlineClose onClick={close} />
-          </div>
-        </div>
-        <div className="grid grid-cols-[2fr_1fr] gap-10 mt-5">
-          <div className="h-[550px] pr-2.5 overflow-y-auto max-[1500px]:h-[450px]">
-            <div>
-              <h1 className="font-medium">{task.taskName}</h1>
-            </div>
-            <div className="flex gap-2.5 mt-2.5">
-              <Button variant="contained" color="inherit">
-                <GrAttachment /> &nbsp; Attach
-              </Button>
-              <Button
-                variant="contained"
-                color="inherit"
-                onClick={handleOpenSubtask}
-              >
-                <VscTypeHierarchySub /> &nbsp; Create Subtask
-              </Button>
-            </div>
-            <div className="w-auto mt-5">
-              <h5 className="font-medium">Description</h5>
-              <div className="mt-[5px] mb-2.5 py-4 px-8 border border-[#b7acac] rounded-[3px]">
-                <input
-                  className="w-full bg-transparent border-none outline-none text-[18px]"
-                  type="text"
-                  name=""
-                  id=""
-                  placeholder="Add a description"
-                  onChange={(e) =>
-                    setDetails({ ...details, description: e.target.value })
-                  }
-                />
-              </div>
-              <div className="flex gap-2.5">
-                <Button variant="contained">Save</Button>
-                <Button variant="contained" color="inherit">
-                  Cancel
-                </Button>
-              </div>
-            </div>
-            <div>
-              {allSubtask.length > 0 && <SubTask subtask={allSubtask} />}
-            </div>
-            <div className="mt-[30px]">
-              <TaskActivity />
-            </div>
-          </div>
-          <div>
-            <div className="[&>button]:flex [&>button]:gap-2.5 [&>button]:items-center!">
-              <Button
-                variant="contained"
-                color={taskStatus.type}
-                onClick={handleClick}
-              >
-                {taskStatus.title}
-                <span>
-                  {open ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}
-                </span>
-              </Button>
-            </div>
-            <ExtraDetails />
-          </div>
+    <div className={task.details}>
+      <div className={task.detailsHeader}>
+        <span className={task.detailsKey}>
+          <span className={task.taskTypeIcon} aria-hidden="true"><FiCheck /></span>
+          {sequence}
+        </span>
+        <div className={task.detailsActions}>
+          {/* Watch, share and more aren't wired up yet */}
+          <Tooltip title="Watch">
+            <button type="button" className={task.iconButton} aria-label="Watch"><FiEye /></button>
+          </Tooltip>
+          <Tooltip title="Share">
+            <button type="button" className={task.iconButton} aria-label="Share"><FiShare2 /></button>
+          </Tooltip>
+          <Tooltip title="More">
+            <button type="button" className={task.iconButton} aria-label="More"><FiMoreHorizontal /></button>
+          </Tooltip>
+          <span className={task.detailsDivider} aria-hidden="true" />
+          <Tooltip title={view === "panel" ? "Expand" : "Show as side panel"}>
+            <button
+              type="button"
+              className={`${task.iconButton} max-[640px]:hidden`}
+              onClick={onToggleView}
+              aria-label={view === "panel" ? "Expand" : "Show as side panel"}
+            >
+              {view === "panel" ? <FiMaximize2 /> : <FiMinimize2 />}
+            </button>
+          </Tooltip>
+          <Tooltip title="Close">
+            <button type="button" className={task.iconButton} onClick={onClose} aria-label="Close"><FiX /></button>
+          </Tooltip>
         </div>
       </div>
-      <Menu
-        id="basic-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        MenuListProps={{
-          "aria-labelledby": "basic-button",
-        }}
-      >
-        <MenuItem onClick={() => changeStatus("TODO")}>ToDo</MenuItem>
-        <MenuItem onClick={() => changeStatus("INPROGRESS")}>
-          InProgress
-        </MenuItem>
-        <MenuItem onClick={() => changeStatus("COMPLETED")}>Completed</MenuItem>
-      </Menu>
+
+      <div className={task.detailsBody}>
+        {!loaded ? (
+          <div className={task.detailsGridPanel} aria-busy="true">
+            <Skeleton variant="text" sx={{ fontSize: 22 }} width="80%" />
+            <Skeleton variant="rounded" height={36} width={240} sx={{ borderRadius: "10px" }} />
+            <Skeleton variant="rounded" height={96} sx={{ borderRadius: "10px" }} />
+            <Skeleton variant="rounded" height={140} sx={{ borderRadius: "12px" }} />
+          </div>
+        ) : view === "panel" ? (
+          <div className={task.detailsGridPanel}>
+            <h2 className={task.taskTitle}>{currentTask.taskName}</h2>
+            {actions}
+            {details}
+            {descriptionSection}
+            {subtasks}
+            {progress}
+            <TaskActivity />
+          </div>
+        ) : (
+          <div className={task.detailsGridModal}>
+            <div className={task.detailsMain}>
+              <h2 className={task.taskTitle}>{currentTask.taskName}</h2>
+              {actions}
+              {descriptionSection}
+              {subtasks}
+              <TaskActivity />
+            </div>
+            <aside className={task.detailsSide}>
+              <div>{statusControl}</div>
+              {details}
+              {progress}
+            </aside>
+          </div>
+        )}
+      </div>
+
       {openSubtask && (
-        <NewSubTask open={openSubtask} setOpen={setOpenSubtask} />
+        <NewSubTask open={openSubtask} onClose={() => setOpenSubtask(false)} onCreated={handleSubtaskCreated} />
       )}
-    </>
+    </div>
   );
 };
 
@@ -257,7 +259,7 @@ function mapDispatchToProps(dispatch: AppDispatch) {
 
 const mapStateToProps = (state: RootState) => ({
   task: state.tasks.selectedTask,
-  allSubtask: state.tasks.allSubtasks
+  allSubtask: state.tasks.allSubtasks,
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
