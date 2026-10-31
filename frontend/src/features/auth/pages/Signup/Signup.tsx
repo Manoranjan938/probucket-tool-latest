@@ -8,6 +8,7 @@ import image from "shared/assets/images/logo.png";
 import googleImage from "shared/assets/images/google-logo.png";
 import { Snackbar } from "@mui/material";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im";
 import useSignUpRequest from "features/auth/hooks/useSignUpRequest";
 import type { UserRequest } from "features/auth/types";
 import { steps } from "features/landing/data";
@@ -21,6 +22,7 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [validError, setValidError] = useState<{
     showEmail: boolean;
     showName: boolean;
@@ -97,17 +99,17 @@ const Signup = () => {
         name: name,
         roleName: "ROLE_USER",
       });
-
-      setEmail("");
-      setName("");
-      setPassword("");
     }
   };
 
   const callAddUser = async () => {
+    setLoading(true);
     try {
       const res = await register(registerRequest);
       if (res.status === 201) {
+        setEmail("");
+        setName("");
+        setPassword("");
         setNotiBar({
           open: true,
           type: "success",
@@ -116,12 +118,15 @@ const Signup = () => {
       }
     } catch (err) {
       //console.log(err.response);
+      setPassword("");
       setNotiBar({
         open: true,
         type: "error",
         // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
         message: (err as ApiError).response!.data.message,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -161,6 +166,7 @@ const Signup = () => {
                 className={auth.input}
                 placeholder="Enter email"
                 autoComplete="username"
+                disabled={loading}
                 aria-invalid={validError.showEmail}
               />
               {validError.showEmail ? (
@@ -180,6 +186,7 @@ const Signup = () => {
                 className={auth.input}
                 placeholder="Enter full name"
                 autoComplete="name"
+                disabled={loading}
                 aria-invalid={validError.showName}
               />
               {validError.showName ? (
@@ -200,11 +207,13 @@ const Signup = () => {
                   className={auth.inputPassword}
                   placeholder="Enter password"
                   autoComplete="new-password"
+                  disabled={loading}
                   aria-invalid={validError.showPassword}
                 />
                 <button
                   type="button"
                   className={auth.toggle}
+                  disabled={loading}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
                   onClick={() => setShowPassword(!showPassword)}
@@ -217,15 +226,22 @@ const Signup = () => {
               ) : null}
             </div>
 
-            <button type="submit" className={auth.btnPrimary} onClick={handleContinue}>
-              Continue
+            <button type="submit" className={auth.btnPrimary} disabled={loading} onClick={handleContinue}>
+              {loading ? (
+                <>
+                  <ImSpinner2 className={auth.spinner} aria-hidden="true" />
+                  Creating account…
+                </>
+              ) : (
+                "Continue"
+              )}
             </button>
           </form>
 
           <div className={auth.divider}>or</div>
 
           {/* Has no handler yet – Google sign-in is listed as "Coming soon" on the landing page */}
-          <button type="button" className={auth.btnGoogle}>
+          <button type="button" className={auth.btnGoogle} disabled={loading}>
             <img src={googleImage} alt="" className={auth.btnGoogleLogo} />
             <span>Continue with Google</span>
           </button>

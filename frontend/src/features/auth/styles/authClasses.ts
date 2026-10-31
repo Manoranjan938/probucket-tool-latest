@@ -31,20 +31,22 @@ export const link = "text-[14px] font-semibold text-brand-strong no-underline ho
 
 export const inputWrap = "relative";
 export const input =
-  "w-full h-[46px] px-3.5 py-0 border border-brand-border rounded-[10px] bg-brand-surface [font-family:inherit] text-[15px] text-brand-ink transition-[border-color,box-shadow] duration-150 ease-[ease] placeholder:text-brand-muted focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_var(--color-brand-soft)] aria-invalid:border-brand-danger aria-invalid:focus:shadow-[0_0_0_3px_rgba(217,58,58,0.12)] motion-reduce:transition-none";
+  "w-full h-[46px] px-3.5 py-0 border border-brand-border rounded-[10px] bg-brand-surface [font-family:inherit] text-[15px] text-brand-ink transition-[border-color,box-shadow] duration-150 ease-[ease] placeholder:text-brand-muted disabled:cursor-not-allowed disabled:opacity-70 focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_var(--color-brand-soft)] aria-invalid:border-brand-danger aria-invalid:focus:shadow-[0_0_0_3px_rgba(217,58,58,0.12)] motion-reduce:transition-none";
 export const inputPassword = `${input} pr-12`;
 
 export const toggle =
-  "absolute top-1/2 right-1.5 flex items-center justify-center w-9 h-9 border-none rounded-lg bg-transparent text-[16px] text-brand-muted cursor-pointer -translate-y-1/2 hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-primary";
+  "absolute top-1/2 right-1.5 flex items-center justify-center w-9 h-9 border-none rounded-lg bg-transparent text-[16px] text-brand-muted cursor-pointer -translate-y-1/2 hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:text-brand-muted";
 
 export const error = "mt-1.5 text-[13px] font-medium text-brand-danger";
 
 /* Buttons – same shape as the landing page buttons */
 const btn =
-  "flex items-center justify-center gap-2.5 w-full h-[46px] border rounded-[10px] [font-family:inherit] text-[16px] font-semibold no-underline cursor-pointer transition-[background-color,border-color,color] duration-150 ease-[ease] focus-visible:outline-3 focus-visible:outline-brand-primary focus-visible:outline-offset-2 motion-reduce:transition-none";
-export const btnPrimary = `${btn} mt-7 border-transparent bg-brand-strong text-white hover:bg-[#4f49b8]`;
-export const btnGoogle = `${btn} border-brand-border bg-brand-surface text-brand-ink hover:border-brand-primary hover:bg-brand-soft`;
+  "flex items-center justify-center gap-2.5 w-full h-[46px] border rounded-[10px] [font-family:inherit] text-[16px] font-semibold no-underline cursor-pointer transition-[background-color,border-color,color] duration-150 ease-[ease] focus-visible:outline-3 focus-visible:outline-brand-primary focus-visible:outline-offset-2 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-70 aria-disabled:pointer-events-none aria-disabled:opacity-70";
+export const btnPrimary = `${btn} mt-7 border-transparent bg-brand-strong text-white hover:bg-[#4f49b8] disabled:hover:bg-brand-strong`;
+export const btnGoogle = `${btn} border-brand-border bg-brand-surface text-brand-ink hover:border-brand-primary hover:bg-brand-soft disabled:hover:border-brand-border disabled:hover:bg-brand-surface`;
 export const btnGoogleLogo = "w-[22px] h-[22px]";
+/* Spinning icon shown inside a button while its request runs */
+export const spinner = "shrink-0 animate-spin motion-reduce:animate-none";
 export const btnGhost = `${btn} mt-3 border-brand-border bg-brand-surface text-brand-ink hover:border-brand-primary hover:text-brand-strong`;
 
 export const divider =

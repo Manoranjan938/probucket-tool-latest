@@ -14,6 +14,7 @@ import { compose } from "redux";
 import useLoginRequest from "features/auth/hooks/useLoginRequest";
 import type { AppDispatch, RootState } from "app/store";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -24,6 +25,7 @@ const Login = ({getUsers}: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
     showEmail: false,
     showPassword: false,
@@ -84,12 +86,11 @@ const Login = ({getUsers}: Props) => {
         username: email,
         password: password,
       });
-      setEmail("");
-      setPassword("")
     }
   };
 
   const callLoginUser = async () => {
+    setLoading(true);
     try{
       const res = await loginRequest(loginRequests);
       if(res.status === 200){
@@ -97,12 +98,15 @@ const Login = ({getUsers}: Props) => {
       }
     }catch(err){
       //console.log(err.response.data.username);
+      setPassword("");
       setStatusBar({
         open: true,
         type: "error",
         // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
         message: (err as ApiError).response!.data.username,
       });
+    }finally{
+      setLoading(false);
     }
   }
 
@@ -151,6 +155,7 @@ const Login = ({getUsers}: Props) => {
                   className={auth.input}
                   placeholder="Enter email"
                   autoComplete="username"
+                  disabled={loading}
                   aria-invalid={error.showEmail}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -172,12 +177,14 @@ const Login = ({getUsers}: Props) => {
                     className={auth.inputPassword}
                     placeholder="Enter password"
                     autoComplete="current-password"
+                    disabled={loading}
                     aria-invalid={error.showPassword}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
                     className={auth.toggle}
+                    disabled={loading}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
@@ -190,14 +197,27 @@ const Login = ({getUsers}: Props) => {
                 )}
               </div>
 
-              <button type="submit" className={auth.btnPrimary} onClick={handleSubmit}>
-                Continue
+              <button type="submit" className={auth.btnPrimary} disabled={loading} onClick={handleSubmit}>
+                {loading ? (
+                  <>
+                    <ImSpinner2 className={auth.spinner} aria-hidden="true" />
+                    Logging in…
+                  </>
+                ) : (
+                  "Continue"
+                )}
               </button>
             </form>
 
             <div className={auth.divider}>or</div>
 
-            <a className={auth.btnGoogle} href={GOOGLE_AUTH_URL}>
+            {/* A link can't be disabled, so aria-disabled turns off clicks (see btn in authClasses) and tabIndex takes it out of the tab order */}
+            <a
+              className={auth.btnGoogle}
+              href={GOOGLE_AUTH_URL}
+              aria-disabled={loading}
+              tabIndex={loading ? -1 : undefined}
+            >
               <img src={googleImage} alt="" className={auth.btnGoogleLogo} />
               <span>Continue with Google</span>
             </a>

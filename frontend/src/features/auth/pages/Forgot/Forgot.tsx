@@ -7,6 +7,7 @@ import type { SnackbarState, ApiError } from "shared/types";
 
 import image from "shared/assets/images/logo.png";
 import { Snackbar } from "@mui/material";
+import { ImSpinner2 } from "react-icons/im";
 
 import useResetPassRequest from 'features/auth/hooks/useResetPassRequest';
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
@@ -18,6 +19,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props,
 const Forgot = () => {
 
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
     show: false,
     message: ''
@@ -52,15 +54,15 @@ const Forgot = () => {
         message: ''
       })
       callResetPass();
-      setEmail('');
-      
     }
   }
 
   const callResetPass = async () => {
+    setLoading(true);
     try {
       const res = await resetPassword(email);
       if (res.status === 200) {
+        setEmail('');
         setStatusBar({
           open: true,
           type: "success",
@@ -74,6 +76,8 @@ const Forgot = () => {
         // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
         message: (err as ApiError).response!.data.username,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,6 +109,7 @@ const Forgot = () => {
                 className={auth.input}
                 placeholder="Enter email"
                 autoComplete="username"
+                disabled={loading}
                 aria-invalid={error.show}
               />
               {error.show ? (
@@ -112,8 +117,15 @@ const Forgot = () => {
               ) : null}
             </div>
 
-            <button type="submit" className={auth.btnPrimary} onClick={handleContinue}>
-              Continue
+            <button type="submit" className={auth.btnPrimary} disabled={loading} onClick={handleContinue}>
+              {loading ? (
+                <>
+                  <ImSpinner2 className={auth.spinner} aria-hidden="true" />
+                  Sending link…
+                </>
+              ) : (
+                "Continue"
+              )}
             </button>
           </form>
 

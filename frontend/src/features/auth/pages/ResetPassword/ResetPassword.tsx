@@ -7,6 +7,7 @@ import { Snackbar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import useResetPassword from "features/auth/hooks/useResetPassword";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -15,6 +16,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props,
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState({
     showPassword: false,
     message: "",
@@ -52,15 +54,16 @@ const ResetPassword = () => {
         showPassword: false,
         message: "",
       });
-      setPassword("");
     }
   };
 
   const callResetPassword = async () => {
+    setLoading(true);
     try {
       const resp = await resetMyPassword(param, password);
 
       if (resp.status === 200) {
+        setPassword("");
         setStatusBar({
           open: true,
           type: "success",
@@ -69,12 +72,15 @@ const ResetPassword = () => {
       }
     } catch (err) {
       console.log(err);
+      setPassword("");
       setStatusBar({
         open: true,
         type: "error",
         // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
         message: (err as ApiError).response!.data.email,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,12 +111,14 @@ const ResetPassword = () => {
                     className={auth.inputPassword}
                     placeholder="Enter password"
                     autoComplete="new-password"
+                    disabled={loading}
                     aria-invalid={error.showPassword}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
                     className={auth.toggle}
+                    disabled={loading}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
@@ -123,8 +131,15 @@ const ResetPassword = () => {
                 )}
               </div>
 
-              <button type="submit" className={auth.btnPrimary} onClick={handleSubmit}>
-                Continue
+              <button type="submit" className={auth.btnPrimary} disabled={loading} onClick={handleSubmit}>
+                {loading ? (
+                  <>
+                    <ImSpinner2 className={auth.spinner} aria-hidden="true" />
+                    Saving password…
+                  </>
+                ) : (
+                  "Continue"
+                )}
               </button>
             </form>
 
