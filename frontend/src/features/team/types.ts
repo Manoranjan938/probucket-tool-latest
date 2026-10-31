@@ -21,8 +21,8 @@ export interface AddTeamMemberRequest {
 export interface UpdateTeamRequest {
   userid: number;
   role: string;
-  /** The backend field is a String; the status select sends 0 / 1 */
-  status: number | string;
+  /** "active" or "inactive" – anything else leaves the status unchanged */
+  status: string;
 }
 
 export interface TeamState {
