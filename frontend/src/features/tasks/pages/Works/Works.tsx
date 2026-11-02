@@ -98,7 +98,12 @@ const Works = ({ title, getTaskList, myTasks }: { title: string } & Props) => {
         onCreated={loadTasks}
         projectIdentifier={name}
       />
-      <TaskDetailsView sequence={openTask} onClose={() => setOpenTask(null)} onTaskChanged={loadTasks} />
+      <TaskDetailsView
+        sequence={openTask}
+        onClose={() => setOpenTask(null)}
+        onOpenTask={setOpenTask}
+        onTaskChanged={loadTasks}
+      />
     </div>
   );
 };

@@ -28,12 +28,14 @@ type OwnProps = {
   /** Sequence of the task to show; null when closed */
   sequence: string | null;
   onClose: () => void;
+  /** Shows another task instead, e.g. the parent of a subtask */
+  onOpenTask: (sequence: string) => void;
   /** Called after the task changed, to reload the board */
   onTaskChanged: () => void;
 };
 
 // Loads the open task into the store and shows it in a side panel, or a centered modal when expanded
-const TaskDetailsView = ({ sequence, onClose, onTaskChanged, setTask, removeTask }: OwnProps & Props) => {
+const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged, setTask, removeTask }: OwnProps & Props) => {
   const [view, setView] = useState<DetailsView>(readView);
   const [, getTaskDetails] = useGetTaskDetails();
   const { enqueueSnackbar } = useSnackbar();
@@ -82,6 +84,7 @@ const TaskDetailsView = ({ sequence, onClose, onTaskChanged, setTask, removeTask
       view={view}
       onToggleView={handleToggleView}
       onClose={handleClose}
+      onOpenTask={onOpenTask}
       onChanged={handleChanged}
     />
   ) : null;

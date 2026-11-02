@@ -21,6 +21,26 @@ public class TaskDetails {
 	private Date createdOn;
 	
 	private Date updatedOn;
+	
+	private boolean subtask;
+	
+	private String parentTaskId;
+
+	public boolean isSubtask() {
+		return subtask;
+	}
+
+	public void setSubtask(boolean subtask) {
+		this.subtask = subtask;
+	}
+
+	public String getParentTaskId() {
+		return parentTaskId;
+	}
+
+	public void setParentTaskId(String parentTaskId) {
+		this.parentTaskId = parentTaskId;
+	}
 
 	public String getTaskName() {
 		return taskName;

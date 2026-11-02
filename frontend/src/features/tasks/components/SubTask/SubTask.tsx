@@ -9,7 +9,8 @@ import type { Subtask } from "features/tasks/types";
 
 interface SubTaskProps {
   subtask: Subtask[];
-  onAdd: () => void;
+  /** Leave out to hide the add button */
+  onAdd?: () => void;
 }
 
 // The subtasks of the open task
@@ -38,11 +39,13 @@ const SubTask = ({ subtask, onAdd }: SubTaskProps) => {
             Order by
             <FiChevronDown aria-hidden="true" />
           </button>
-          <Tooltip title="Add subtask">
-            <button type="button" className={task.iconButton} onClick={onAdd} aria-label="Add subtask">
-              <FiPlus />
-            </button>
-          </Tooltip>
+          {onAdd ? (
+            <Tooltip title="Add subtask">
+              <button type="button" className={task.iconButton} onClick={onAdd} aria-label="Add subtask">
+                <FiPlus />
+              </button>
+            </Tooltip>
+          ) : null}
         </div>
       </div>
 

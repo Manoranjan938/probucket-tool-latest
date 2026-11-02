@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@mui/material";
-import { FiCheckCircle, FiFlag, FiInbox } from "react-icons/fi";
+import { FiCheckCircle, FiCornerDownRight, FiFlag, FiInbox } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
@@ -52,6 +52,13 @@ const OpenTasks = ({ name, worksLink }: OpenTasksProps) => {
             return (
               <li key={task.taskSequence} className={dashboard.taskRow}>
                 <span className={dashboard.taskKey}>{task.taskSequence}</span>
+                {task.subtask ? (
+                  <FiCornerDownRight
+                    className="shrink-0 text-[13px] text-brand-muted"
+                    title={`Subtask of ${task.parentTaskId}`}
+                    aria-label={`Subtask of ${task.parentTaskId}`}
+                  />
+                ) : null}
                 <span className={dashboard.taskName} title={task.taskName}>{task.taskName}</span>
                 {task.priority ? (
                   <FiFlag

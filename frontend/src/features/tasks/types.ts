@@ -1,5 +1,5 @@
-/** model/response/TaskListResponse.java */
-export interface TaskListItem {
+/** model/response/SubtaskList.java */
+export interface Subtask {
   taskName: string;
   taskType: string;
   taskSequence: string;
@@ -8,11 +8,19 @@ export interface TaskListItem {
   assignee: string;
 }
 
-/** model/response/SubtaskList.java */
-export type Subtask = TaskListItem;
+/** model/response/TaskListResponse.java */
+export interface TaskListItem extends Subtask {
+  subtask: boolean;
+  /** Sequence of the parent task; null on parent tasks */
+  parentTaskId: string | null;
+  subtaskCount: number;
+}
 
 /** model/response/TaskDetails.java – java.util.Date is sent as epoch milliseconds */
-export interface TaskDetails extends TaskListItem {
+export interface TaskDetails extends Subtask {
+  subtask: boolean;
+  /** Sequence of the parent task; null on parent tasks */
+  parentTaskId: string | null;
   taskDesc: string;
   createdOn: number;
   updatedOn: number;

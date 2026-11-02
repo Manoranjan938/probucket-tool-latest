@@ -1,8 +1,10 @@
 package com.tool.ProjectTool.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import com.tool.ProjectTool.entity.Backlog;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
@@ -82,6 +85,14 @@ public class ProjectTaskService {
 		List<ProjectTask> tasks = projectTaskRepo.findByProjectIdentifierOrderByPriority(backlogId);
 		if (!tasks.isEmpty()) {
 			List<TaskListResponse> taskLists = new ArrayList<>();
+
+			Map<String, Integer> subtaskCounts = new HashMap<>();
+			for (ProjectTask project : tasks) {
+				if (project.isSubtask()) {
+					subtaskCounts.merge(project.getParentTaskId(), 1, Integer::sum);
+				}
+			}
+
 			for (ProjectTask project : tasks) {
 				TaskListResponse tas = new TaskListResponse();
 
@@ -89,6 +100,9 @@ public class ProjectTaskService {
 				tas.setTaskSequence(project.getProjectSequence());
 				tas.setPriority(project.getPriority());
 				tas.setStatus(project.getStatus());
+				tas.setSubtask(project.isSubtask());
+				tas.setParentTaskId(project.getParentTaskId());
+				tas.setSubtaskCount(subtaskCounts.getOrDefault(project.getProjectSequence(), 0));
 
 				taskLists.add(tas);
 			}
@@ -131,6 +145,9 @@ public class ProjectTaskService {
 
 			TaskDetails getTask = new TaskDetails();
 			Users user = userRepo.findByUserId(task.getAssignee());
+
+			getTask.setSubtask(task.isSubtask());
+			getTask.setParentTaskId(task.getParentTaskId());
 
 			if (user == null) {
 				getTask.setTaskName(task.getTaskName());
@@ -182,6 +199,16 @@ public class ProjectTaskService {
 	}
 
 	public String createSubtask(RequestCreateSubtask subtaskRequest) {
+
+		ProjectTask parent = projectTaskRepo.findByProjectSequence(subtaskRequest.getParentTaskId());
+
+		if (parent == null) {
+			throw new TaskIdNotFoundException("Parent task not found");
+		}
+
+		if (parent.isSubtask()) {
+			throw new BadRequestException("A subtask can't have its own subtasks");
+		}
 
 		try {
 			Backlog back = backlogRepo.findByProjectIdentifier(subtaskRequest.getProjectId());
@@ -236,6 +263,9 @@ public class ProjectTaskService {
 			task.setPriority(String.valueOf(row[3]));
 			task.setStatus(String.valueOf(row[4]));
 			task.setAssignee(String.valueOf(row[5]));
+			task.setSubtask((Boolean) row[6]);
+			task.setParentTaskId((String) row[7]);
+			task.setSubtaskCount(projectTaskRepo.getTotalSubtasks(task.getTaskSequence()));
 			
 			taskLists.add(task);
 		}

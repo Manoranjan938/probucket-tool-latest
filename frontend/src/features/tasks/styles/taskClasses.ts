@@ -52,6 +52,8 @@ export const card =
 export const cardSelected = `${card} border-brand-primary! shadow-[0_0_0_1px_var(--color-brand-primary)]!`;
 export const cardName = "line-clamp-3 text-[14px] font-semibold leading-[1.45] text-brand-ink";
 export const cardFooter = "flex items-center gap-2";
+export const cardParent = "inline-flex items-center gap-1 text-[12px] font-semibold text-brand-muted";
+export const cardSubtaskCount = "inline-flex items-center gap-1 text-[12px] font-semibold text-brand-muted";
 export const cardKey = "text-[12px] font-semibold uppercase text-brand-muted";
 export const cardAssign =
   "flex items-center justify-center w-6 h-6 ml-auto border border-dashed border-brand-muted rounded-[50%] text-[11px] text-brand-muted";
@@ -101,6 +103,7 @@ export const sideCardTitle = "mb-3 text-[13px] font-bold tracking-[0.06em] upper
 export const detailRow = "grid grid-cols-[110px_minmax(0,1fr)] items-center gap-3 min-h-9 text-[14px]";
 export const detailLabel = "text-brand-muted";
 export const detailValue = "flex items-center gap-2 min-w-0 font-semibold text-brand-ink";
+export const parentLink = "inline-flex items-center gap-1 self-start";
 export const linkButton =
   "p-0 border-none bg-transparent [font-family:inherit] text-[13px] font-semibold text-brand-strong cursor-pointer hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
 

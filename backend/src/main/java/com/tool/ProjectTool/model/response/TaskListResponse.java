@@ -13,6 +13,36 @@ public class TaskListResponse {
 	private String status;
 	
 	private String assignee;
+	
+	private boolean subtask;
+	
+	private String parentTaskId;
+	
+	private int subtaskCount;
+
+	public boolean isSubtask() {
+		return subtask;
+	}
+
+	public void setSubtask(boolean subtask) {
+		this.subtask = subtask;
+	}
+
+	public String getParentTaskId() {
+		return parentTaskId;
+	}
+
+	public void setParentTaskId(String parentTaskId) {
+		this.parentTaskId = parentTaskId;
+	}
+
+	public int getSubtaskCount() {
+		return subtaskCount;
+	}
+
+	public void setSubtaskCount(int subtaskCount) {
+		this.subtaskCount = subtaskCount;
+	}
 
 	public String getTaskName() {
 		return taskName;

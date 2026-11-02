@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
 import { useSnackbar } from "notistack";
-import {
-  FiCheck,
-  FiChevronDown,
-  FiEye,
-  FiGitMerge,
-  FiMaximize2,
-  FiMinimize2,
-  FiMoreHorizontal,
-  FiPaperclip,
-  FiShare2,
-  FiX,
-} from "react-icons/fi";
+import { FiCheck, FiChevronDown, FiCornerLeftUp, FiEye, FiGitMerge, FiMaximize2, FiMinimize2, FiMoreHorizontal, FiPaperclip, FiShare2, FiX } from "react-icons/fi";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 
@@ -38,6 +27,8 @@ type OwnProps = {
   view: DetailsView;
   onToggleView: () => void;
   onClose: () => void;
+  /** Shows the given task instead of this one */
+  onOpenTask: (sequence: string) => void;
   /** Called after the task changed, to reload it and the board */
   onChanged: () => void;
 };
@@ -48,6 +39,7 @@ const TaskDetails = ({
   view,
   onToggleView,
   onClose,
+  onOpenTask,
   onChanged,
   task: currentTask,
   setSubtasks,
@@ -62,6 +54,7 @@ const TaskDetails = ({
   const { enqueueSnackbar } = useSnackbar();
 
   const loaded = currentTask.taskSequence === sequence;
+  const isSubtask = Boolean(currentTask.subtask);
   const status = taskStatuses[currentTask.status ?? ""] ?? taskStatuses.TODO;
 
   const loadSubtasks = async () => {
@@ -144,10 +137,12 @@ const TaskDetails = ({
         <FiPaperclip aria-hidden="true" />
         Attach
       </button>
-      <button type="button" className={`${task.btnGhost} ${task.btnSmall}`} onClick={() => setOpenSubtask(true)}>
-        <FiGitMerge aria-hidden="true" />
-        Create subtask
-      </button>
+      {isSubtask ? null : (
+        <button type="button" className={`${task.btnGhost} ${task.btnSmall}`} onClick={() => setOpenSubtask(true)}>
+          <FiGitMerge aria-hidden="true" />
+          Create subtask
+        </button>
+      )}
     </div>
   );
 
@@ -170,8 +165,23 @@ const TaskDetails = ({
   );
 
   const details = <ExtraDetails onChanged={onChanged} />;
-  const progress = <TaskStatusCompletion task={currentTask} />;
-  const subtasks = <SubTask subtask={allSubtask} onAdd={() => setOpenSubtask(true)} />;
+  // Subtasks can't have their own, so these only show on a subtask for data from before that rule
+  const showSubtasks = !isSubtask || allSubtask.length > 0;
+  const progress = showSubtasks ? <TaskStatusCompletion task={currentTask} /> : null;
+  const subtasks = showSubtasks ? (
+    <SubTask subtask={allSubtask} onAdd={isSubtask ? undefined : () => setOpenSubtask(true)} />
+  ) : null;
+  const parentLink =
+    isSubtask && currentTask.parentTaskId ? (
+      <button
+        type="button"
+        className={`${task.linkButton} ${task.parentLink}`}
+        onClick={() => onOpenTask(currentTask.parentTaskId!)}
+      >
+        <FiCornerLeftUp aria-hidden="true" />
+        Subtask of {currentTask.parentTaskId}
+      </button>
+    ) : null;
 
   return (
     <div className={task.details}>
@@ -218,6 +228,7 @@ const TaskDetails = ({
           </div>
         ) : view === "panel" ? (
           <div className={task.detailsGridPanel}>
+            {parentLink}
             <h2 className={task.taskTitle}>{currentTask.taskName}</h2>
             {actions}
             {details}
@@ -229,6 +240,7 @@ const TaskDetails = ({
         ) : (
           <div className={task.detailsGridModal}>
             <div className={task.detailsMain}>
+              {parentLink}
               <h2 className={task.taskTitle}>{currentTask.taskName}</h2>
               {actions}
               {descriptionSection}
