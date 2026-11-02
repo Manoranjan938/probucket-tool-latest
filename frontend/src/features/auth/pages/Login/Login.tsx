@@ -43,7 +43,7 @@ const Login = ({getUsers}: Props) => {
     username: "",
     password: "",
   });
-  const [tokens, loginRequest] = useLoginRequest();
+  const [loginRequest] = useLoginRequest();
 
   const navigate = useNavigate();
 
@@ -95,6 +95,8 @@ const Login = ({getUsers}: Props) => {
     try{
       const res = await loginRequest(loginRequests);
       if(res.status === 200){
+        // The next page reads the user from the store as soon as it mounts
+        await getUsers(res.data.data.token);
         navigate("/projects");
       }
     }catch(err){
@@ -115,10 +117,6 @@ const Login = ({getUsers}: Props) => {
       callLoginUser();
     }
   }, [loginRequests]);
-
-  useEffect(() => {
-    getUsers(tokens);
-  }, [tokens]);
 
   useEffect(() => {
 
