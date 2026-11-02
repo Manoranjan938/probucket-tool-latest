@@ -1,6 +1,5 @@
 package com.tool.ProjectTool.model.response;
 
-import java.math.BigInteger;
 
 public class TeamMembersList {
 
@@ -8,7 +7,7 @@ public class TeamMembersList {
 	
 	private String name;
 	
-	private BigInteger userid;
+	private Long userid;
 	
 	private String role;
 	
@@ -32,11 +31,11 @@ public class TeamMembersList {
 		this.name = name;
 	}
 
-	public BigInteger getUserid() {
+	public Long getUserid() {
 		return userid;
 	}
 
-	public void setUserid(BigInteger userid) {
+	public void setUserid(Long userid) {
 		this.userid = userid;
 	}
 

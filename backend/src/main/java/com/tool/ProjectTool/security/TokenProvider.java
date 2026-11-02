@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -14,12 +16,16 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class TokenProvider {
+
+	private static final int HS512_MIN_KEY_BYTES = 64;
 
 	@Value("${app.jwt.secret}")
 	private String secret;
@@ -27,13 +33,26 @@ public class TokenProvider {
 	@Value("${app.jwt.expiration-ms}")
 	private long expirationTime;
 
+	private SecretKey signingKey;
+
+	@PostConstruct
+	void initSigningKey() {
+		byte[] keyBytes = Decoders.BASE64.decode(secret);
+
+		if (keyBytes.length < HS512_MIN_KEY_BYTES) {
+			throw new IllegalStateException("app.jwt.secret must decode to at least " + HS512_MIN_KEY_BYTES
+					+ " bytes, generate one with: openssl rand -base64 64 | tr -d '\\n'");
+		}
+
+		signingKey = Keys.hmacShaKeyFor(keyBytes);
+	}
+
 	public String generateToken(Authentication auth) {
 
 		Users user = (Users) auth.getPrincipal();
 		Date now = new Date(System.currentTimeMillis());
 
 		Date expiryDate = new Date(now.getTime() + expirationTime);
-		String id = user.getUserId();
 
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("id", user.getUserId());
@@ -41,15 +60,15 @@ public class TokenProvider {
 		claims.put("username", user.getUsername());
 		claims.put("fullName", user.getName());
 
-		return Jwts.builder().setSubject(id).setClaims(claims).setIssuedAt(now).setExpiration(expiryDate)
-				.signWith(SignatureAlgorithm.HS512, secret).compact();
+		return Jwts.builder().claims(claims).issuedAt(now).expiration(expiryDate)
+				.signWith(signingKey, Jwts.SIG.HS512).compact();
 
 	}
 
 	public boolean validateToken(String token) {
 		try {
 
-			Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+			parseClaims(token);
 			return true;
 
 		} catch (SignatureException e) {
@@ -68,7 +87,7 @@ public class TokenProvider {
 	}
 
 	public String getUserIdFromJwt(String token) {
-		Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+		Claims claims = parseClaims(token);
 
 		String id = (String) claims.get("id");
 
@@ -76,11 +95,15 @@ public class TokenProvider {
 	}
 
 	public String getRoleFromJwt(String token) {
-		Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+		Claims claims = parseClaims(token);
 
 		String role = (String) claims.get("rolename");
 
 		return role;
+	}
+
+	private Claims parseClaims(String token) {
+		return Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token).getPayload();
 	}
 
 }

@@ -1,6 +1,5 @@
 package com.tool.ProjectTool.service;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +34,6 @@ import com.tool.ProjectTool.repo.UserRepository;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import net.bytebuddy.utility.RandomString;
 
 @Service
 public class TeamService {
@@ -86,8 +84,8 @@ public class TeamService {
 		Users newUser = new Users();
 		TeamDetails team = new TeamDetails();
 		
-		String randomPass = RandomString.make(14);
-		String token = RandomString.make(60);
+		String randomPass = randomString(14);
+		String token = randomString(60);
 		
 		if (checkIds != null) {
 			id = randomString(20);
@@ -128,7 +126,7 @@ public class TeamService {
 
 				teamLi.setEmail(String.valueOf(row[0]));
 				teamLi.setName(String.valueOf(row[1]));
-				teamLi.setUserid((BigInteger) row[2]);
+				teamLi.setUserid((Long) row[2]);
 				teamLi.setAddedDate(String.valueOf(row[3]));
 				teamLi.setRole(String.valueOf(row[5]));
 				teamLi.setStatus((Integer) row[4]);
@@ -180,7 +178,7 @@ public class TeamService {
 
 		if (team != null) {
 
-			Users user = userRepo.getById(teamRe.getUserid());
+			Users user = userRepo.getReferenceById(teamRe.getUserid());
 
 			if (user != null) {
 				team.setTeamRole(teamRe.getRole());

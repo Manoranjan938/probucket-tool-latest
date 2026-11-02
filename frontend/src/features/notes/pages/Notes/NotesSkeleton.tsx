@@ -8,7 +8,7 @@ export const NoteCardsSkeleton = () => {
   return (
     <div className={note.grid} aria-busy="true">
       {[0, 1, 2, 3, 4, 5].map((item) => (
-        <div key={item} className={`${note.card} flex-col min-h-[150px] p-5`}>
+        <div key={item} className={`${note.card} flex-col min-h-37.5 p-5`}>
           <Skeleton variant="text" width="55%" sx={{ fontSize: 16, mb: "8px" }} />
           <Skeleton variant="text" width="95%" sx={{ fontSize: 14 }} />
           <Skeleton variant="text" width="85%" sx={{ fontSize: 14 }} />

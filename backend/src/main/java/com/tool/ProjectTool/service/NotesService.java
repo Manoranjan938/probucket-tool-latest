@@ -1,6 +1,5 @@
 package com.tool.ProjectTool.service;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -51,7 +50,7 @@ public class NotesService {
 			Object[] row = (Object[]) itr.next();
 			NoteList note = new NoteList();
 
-			note.setId((BigInteger) row[0]);
+			note.setId((Long) row[0]);
 			note.setDescription(String.valueOf(row[1]));
 			note.setTitle(String.valueOf(row[2]));
 

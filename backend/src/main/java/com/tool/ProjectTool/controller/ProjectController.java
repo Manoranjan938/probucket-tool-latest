@@ -2,8 +2,8 @@ package com.tool.ProjectTool.controller;
 
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
-import javax.validation.Valid;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ public class ProjectController {
 	private ValidationErrorService errorService;
 
 	@PostMapping("/createProject")
-	@RolesAllowed({ "ROLE_USER", "ROLE_TEAM-ADMIN", "ROLE_PERSONAL" })
+	@RolesAllowed({ "USER", "TEAM-ADMIN", "PERSONAL" })
 	public ResponseEntity<?> createNewProject(@Valid @RequestBody ProjectRequest request, BindingResult result) {
 
 		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
@@ -50,8 +50,9 @@ public class ProjectController {
 	}
 
 	@GetMapping("/getProjects/{userId}")
-	@RolesAllowed({ "ROLE_USER", "ROLE_TEAM-ADMIN", "ROLE_PERSONAL", "ROLE_TEAM-DEVELOPER",
-			"ROLE_TEAM-TESTER, ROLE_TEAM-TASK-MANAGER" })
+	// TODO(boot-migration): the last entry is one string, not two roles, so neither of those roles is ever matched.
+	@RolesAllowed({ "USER", "TEAM-ADMIN", "PERSONAL", "TEAM-DEVELOPER",
+			"TEAM-TESTER, ROLE_TEAM-TASK-MANAGER" })
 	public ResponseEntity<List<ProjectResponse>> getAllProjects(@PathVariable("userId") String userId) {
 
 		List<ProjectResponse> projects = projectService.getAllProjects(userId);

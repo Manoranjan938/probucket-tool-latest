@@ -5,7 +5,7 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,6 @@ import com.tool.ProjectTool.repo.UserRepository;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import net.bytebuddy.utility.RandomString;
 
 @Service
 public class UserService {
@@ -91,7 +90,7 @@ public class UserService {
 				users.setEmailVerified(false);
 				users.setPassword(passEncode.encode(user.getPassword()));
 				users.setStatus(0);
-				String token = RandomString.make(80);
+				String token = randomString(80);
 				users.setVerifyToken(token);
 
 				userRepo.save(users);
@@ -176,7 +175,7 @@ public class UserService {
 
 		if (user != null) {
 
-			String token = RandomString.make(70);
+			String token = randomString(70);
 
 			user.setVerifyToken(token);
 			userRepo.save(user);

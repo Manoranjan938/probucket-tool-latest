@@ -1,6 +1,5 @@
 package com.tool.ProjectTool.service;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +64,7 @@ public class CommentsService {
 				Object[] row = (Object[]) itr.next();
 				CommentsList comment = new CommentsList();
 				comment.setName(String.valueOf(row[0]));
-				comment.setId((BigInteger) row[1]);
+				comment.setId((Long) row[1]);
 				comment.setComment(String.valueOf(row[2]));
 				comment.setCommentDate(String.valueOf(row[3]));
 				
