@@ -47,7 +47,6 @@ const Signup = () => {
     username: "",
     password: "",
     name: "",
-    roleName: "",
   });
   const [register] = useSignUpRequest();
 
@@ -98,7 +97,6 @@ const Signup = () => {
         username: email,
         password: password,
         name: name,
-        roleName: "ROLE_USER",
       });
     }
   };

@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,9 +57,10 @@ public class TeamController {
 	}
 
 	@GetMapping("/getProjectsByTeam/{userId}")
-	public ResponseEntity<ApiResponse<List<ProjectResponse>>> getProjectListByTeamMember(@PathVariable("userId") String projectId) {
+	@PreAuthorize("#userId == principal.userId")
+	public ResponseEntity<ApiResponse<List<ProjectResponse>>> getProjectListByTeamMember(@PathVariable("userId") String userId) {
 
-		return ApiResponseBuilder.ok(teamService.getAllProjects(projectId));
+		return ApiResponseBuilder.ok(teamService.getAllProjects(userId));
 	}
 	
 	@PostMapping("/updateTeamMember")

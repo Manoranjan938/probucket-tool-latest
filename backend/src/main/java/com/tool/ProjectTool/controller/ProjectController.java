@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ public class ProjectController {
 	private ValidationErrorService errorService;
 
 	@PostMapping("/createProject")
+	@PreAuthorize("#request.userId == principal.userId")
 	@RolesAllowed({ "USER", "TEAM-ADMIN", "PERSONAL" })
 	public ResponseEntity<?> createNewProject(@Valid @RequestBody ProjectRequest request, BindingResult result) {
 
@@ -51,6 +53,7 @@ public class ProjectController {
 	}
 
 	@GetMapping("/getProjects/{userId}")
+	@PreAuthorize("#userId == principal.userId")
 	// TODO(boot-migration): the last entry is one string, not two roles, so neither of those roles is ever matched.
 	@RolesAllowed({ "USER", "TEAM-ADMIN", "PERSONAL", "TEAM-DEVELOPER",
 			"TEAM-TESTER, ROLE_TEAM-TASK-MANAGER" })
@@ -85,6 +88,7 @@ public class ProjectController {
 	}
 
 	@PutMapping("/deleteProject/{projectId}/{userId}")
+	@PreAuthorize("#userId == principal.userId")
 	public ResponseEntity<?> deleteProject(@PathVariable("projectId") String id,
 			@PathVariable("userId") String userId) {
 

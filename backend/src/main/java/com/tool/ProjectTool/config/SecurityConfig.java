@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,6 +20,8 @@ import com.tool.ProjectTool.security.AuthenticationFilter;
 import com.tool.ProjectTool.security.CustomAuthenticationEntryPoint;
 import com.tool.ProjectTool.security.SecurityConstants;
 import com.tool.ProjectTool.service.CustomUserService;
+
+import jakarta.servlet.DispatcherType;
 
 @Configuration
 @EnableWebSecurity
@@ -50,19 +53,19 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(AbstractHttpConfigurer::disable)
+		// withDefaults() uses the @CrossOrigin settings of the controllers, so preflights and 401s keep their CORS headers
+		http.cors(Customizer.withDefaults())
+			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(entryPoint))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-		// TODO(boot-migration): every route without @RolesAllowed is public. SIGN_UP_URLS does not match the real
-		// /api/v1/... routes and the old config had no catch-all, so anyRequest().permitAll() keeps that behaviour.
+		// ERROR dispatches render the response of an already rejected or failed request
 		http.authorizeHttpRequests(auth -> auth
-			.requestMatchers(SecurityConstants.SIGN_UP_URLS).permitAll()
-			.anyRequest().permitAll());
-		//http.authorizeRequests().antMatchers("/api/home/**").hasAuthority("ROLE_USER");
-		//http.authorizeRequests().antMatchers("/api/v1/project/**").authenticated();
+			.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+			.requestMatchers(SecurityConstants.PUBLIC_URLS).permitAll()
+			.anyRequest().authenticated());
 		http.addFilterBefore(authFilter(), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();

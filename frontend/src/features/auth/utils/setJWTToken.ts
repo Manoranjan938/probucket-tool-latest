@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "shared/services/axios";
 
 const setJWTToken = (token: string | false) => {
   if (token) {

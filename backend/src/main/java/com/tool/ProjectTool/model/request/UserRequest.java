@@ -15,8 +15,6 @@ public class UserRequest {
 	@NotBlank
 	private String name;
 	
-	private String roleName;
-
 	public String getUsername() {
 		return username;
 	}
@@ -31,14 +29,6 @@ public class UserRequest {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public String getRoleName() {
-		return roleName;
-	}
-
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
 	}
 
 	public String getName() {

@@ -3,6 +3,7 @@ package com.tool.ProjectTool.controller;
 import java.util.Collections;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 public class NotificationController {
 
 	@GetMapping("/getNotificationList/{userId}")
+	@PreAuthorize("#userId == principal.userId")
 	public ResponseEntity<?> getNotificationList(@PathVariable("") String userId){
 		
 		return ApiResponseBuilder.ok(Collections.emptyList());

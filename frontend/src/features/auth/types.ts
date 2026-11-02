@@ -24,7 +24,6 @@ export interface UserRequest {
   username: string;
   password: string;
   name: string;
-  roleName: string;
 }
 
 export interface SecurityState {

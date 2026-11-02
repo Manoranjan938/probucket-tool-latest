@@ -7,12 +7,8 @@ const useGetProjectDetails = () => {
   const [project, setProject] = useState<Partial<Project>>({});
 
   const getProjectDetails = async (projectId: string | null) => {
-    const token = localStorage.getItem("jwtToken");
     try {
-      const resp = await axios.get<ApiResponse<Project>>(`/project/getProjectDetails/${projectId}`, {
-        // TODO(ts-migration): token is null when logged out – the header is then sent as the string "null"
-        headers: { Authorization: token as string },
-      });
+      const resp = await axios.get<ApiResponse<Project>>(`/project/getProjectDetails/${projectId}`);
       setProject(resp.data.data);
       return resp;
     } catch (err) {

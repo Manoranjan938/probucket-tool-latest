@@ -2,6 +2,7 @@ package com.tool.ProjectTool.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,7 @@ public class UserController {
 	private UserService userService;
 	
 	@GetMapping("/me/{email}")
+	@PreAuthorize("#email == principal.email")
 	public ResponseEntity<?> getUserDetails(@PathVariable("email") String email){
 		
 		UserResponse userDetails = userService.getUserDetails(email);
@@ -33,6 +35,7 @@ public class UserController {
 	}
 	
 	@PostMapping("/updateMe")
+	@PreAuthorize("#updateUser.userId == principal.id")
 	public ResponseEntity<?> updateUserDetails(@RequestBody UpdateUserRequest updateUser){
 		
 		String response = userService.updateUser(updateUser);
@@ -41,6 +44,7 @@ public class UserController {
 	}
 	
 	@PostMapping("/updatePassword")
+	@PreAuthorize("#passReq.userId == principal.userId")
 	public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordRequest passReq){
 		
 		return ApiResponseBuilder.ok(userService.updatePassword(passReq));

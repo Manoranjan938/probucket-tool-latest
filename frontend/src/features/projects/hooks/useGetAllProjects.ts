@@ -7,12 +7,8 @@ const useGetAllProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   const getAllProjectDetails = async (userId: string | undefined) => {
-    const token = localStorage.getItem("jwtToken");
     try {
-      const res = await axios.get<ApiResponse<Project[]>>(`/project/getProjects/${userId}`, {
-        // TODO(ts-migration): token is null when logged out – the header is then sent as the string "null"
-        headers: { Authorization: token as string },
-      });
+      const res = await axios.get<ApiResponse<Project[]>>(`/project/getProjects/${userId}`);
 
       setProjects(res.data.data);
       return res;

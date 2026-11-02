@@ -83,7 +83,7 @@ public class UserService {
 					id = ids;
 				}
 				users.setUserId(id);
-				users.setRoleName(user.getRoleName());
+				users.setRoleName("ROLE_USER");
 				users.setEmailVerified(false);
 				users.setPassword(passEncode.encode(user.getPassword()));
 				users.setStatus(0);
