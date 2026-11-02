@@ -17,6 +17,11 @@ export interface AddTeamMemberRequest {
   projectId: string;
 }
 
+/** model/response/NewTeamMemberResponse.java */
+export interface NewTeamMember {
+  temporaryPassword: string;
+}
+
 /** model/request/UpdateTeamRequest.java */
 export interface UpdateTeamRequest {
   userid: number;

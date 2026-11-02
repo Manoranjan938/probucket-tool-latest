@@ -3,7 +3,6 @@ package com.tool.ProjectTool.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.NotesRequest;
+import com.tool.ProjectTool.model.response.ApiResponse;
+import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.NoteDetails;
 import com.tool.ProjectTool.model.response.NoteList;
 import com.tool.ProjectTool.service.NotesService;
@@ -29,26 +30,26 @@ public class NotesController {
 	@PostMapping("/newNote")
 	public ResponseEntity<?> createNewNote(@RequestBody NotesRequest notesRequest) {
 
-		return new ResponseEntity<String>(noteService.createNote(notesRequest), HttpStatus.CREATED);
+		return ApiResponseBuilder.created(noteService.createNote(notesRequest));
 	}
 
 	@GetMapping("/getNoteList/{userId}/{projectId}")
-	public ResponseEntity<List<NoteList>> getNoteLists(@PathVariable("userId") String userId,
+	public ResponseEntity<ApiResponse<List<NoteList>>> getNoteLists(@PathVariable("userId") String userId,
 			@PathVariable("projectId") String projectId) {
 
-		return new ResponseEntity<List<NoteList>>(noteService.getAllNotes(projectId, userId), HttpStatus.OK);
+		return ApiResponseBuilder.ok(noteService.getAllNotes(projectId, userId));
 	}
 
 	@GetMapping("/getNoteDetails/{noteId}")
-	public ResponseEntity<NoteDetails> getNoteDetails(@PathVariable("noteId") Long id) {
+	public ResponseEntity<ApiResponse<NoteDetails>> getNoteDetails(@PathVariable("noteId") Long id) {
 
-		return new ResponseEntity<NoteDetails>(noteService.getNoteDetails(id), HttpStatus.OK);
+		return ApiResponseBuilder.ok(noteService.getNoteDetails(id));
 	}
 
 	@PostMapping("/deleteNote/{noteId}/{userId}")
 	public ResponseEntity<?> deleteTask(@PathVariable("noteId") Long id, @PathVariable("userId") String userId) {
 
-		return new ResponseEntity<String>(noteService.deleteNote(userId, id), HttpStatus.OK);
+		return ApiResponseBuilder.ok(noteService.deleteNote(userId, id));
 	}
 
 }

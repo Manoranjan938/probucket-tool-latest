@@ -6,7 +6,6 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.ProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectRequest;
+import com.tool.ProjectTool.model.response.ApiResponse;
+import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.ProjectResponse;
 import com.tool.ProjectTool.service.ProjectService;
 import com.tool.ProjectTool.service.ValidationErrorService;
@@ -46,29 +47,29 @@ public class ProjectController {
 
 		String project = projectService.saveProject(request);
 
-		return new ResponseEntity<String>(project, HttpStatus.CREATED);
+		return ApiResponseBuilder.created(project);
 	}
 
 	@GetMapping("/getProjects/{userId}")
 	// TODO(boot-migration): the last entry is one string, not two roles, so neither of those roles is ever matched.
 	@RolesAllowed({ "USER", "TEAM-ADMIN", "PERSONAL", "TEAM-DEVELOPER",
 			"TEAM-TESTER, ROLE_TEAM-TASK-MANAGER" })
-	public ResponseEntity<List<ProjectResponse>> getAllProjects(@PathVariable("userId") String userId) {
+	public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAllProjects(@PathVariable("userId") String userId) {
 
 		List<ProjectResponse> projects = projectService.getAllProjects(userId);
 
-		return new ResponseEntity<List<ProjectResponse>>(projects, HttpStatus.OK);
+		return ApiResponseBuilder.ok(projects);
 
 	}
 
 	@GetMapping("/getProjectDetails/{projectId}")
 	// @RolesAllowed({"ROLE_TEAM-ADMIN","ROLE_PERSONAL", "ROLE_TEAM-DEVELOPER",
 	// "ROLE_TEAM-TESTER, ROLE_TEAM-TASK-MANAGER"})
-	public ResponseEntity<ProjectResponse> getProjectDetailss(@PathVariable("projectId") String projectId) {
+	public ResponseEntity<ApiResponse<ProjectResponse>> getProjectDetailss(@PathVariable("projectId") String projectId) {
 
 		ProjectResponse project = projectService.getProjectById(projectId);
 
-		return new ResponseEntity<ProjectResponse>(project, HttpStatus.OK);
+		return ApiResponseBuilder.ok(project);
 	}
 
 	@PutMapping("/updateProject")
@@ -80,7 +81,7 @@ public class ProjectController {
 		}
 		String update = projectService.updateProject(projRequest);
 
-		return new ResponseEntity<String>(update, HttpStatus.OK);
+		return ApiResponseBuilder.ok(update);
 	}
 
 	@PutMapping("/deleteProject/{projectId}/{userId}")
@@ -89,7 +90,7 @@ public class ProjectController {
 
 		String delete = projectService.deleteProject(id, userId);
 
-		return new ResponseEntity<String>(delete, HttpStatus.OK);
+		return ApiResponseBuilder.ok(delete);
 	}
 
 }

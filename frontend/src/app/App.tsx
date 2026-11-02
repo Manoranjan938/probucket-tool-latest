@@ -41,6 +41,7 @@ const Login = lazy(() => import("features/auth/pages/Login/Login"));
 const Forgot = lazy(() => import("features/auth/pages/Forgot/Forgot"));
 const Signup = lazy(() => import("features/auth/pages/Signup/Signup"));
 const EmailVerify = lazy(() => import("features/auth/pages/EmailVerify/EmailVerify"));
+const VerifyAccount = lazy(() => import("features/auth/pages/VerifyAccount/VerifyAccount"));
 const Error = lazy(() => import("shared/pages/Error/Error"));
 const DashboardScreen = lazy(() => import("features/dashboard/pages/DashboardScreen/DashboardScreen"));
 const Logout = lazy(() => import("features/auth/pages/Logout/Logout"));
@@ -142,6 +143,7 @@ function App() {
             <Route path="/logout" element={<Suspense fallback={<LogoutSkeleton />}><Logout /></Suspense>} />
             <Route path="/signup" element={<Suspense fallback={<SignupSkeleton />}><Signup /></Suspense>} />
             <Route path="/verify-email" element={<Suspense fallback={<EmailVerifySkeleton />}><EmailVerify /></Suspense>} />
+            <Route path="/verify" element={<Suspense fallback={<EmailVerifySkeleton />}><VerifyAccount /></Suspense>} />
             <Route path="/resetpassword" element={<Suspense fallback={<ForgotSkeleton />}><Forgot /></Suspense>} />
             <Route path="/reset-passwords" element={<Suspense fallback={<ResetPasswordSkeleton />}><ResetPassword /></Suspense>} />
             <Route path="/projects" element={<Suspense fallback={<ProjectsSkeleton />}><Projects /></Suspense>} />

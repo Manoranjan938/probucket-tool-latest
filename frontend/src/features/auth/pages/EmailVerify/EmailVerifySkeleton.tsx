@@ -7,7 +7,7 @@ import {
   AuthFooterSkeleton,
 } from "features/auth/components/AuthSkeleton/AuthSkeleton";
 
-// Shown while the Verify email page's code is loading
+// Shown while the Verify email page's code is loading, and while VerifyAccount waits for the API
 const EmailVerifySkeleton = () => {
   return (
     <div className={auth.layoutSingle} aria-busy="true">

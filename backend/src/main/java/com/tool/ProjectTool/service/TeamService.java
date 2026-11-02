@@ -24,9 +24,11 @@ import com.tool.ProjectTool.entity.TeamDetails;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.exception.UserAlreadyExistException;
+import com.tool.ProjectTool.exception.UserNotFoundException;
 import com.tool.ProjectTool.model.request.RequestTeamMember;
 import com.tool.ProjectTool.model.request.UpdateTeamRequest;
 import com.tool.ProjectTool.model.response.EmailResponse;
+import com.tool.ProjectTool.model.response.NewTeamMemberResponse;
 import com.tool.ProjectTool.model.response.ProjectResponse;
 import com.tool.ProjectTool.model.response.TeamMembersList;
 import com.tool.ProjectTool.repo.TeamRepository;
@@ -53,8 +55,8 @@ public class TeamService {
 	@Value("${app.mail.from}")
 	private String mailFrom;
 
-	@Value("${app.backend-url}")
-	private String backendUrl;
+	@Value("${app.frontend-url}")
+	private String frontendUrl;
 
 	@Autowired
 	private Configuration config;
@@ -69,7 +71,7 @@ public class TeamService {
 		return sb.toString();
 	}
 
-	public String createNewTeamMember(RequestTeamMember teamReq) {
+	public NewTeamMemberResponse createNewTeamMember(RequestTeamMember teamReq) {
 		
 		String ids = randomString(20);
 		String id = null;
@@ -111,7 +113,7 @@ public class TeamService {
 		
 		sendNewTeamMemberConfirmationEmail(teamReq.getEmail(), token);
 		
-		return "New team member added sucessfully with temporary password: " + randomPass;
+		return new NewTeamMemberResponse(randomPass);
 	}
 	
 	public List<TeamMembersList> getTeamList(String projectId) {
@@ -196,7 +198,7 @@ public class TeamService {
 			return "User updated successfully";
 		}
 
-		return null;
+		throw new UserNotFoundException("Team member not found");
 	}
 
 	public EmailResponse sendNewTeamMemberConfirmationEmail(String email, String secretString) {
@@ -215,7 +217,7 @@ public class TeamService {
 
 			model.put("token", secretString);
 
-			model.put("backendUrl", backendUrl);
+			model.put("frontendUrl", frontendUrl);
 
 			Template t = config.getTemplate("registration-confirmation-template.ftl");
 			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);

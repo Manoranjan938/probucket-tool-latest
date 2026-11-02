@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import * as auth from "features/auth/styles/authClasses";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
-import type { SnackbarState, ApiError } from "shared/types";
+import type { SnackbarState } from "shared/types";
 
 import image from "shared/assets/images/logo.png";
 import { Snackbar } from "@mui/material";
@@ -11,6 +11,7 @@ import { ImSpinner2 } from "react-icons/im";
 
 import useResetPassRequest from 'features/auth/hooks/useResetPassRequest';
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
@@ -73,8 +74,7 @@ const Forgot = () => {
       setStatusBar({
         open: true,
         type: "error",
-        // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
-        message: (err as ApiError).response!.data.username,
+        message: getApiErrorMessage(err),
       });
     } finally {
       setLoading(false);

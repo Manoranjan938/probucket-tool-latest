@@ -63,10 +63,10 @@ const Projects = ({ getProjects, currentUser, myProjects }: Props) => {
           currentUser.rolename === "ROLE_USER"
         ) {
           const res = await getAllProjectDetails(currentUser.id);
-          getProjects(res.data);
+          getProjects(res.data.data);
         } else if (currentUser.rolename === "ROLE_TEAM-USER") {
           const res = await getProjectsByTeam(currentUser.id);
-          getProjects(res.data);
+          getProjects(res.data.data);
         }
       } catch (err) {
         console.log(err);

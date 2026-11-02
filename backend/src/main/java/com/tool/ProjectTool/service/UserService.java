@@ -44,9 +44,6 @@ public class UserService {
 	@Value("${app.mail.from}")
 	private String mailFrom;
 
-	@Value("${app.backend-url}")
-	private String backendUrl;
-
 	@Value("${app.frontend-url}")
 	private String frontendUrl;
 
@@ -234,7 +231,7 @@ public class UserService {
 
 			model.put("token", token);
 
-			model.put("backendUrl", backendUrl);
+			model.put("frontendUrl", frontendUrl);
 
 			Template t = config.getTemplate("registration-confirmation-template.ftl");
 			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);

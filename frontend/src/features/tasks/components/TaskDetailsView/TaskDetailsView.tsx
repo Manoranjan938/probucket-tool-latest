@@ -41,7 +41,7 @@ const TaskDetailsView = ({ sequence, onClose, onTaskChanged, setTask, removeTask
   const loadTask = async (taskSequence: string) => {
     try {
       const resp = await getTaskDetails(taskSequence);
-      setTask(resp.data);
+      setTask(resp.data.data);
     } catch (err) {
       console.log(err);
       enqueueSnackbar("Couldn't load the task. Please try again.", { ...toastOptions, variant: "error" });

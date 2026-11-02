@@ -15,19 +15,13 @@ import ProjectDetails from "features/projects/components/ProjectDetails/ProjectD
 import useCreateNewProject from "features/projects/hooks/useCreateNewProject";
 import type { RootState } from "app/store";
 import type { ProjectDraft } from "features/projects/types";
-import type { ApiError } from "shared/types";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const steps = ["Template", "Managed by", "Details"];
 const lastStep = steps.length - 1;
 
 // Same corner as the Snackbars on the other pages
 const toastOptions: OptionsObject = { anchorOrigin: { vertical: "bottom", horizontal: "right" } };
-
-// The backend answers with a field -> message map; show its first message
-const getErrorMessage = (err: ApiError) => {
-  const message = Object.values(err.response?.data ?? {})[0];
-  return typeof message === "string" ? message : "Couldn't create the project. Please try again.";
-};
 
 const NewProject = ({ currentUser }: Props) => {
   const [page, setPage] = useState(0);
@@ -82,7 +76,7 @@ const NewProject = ({ currentUser }: Props) => {
       enqueueSnackbar("Project created successfully", { ...toastOptions, variant: "success" });
       navigate("/projects");
     } catch (err) {
-      enqueueSnackbar(getErrorMessage(err as ApiError), { ...toastOptions, variant: "error" });
+      enqueueSnackbar(getApiErrorMessage(err, "Couldn't create the project. Please try again."), { ...toastOptions, variant: "error" });
       setCreating(false);
     }
   };

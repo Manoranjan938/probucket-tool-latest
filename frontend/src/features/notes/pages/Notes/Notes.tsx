@@ -30,7 +30,7 @@ const Notes = ({ currentUser, myNotes, setNote }: Props) => {
   const loadNotes = async () => {
     try {
       const resp = await getNotesList(projectId, currentUser.id);
-      setNote(resp.data);
+      setNote(resp.data.data);
     } catch (err) {
       console.log(err);
       setNote([]);

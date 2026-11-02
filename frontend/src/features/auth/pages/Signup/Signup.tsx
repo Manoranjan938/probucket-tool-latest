@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import * as auth from "features/auth/styles/authClasses";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState, ApiError } from "shared/types";
+import type { SnackbarState } from "shared/types";
 
 import image from "shared/assets/images/logo.png";
 import googleImage from "shared/assets/images/google-logo.png";
@@ -12,6 +12,7 @@ import { ImSpinner2 } from "react-icons/im";
 import useSignUpRequest from "features/auth/hooks/useSignUpRequest";
 import type { UserRequest } from "features/auth/types";
 import { steps } from "features/landing/data";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -122,8 +123,7 @@ const Signup = () => {
       setNotiBar({
         open: true,
         type: "error",
-        // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
-        message: (err as ApiError).response!.data.message,
+        message: getApiErrorMessage(err),
       });
     } finally {
       setLoading(false);

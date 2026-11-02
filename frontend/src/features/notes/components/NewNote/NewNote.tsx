@@ -52,7 +52,7 @@ const NewNote = ({ open, onClose, onCreated, projectId, currentUser }: OwnProps 
         userId: currentUser.id!,
         projectId: projectId!,
       });
-      enqueueSnackbar(res.data || "Note added", { ...toastOptions, variant: "success" });
+      enqueueSnackbar(res.data.message || "Note added", { ...toastOptions, variant: "success" });
       onCreated();
       handleClose();
     } catch (err) {

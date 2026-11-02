@@ -10,9 +10,9 @@ import CommentList from "features/comments/components/CommentList/CommentList";
 import useGetComments from "features/comments/hooks/useGetComments";
 import { setAllComments } from "features/comments/store/commentAction";
 import { toastOptions } from "features/tasks/data";
-import type { ApiError } from "shared/types";
 import type { AppDispatch, RootState } from "app/store";
 import type { Comment } from "features/comments/types";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 // Comment box and the comments of the open task
 const Comments = ({ currentTask, currentUser, setComments }: Props) => {
@@ -55,11 +55,10 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
         comment: text,
       });
       setComment("");
-      enqueueSnackbar(resp.data || "Comment added", { ...toastOptions, variant: "success" });
+      enqueueSnackbar(resp.data.message || "Comment added", { ...toastOptions, variant: "success" });
       loadComments();
     } catch (err) {
-      const message = (err as ApiError).response?.data?.message;
-      enqueueSnackbar(message || "Couldn't add the comment. Please try again.", { ...toastOptions, variant: "error" });
+      enqueueSnackbar(getApiErrorMessage(err, "Couldn't add the comment. Please try again."), { ...toastOptions, variant: "error" });
     } finally {
       setSaving(false);
     }

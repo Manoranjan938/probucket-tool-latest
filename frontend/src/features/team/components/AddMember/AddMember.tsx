@@ -6,9 +6,8 @@ import { FiAlertTriangle, FiCheck, FiCopy, FiX } from "react-icons/fi";
 import * as team from "features/team/styles/teamClasses";
 
 import useAddTeamMember from "features/team/hooks/useAddTeamMember";
-import { temporaryPassword } from "features/team/data";
 import { toastOptions } from "features/tasks/data";
-import type { ApiError } from "shared/types";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 interface AddMemberProps {
   open: boolean;
@@ -27,8 +26,8 @@ const AddMember = ({ open, onClose, onAdded, projectId }: AddMemberProps) => {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({ name: "", email: "" });
   const [saving, setSaving] = useState(false);
-  // Set once the member is added: who was added and the backend's message with the password
-  const [added, setAdded] = useState<{ name: string; message: string } | null>(null);
+  // Set once the member is added: who was added and their one-time password
+  const [added, setAdded] = useState<{ name: string; password: string } | null>(null);
   const [addTeamMember] = useAddTeamMember();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -60,21 +59,18 @@ const AddMember = ({ open, onClose, onAdded, projectId }: AddMemberProps) => {
     setSaving(true);
     try {
       const resp = await addTeamMember({ name: memberName, email: memberEmail, projectId: projectId! });
-      setAdded({ name: memberName, message: resp.data });
+      setAdded({ name: memberName, password: resp.data.data.temporaryPassword });
       onAdded();
     } catch (err) {
-      const message = (err as ApiError).response?.data?.message;
-      enqueueSnackbar(message || "Couldn't add the member. Please try again.", { ...toastOptions, variant: "error" });
+      enqueueSnackbar(getApiErrorMessage(err, "Couldn't add the member. Please try again."), { ...toastOptions, variant: "error" });
     } finally {
       setSaving(false);
     }
   };
 
-  const password = added ? temporaryPassword(added.message) : null;
-
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(password!);
+      await navigator.clipboard.writeText(added!.password);
       enqueueSnackbar("Password copied", { ...toastOptions, variant: "success" });
     } catch {
       enqueueSnackbar("Couldn't copy – select the password and copy it yourself.", { ...toastOptions, variant: "error" });
@@ -100,34 +96,28 @@ const AddMember = ({ open, onClose, onAdded, projectId }: AddMemberProps) => {
             </button>
           </div>
           <div className={team.dialogBody}>
-            {password ? (
-              <>
-                <div className={team.field}>
-                  <label htmlFor="temporary-password" className={team.label}>Temporary password</label>
-                  <div className={team.inputRow}>
-                    <input
-                      id="temporary-password"
-                      type="text"
-                      readOnly
-                      value={password}
-                      className={team.inputMono}
-                      onFocus={(e) => e.target.select()}
-                    />
-                    <button type="button" className={team.btnGhost} onClick={handleCopy}>
-                      <FiCopy aria-hidden="true" />
-                      Copy
-                    </button>
-                  </div>
-                  <p className={team.hint}>They sign in with their email address and this password.</p>
-                </div>
-                <p className={team.notice}>
-                  <FiAlertTriangle className="shrink-0 mt-0.5 text-[#b7791f]" aria-hidden="true" />
-                  Copy it now and share it with them – it won't be shown again.
-                </p>
-              </>
-            ) : (
-              <p className="text-[15px]">{added.message}</p>
-            )}
+            <div className={team.field}>
+              <label htmlFor="temporary-password" className={team.label}>Temporary password</label>
+              <div className={team.inputRow}>
+                <input
+                  id="temporary-password"
+                  type="text"
+                  readOnly
+                  value={added.password}
+                  className={team.inputMono}
+                  onFocus={(e) => e.target.select()}
+                />
+                <button type="button" className={team.btnGhost} onClick={handleCopy}>
+                  <FiCopy aria-hidden="true" />
+                  Copy
+                </button>
+              </div>
+              <p className={team.hint}>They sign in with their email address and this password.</p>
+            </div>
+            <p className={team.notice}>
+              <FiAlertTriangle className="shrink-0 mt-0.5 text-[#b7791f]" aria-hidden="true" />
+              Copy it now and share it with them – it won't be shown again.
+            </p>
           </div>
           <div className={team.dialogFooter}>
             <button type="button" className={team.btnPrimary} onClick={handleClose}>Done</button>

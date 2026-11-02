@@ -9,6 +9,7 @@ import useUpdateTeamMember from "features/team/hooks/useUpdateTeamMember";
 import { isActive, memberRole, roleSuggestions } from "features/team/data";
 import { toastOptions } from "features/tasks/data";
 import type { TeamMember } from "features/team/types";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 interface EditMemberProps {
   /** The member to edit; null when closed */
@@ -44,12 +45,12 @@ const EditMember = ({ member, onClose, onSaved }: EditMemberProps) => {
         role: role.trim(),
         status: active ? "active" : "inactive",
       });
-      enqueueSnackbar(resp.data || "Member updated", { ...toastOptions, variant: "success" });
+      enqueueSnackbar(resp.data.message || "Member updated", { ...toastOptions, variant: "success" });
       onSaved();
       onClose();
     } catch (err) {
       console.log(err);
-      enqueueSnackbar("Couldn't update the member. Please try again.", { ...toastOptions, variant: "error" });
+      enqueueSnackbar(getApiErrorMessage(err, "Couldn't update the member. Please try again."), { ...toastOptions, variant: "error" });
     } finally {
       setSaving(false);
     }

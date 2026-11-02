@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import com.tool.ProjectTool.entity.Backlog;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.ProjectNotFoundException;
-import com.tool.ProjectTool.exception.UserNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectRequest;
 import com.tool.ProjectTool.model.response.ProjectResponse;
@@ -112,7 +112,7 @@ public class ProjectService {
 			return "Project created";
 		} catch (Exception e) {
 			System.out.println(e);
-			return null;
+			throw new BadRequestException("Project could not be created");
 		}
 	}
 
@@ -159,7 +159,7 @@ public class ProjectService {
 			return response;
 		}
 
-		throw new UserNotFoundException("Project not found with id" + id);
+		throw new ProjectNotFoundException("Project not found with id" + id);
 	}
 
 	public String updateProject(UpdateProjectRequest projRequest) {

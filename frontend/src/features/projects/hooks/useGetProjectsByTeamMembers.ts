@@ -1,15 +1,16 @@
 import axios from "shared/services/axios";
 import { useState } from "react";
 import type { Project } from "features/projects/types";
+import type { ApiResponse } from "shared/types";
 
 const useGetProjectsByTeamMembers = () => {
   const [teamProjects, setTeamProjects] = useState<Project[]>([]);
 
   const getProjectsByTeam = async (userId: string | undefined) => {
     try {
-      const resp = await axios.get<Project[]>(`/team/getProjectsByTeam/${userId}`);
+      const resp = await axios.get<ApiResponse<Project[]>>(`/team/getProjectsByTeam/${userId}`);
 
-      setTeamProjects(resp.data);
+      setTeamProjects(resp.data.data);
       return resp;
     } catch (err) {
       throw err;

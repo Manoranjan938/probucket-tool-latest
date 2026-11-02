@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "shared/services/axios";
 import type { NoteListItem } from "features/notes/types";
+import type { ApiResponse } from "shared/types";
 
 const useGetNotesList = () => {
   const [notes, setNotes] = useState<NoteListItem[]>([]);
@@ -9,9 +10,9 @@ const useGetNotesList = () => {
     projectId: string | null | undefined,
     userid: string | undefined
   ) => {
-    const resp = await axios.get<NoteListItem[]>(`/note/getNoteList/${userid}/${projectId}`);
+    const resp = await axios.get<ApiResponse<NoteListItem[]>>(`/note/getNoteList/${userid}/${projectId}`);
 
-    setNotes(resp.data);
+    setNotes(resp.data.data);
     return resp;
   };
 

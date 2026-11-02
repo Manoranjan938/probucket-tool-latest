@@ -53,7 +53,7 @@ const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: O
         priority,
         status: "",
       });
-      enqueueSnackbar(resp.data || "Subtask created", { ...toastOptions, variant: "success" });
+      enqueueSnackbar(resp.data.message || "Subtask created", { ...toastOptions, variant: "success" });
       onCreated();
       handleClose();
     } catch (err) {

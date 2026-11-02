@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import * as auth from "features/auth/styles/authClasses";
 import image from "shared/assets/images/logo.png";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState, ApiError } from "shared/types";
+import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 import useResetPassword from "features/auth/hooks/useResetPassword";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -67,7 +68,7 @@ const ResetPassword = () => {
         setStatusBar({
           open: true,
           type: "success",
-          message: resp.data,
+          message: resp.data.message,
         });
       }
     } catch (err) {
@@ -76,8 +77,7 @@ const ResetPassword = () => {
       setStatusBar({
         open: true,
         type: "error",
-        // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
-        message: (err as ApiError).response!.data.email,
+        message: getApiErrorMessage(err),
       });
     } finally {
       setLoading(false);

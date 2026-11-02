@@ -9,6 +9,3 @@ export const memberRole = (member: TeamMember) =>
 
 /** status is 0 for active members and 1 for inactive ones */
 export const isActive = (member: TeamMember) => member.status === 0;
-
-/** The temporary password in the backend's "...with temporary password: XYZ" message, if there is one */
-export const temporaryPassword = (message: string) => message.match(/temporary password:\s*(\S+)/i)?.[1] ?? null;

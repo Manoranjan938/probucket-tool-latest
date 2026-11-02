@@ -5,7 +5,6 @@ import java.util.List;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
+import com.tool.ProjectTool.model.response.ApiResponse;
+import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.HomeTaskCounts;
 import com.tool.ProjectTool.model.response.StatisticsResponse;
 import com.tool.ProjectTool.model.response.SubtaskList;
@@ -49,55 +50,55 @@ public class TaskController {
 
 		String message = taskService.addProjectTask(taskRequest);
 
-		return new ResponseEntity<String>(message, HttpStatus.CREATED);
+		return ApiResponseBuilder.created(message);
 	}
 
 	@GetMapping("/getTasks/{backlog_id}")
-	public ResponseEntity<List<TaskListResponse>> getTaskLists(@PathVariable("backlog_id") String id) {
+	public ResponseEntity<ApiResponse<List<TaskListResponse>>> getTaskLists(@PathVariable("backlog_id") String id) {
 
-		return new ResponseEntity<List<TaskListResponse>>(taskService.getTaskLists(id), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.getTaskLists(id));
 	}
 
 	@GetMapping("/getTaskDetails/{project_sequence}")
 	public ResponseEntity<?> getTaskDetails(@PathVariable("project_sequence") String taskSeaquenceId) {
 
-		return new ResponseEntity<TaskDetails>(taskService.getTaskDetails(taskSeaquenceId), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.getTaskDetails(taskSeaquenceId));
 	}
 
 	@PostMapping("/updateTask")
 	public ResponseEntity<?> updateProjectTask(@RequestBody UpdateProjectTaskRequest updateTask) {
 
-		return new ResponseEntity<String>(taskService.updateTask(updateTask), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.updateTask(updateTask));
 	}
 	
 	@PostMapping("/createSubTask")
 	public ResponseEntity<?> createSubTask(@RequestBody RequestCreateSubtask subtaskRequest){
 		
-		return new ResponseEntity<String>(taskService.createSubtask(subtaskRequest), HttpStatus.CREATED);
+		return ApiResponseBuilder.created(taskService.createSubtask(subtaskRequest));
 	}
 	
 	@GetMapping("/getSubtaskList/{parentId}")
-	public ResponseEntity<List<SubtaskList>> getSubtaskList(@PathVariable("parentId") String parentId){
+	public ResponseEntity<ApiResponse<List<SubtaskList>>> getSubtaskList(@PathVariable("parentId") String parentId){
 		
-		return new ResponseEntity<List<SubtaskList>>(taskService.getSubTaskList(parentId), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.getSubTaskList(parentId));
 	}
 	
 	@GetMapping("/getTasksByAssignee/{assigneeEmail}")
-	public ResponseEntity<List<TaskListResponse>> getTaskListsByAssignee(@PathVariable("assigneeEmail") String email){
+	public ResponseEntity<ApiResponse<List<TaskListResponse>>> getTaskListsByAssignee(@PathVariable("assigneeEmail") String email){
 		
-		return new ResponseEntity<List<TaskListResponse>>(taskService.getTaskListsByAssignee(email), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.getTaskListsByAssignee(email));
 	}
 	
 	@GetMapping("/getStatistics/{taskId}")
-	public ResponseEntity<StatisticsResponse> getTaskStatistics(@PathVariable("taskId") String id){
+	public ResponseEntity<ApiResponse<StatisticsResponse>> getTaskStatistics(@PathVariable("taskId") String id){
 		
-		return new ResponseEntity<StatisticsResponse>(taskService.getStatisticInfo(id), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.getStatisticInfo(id));
 	}
 	
 	@GetMapping("/getHomeTaskCounts/{projectid}")
-	public ResponseEntity<HomeTaskCounts> getHomeTaskCounts(@PathVariable("projectid") String projectId){
+	public ResponseEntity<ApiResponse<HomeTaskCounts>> getHomeTaskCounts(@PathVariable("projectid") String projectId){
 		
-		return new ResponseEntity<HomeTaskCounts>(taskService.getHomeStatsData(projectId), HttpStatus.OK);
+		return ApiResponseBuilder.ok(taskService.getHomeStatsData(projectId));
 	}
 
 }

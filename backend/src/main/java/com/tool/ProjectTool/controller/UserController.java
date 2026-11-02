@@ -1,7 +1,6 @@
 package com.tool.ProjectTool.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.UpdatePasswordRequest;
 import com.tool.ProjectTool.model.request.UpdateUserRequest;
+import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.UserResponse;
 import com.tool.ProjectTool.service.UserService;
 
@@ -29,7 +29,7 @@ public class UserController {
 		
 		UserResponse userDetails = userService.getUserDetails(email);
 		
-		return new ResponseEntity<UserResponse>(userDetails, HttpStatus.OK);
+		return ApiResponseBuilder.ok(userDetails);
 	}
 	
 	@PostMapping("/updateMe")
@@ -37,13 +37,13 @@ public class UserController {
 		
 		String response = userService.updateUser(updateUser);
 		
-		return  new ResponseEntity<String>(response, HttpStatus.CREATED);
+		return ApiResponseBuilder.created(response);
 	}
 	
 	@PostMapping("/updatePassword")
 	public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordRequest passReq){
 		
-		return new ResponseEntity<String>(userService.updatePassword(passReq), HttpStatus.OK);
+		return ApiResponseBuilder.ok(userService.updatePassword(passReq));
 	}
 	
 }

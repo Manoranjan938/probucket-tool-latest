@@ -6,7 +6,7 @@ import googleImage from "shared/assets/images/google-logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import { GOOGLE_AUTH_URL } from "shared/constants/constant";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
-import type { SnackbarState, ApiError } from "shared/types";
+import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
 import { login } from "features/auth/store/securityActions";
 import { connect, type ConnectedProps } from "react-redux";
@@ -16,6 +16,7 @@ import type { AppDispatch, RootState } from "app/store";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
@@ -102,8 +103,7 @@ const Login = ({getUsers}: Props) => {
       setStatusBar({
         open: true,
         type: "error",
-        // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
-        message: (err as ApiError).response!.data.username,
+        message: getApiErrorMessage(err),
       });
     }finally{
       setLoading(false);

@@ -67,7 +67,7 @@ const TaskDetails = ({
   const loadSubtasks = async () => {
     try {
       const resp = await getSubtaskList(sequence);
-      setSubtasks(resp.data);
+      setSubtasks(resp.data.data);
     } catch (err) {
       console.log(err);
     }

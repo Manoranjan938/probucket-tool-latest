@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import image from "shared/assets/images/logo.png";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";
-import type { SnackbarState, ApiError } from "shared/types";
+import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import useUpdatePassword from "features/profile/hooks/useUpdatePassword";
 import type { RootState } from "app/store";
 import type { UpdatePasswordRequest } from "features/profile/types";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -74,7 +75,7 @@ const Profile = ({ user }: Props) => {
         setStatusBar({
           open: true,
           type: "success",
-          message: resp.data,
+          message: resp.data.message,
         });
       }
     } catch (err) {
@@ -82,8 +83,7 @@ const Profile = ({ user }: Props) => {
       setStatusBar({
         open: true,
         type: "error",
-        // TODO(ts-migration): throws inside the catch when there is no response (e.g. network error)
-        message: (err as ApiError).response!.data.email,
+        message: getApiErrorMessage(err),
       });
     }
   };

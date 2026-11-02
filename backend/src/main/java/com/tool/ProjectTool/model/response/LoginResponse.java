@@ -2,21 +2,10 @@ package com.tool.ProjectTool.model.response;
 
 public class LoginResponse {
 
-	private boolean success;
-
 	private String token;
 
-	public LoginResponse(boolean success, String token) {
-		this.success = success;
+	public LoginResponse(String token) {
 		this.token = token;
-	}
-
-	public boolean isSuccess() {
-		return success;
-	}
-
-	public void setSuccess(boolean success) {
-		this.success = success;
 	}
 
 	public String getToken() {
@@ -29,7 +18,7 @@ public class LoginResponse {
 
 	@Override
 	public String toString() {
-		return "JWTLoginResponse [success=" + success + ", token=" + token + "]";
+		return "JWTLoginResponse [token=" + token + "]";
 	}
 	
 }

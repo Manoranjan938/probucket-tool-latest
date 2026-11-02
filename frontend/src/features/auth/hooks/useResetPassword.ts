@@ -1,9 +1,10 @@
 import axios from "shared/services/axios";
+import type { ApiResponse } from "shared/types";
 
 const useResetPassword = () => {
   const resetMyPassword = async (token: string | null, pass: string) => {
     try {
-      const resp = await axios.post<string>(
+      const resp = await axios.post<ApiResponse>(
         `/auth/resetMyPassword?token=${token}&pass=${pass}`
       );
 

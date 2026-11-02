@@ -3,11 +3,13 @@ package com.tool.ProjectTool.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+
+import com.tool.ProjectTool.exception.ApiErrorCode;
+import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 
 @Service
 public class ValidationErrorService {
@@ -21,7 +23,7 @@ public class ValidationErrorService {
 				errorMap.put(error.getField(), error.getDefaultMessage());
 			}
 			
-			return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+			return ApiResponseBuilder.error(ApiErrorCode.VALIDATION_FAILED, "Validation failed", errorMap);
 		}
 		
 		return null;

@@ -3,7 +3,6 @@ package com.tool.ProjectTool.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.LoginRequest;
 import com.tool.ProjectTool.model.request.UserRequest;
+import com.tool.ProjectTool.model.response.ApiResponse;
+import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.LoginResponse;
 import com.tool.ProjectTool.security.SecurityConstants;
 import com.tool.ProjectTool.security.TokenProvider;
@@ -54,7 +55,7 @@ public class AuthController {
 
 		String user1 = userService.createUser(user);
 
-		return new ResponseEntity<String>(user1, HttpStatus.CREATED);
+		return ApiResponseBuilder.created(user1);
 	}
 
 	@PostMapping("/login")
@@ -65,7 +66,7 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		String jwt = SecurityConstants.TOKEN_PREFIX + tokenProvider.generateToken(auth);
 
-		return ResponseEntity.ok(new LoginResponse(true, jwt));
+		return ApiResponseBuilder.ok("Login successful", new LoginResponse(jwt));
 	}
 
 	@GetMapping("/verify")
@@ -73,14 +74,14 @@ public class AuthController {
 
 		String mess = userService.verifyUser(token);
 
-		return new ResponseEntity<String>(mess, HttpStatus.OK);
+		return ApiResponseBuilder.ok(mess);
 	}
 
 	@GetMapping("/requestPasswordChange/{email}")
-	public ResponseEntity<String> requestPasswordChange(@PathVariable("email") String email) {
+	public ResponseEntity<ApiResponse<Void>> requestPasswordChange(@PathVariable("email") String email) {
 
 		String message = userService.requestResetPssword(email);
-		return new ResponseEntity<String>(message, HttpStatus.OK);
+		return ApiResponseBuilder.ok(message);
 	}
 
 	@PostMapping("/resetMyPassword")
@@ -88,7 +89,7 @@ public class AuthController {
 
 		String message = userService.resetPassword(token, pass);
 
-		return new ResponseEntity<String>(message, HttpStatus.OK);
+		return ApiResponseBuilder.ok(message);
 	}
 
 }

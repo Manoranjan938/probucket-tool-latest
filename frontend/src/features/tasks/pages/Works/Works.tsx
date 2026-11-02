@@ -32,7 +32,7 @@ const Works = ({ title, getTaskList, myTasks }: { title: string } & Props) => {
   const loadTasks = async () => {
     try {
       const resp = await getTaskLists(name);
-      getTaskList(resp.data);
+      getTaskList(resp.data.data);
     } catch {
       // The backend answers 400 "Task not found" when the project has no tasks
       getTaskList([]);

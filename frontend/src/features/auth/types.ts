@@ -16,7 +16,6 @@ export interface LoginRequest {
 
 /** model/response/LoginResponse.java */
 export interface LoginResponse {
-  success: boolean;
   token: string;
 }
 
