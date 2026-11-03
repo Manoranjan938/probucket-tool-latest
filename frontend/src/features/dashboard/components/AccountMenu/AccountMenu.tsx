@@ -62,7 +62,7 @@ const AccountMenu = ({ collapsed, currentUser }: OwnProps & Props) => {
           sx: { width: collapsed ? dashboard.menuWidthCollapsed : anchorEl?.offsetWidth },
         }}
       >
-        <MenuItem component={Link} to="/people" onClick={handleClose} className={dashboard.menuItem}>
+        <MenuItem component={Link} to="/profile" onClick={handleClose} className={dashboard.menuItem}>
           <FiUser className={dashboard.menuItemIcon} aria-hidden="true" />
           Profile
         </MenuItem>

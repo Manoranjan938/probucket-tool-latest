@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import type { ReactNode } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store";
 import { restoreSession } from "features/auth/store/securityActions";
@@ -180,7 +180,9 @@ function App() {
                 </Suspense>
               }
             />
-            <Route path="/people" element={<Suspense fallback={<UserProfileSkeleton />}><RequireLogin><UserProfile /></RequireLogin></Suspense>} />
+            <Route path="/profile" element={<Suspense fallback={<UserProfileSkeleton />}><RequireLogin><UserProfile /></RequireLogin></Suspense>} />
+            {/* The old address of the Profile page */}
+            <Route path="/people" element={<Navigate to="/profile" replace />} />
             <Route path="*" element={<Suspense fallback={<ErrorSkeleton />}><Error /></Suspense>} />
           </Routes>
         </RouteErrorBoundary>

@@ -1,24 +1,45 @@
 import React from "react";
 import { Skeleton } from "@mui/material";
 
-// Shown while the Profile page's code is loading (the "Update your password" card)
+import * as profile from "features/profile/styles/profileClasses";
+
+import ProjectsTopBarSkeleton from "features/projects/components/ProjectsTopBar/ProjectsTopBarSkeleton";
+
+const CardSkeleton = ({ height }: { height: number }) => (
+  <div className={profile.card}>
+    <div className={profile.cardHeader}>
+      <div className="flex-1">
+        <Skeleton variant="text" width={150} sx={{ fontSize: 16 }} />
+        <Skeleton variant="text" width="50%" sx={{ fontSize: 14 }} />
+      </div>
+    </div>
+    <div className={profile.cardBody}>
+      <Skeleton variant="rounded" height={height} sx={{ borderRadius: "10px" }} />
+    </div>
+  </div>
+);
+
+// Shown while the Profile page's code is loading
 const UserProfileSkeleton = () => {
   return (
-    <div className="w-full" aria-busy="true">
-      <div className="w-[400px] my-[2%] mx-auto p-4">
-        <div className="flex justify-center items-center gap-1">
-          <Skeleton variant="circular" width={40} height={40} />
-          <Skeleton variant="text" width={140} sx={{ fontSize: 28 }} />
+    <div className={profile.page} aria-busy="true">
+      <ProjectsTopBarSkeleton />
+      <div className={profile.container}>
+        <Skeleton variant="text" width={110} sx={{ fontSize: 14, mb: "16px" }} />
+        <div className={profile.header}>
+          <Skeleton variant="circular" width={64} height={64} className="shrink-0" />
+          <div className="flex-1">
+            <Skeleton variant="text" width={200} sx={{ fontSize: 24 }} />
+            <Skeleton variant="text" width={240} sx={{ fontSize: 15, maxWidth: "100%" }} />
+          </div>
         </div>
-        <div className="mt-5 p-10 rounded-[5px] shadow-[1px_10px_30px_#0003]">
-          <div className="flex flex-col items-center">
-            <Skeleton variant="text" width={180} sx={{ fontSize: 16 }} />
-            <Skeleton variant="text" width={90} sx={{ fontSize: 18, mt: "12px" }} />
-          </div>
-          <div className="mt-5">
-            <Skeleton variant="rounded" width={305} height={34} sx={{ my: "10px", borderRadius: "3px" }} />
-            <Skeleton variant="rounded" height={35} sx={{ mt: "20px", borderRadius: "3px" }} />
-          </div>
+        <div className={profile.tabs}>
+          <Skeleton variant="rounded" width={74} height={36} sx={{ borderRadius: "8px" }} />
+          <Skeleton variant="rounded" width={82} height={36} sx={{ borderRadius: "8px" }} />
+        </div>
+        <div className={profile.panel}>
+          <CardSkeleton height={160} />
+          <CardSkeleton height={56} />
         </div>
       </div>
     </div>

@@ -14,6 +14,8 @@ export const brand = "flex items-center gap-2 no-underline text-brand-ink";
 export const brandLogo = "w-[30px] h-[30px]";
 export const brandName = "text-[20px] font-bold tracking-[-0.01em]";
 export const user = "flex items-center gap-3 min-w-0";
+export const userLink =
+  "flex items-center gap-3 min-w-0 rounded-lg no-underline hover:[&>span:last-child]:text-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
 export const avatar =
   "flex shrink-0 items-center justify-center w-9 h-9 rounded-[50%] bg-brand-strong text-[15px] font-bold text-white uppercase";
 export const userName = "truncate text-[15px] font-semibold text-brand-ink max-[640px]:hidden";

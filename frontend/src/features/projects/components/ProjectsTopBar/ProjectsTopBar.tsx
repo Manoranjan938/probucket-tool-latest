@@ -9,7 +9,7 @@ import * as project from "features/projects/styles/projectClasses";
 import logo from "shared/assets/images/logo.png";
 import type { RootState } from "app/store";
 
-// Top bar of the Projects list and the Create project wizard (logo, signed-in user, Log out)
+// Top bar of the Projects list, the Create project wizard and the Profile page (logo, link to the profile, Log out)
 const ProjectsTopBar = ({ currentUser }: Props) => {
   return (
     <header className={project.topBar}>
@@ -20,12 +20,14 @@ const ProjectsTopBar = ({ currentUser }: Props) => {
         </Link>
 
         <div className={project.user}>
-          <span className={project.avatar} aria-hidden="true">
-            {currentUser.fullName?.substring(0, 1)}
-          </span>
-          <span className={project.userName} title={currentUser.username}>
-            {currentUser.fullName}
-          </span>
+          <Link to="/profile" className={project.userLink} aria-label={`Your profile: ${currentUser.fullName ?? ""}`}>
+            <span className={project.avatar} aria-hidden="true">
+              {currentUser.fullName?.substring(0, 1)}
+            </span>
+            <span className={project.userName} title={currentUser.username}>
+              {currentUser.fullName}
+            </span>
+          </Link>
           <Link to="/logout" className={project.logout}>
             <FaSignOutAlt />
             <span className="max-[480px]:sr-only">Log out</span>
