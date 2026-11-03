@@ -2,15 +2,20 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
-import { Divider, Menu, MenuItem } from "@mui/material";
+import { Divider, Menu, MenuItem, Tooltip } from "@mui/material";
 import { FiChevronUp, FiFolder, FiLogOut, FiUser } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
 import type { RootState } from "app/store";
 
+type OwnProps = {
+  /** Only the avatar shows, with the user's name as a tooltip */
+  collapsed: boolean;
+};
+
 // Signed-in user at the bottom of the sidebar, with Profile, Projects and Log out
-const AccountMenu = ({ currentUser }: Props) => {
+const AccountMenu = ({ collapsed, currentUser }: OwnProps & Props) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
 
@@ -20,23 +25,30 @@ const AccountMenu = ({ currentUser }: Props) => {
 
   return (
     <>
-      <button
-        type="button"
-        className={dashboard.menuTrigger}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? "account-menu" : undefined}
-      >
-        <span className={dashboard.userAvatar} aria-hidden="true">
-          {currentUser.fullName?.substring(0, 1)}
-        </span>
-        <span className={dashboard.triggerText}>
-          <span className={`block ${dashboard.triggerTitle}`}>{currentUser.fullName}</span>
-          <span className={`block ${dashboard.userEmail}`}>{currentUser.username}</span>
-        </span>
-        <FiChevronUp className={dashboard.triggerChevron} aria-hidden="true" />
-      </button>
+      <Tooltip title={collapsed && !open ? currentUser.fullName ?? "" : ""} placement="right">
+        <button
+          type="button"
+          className={collapsed ? dashboard.menuTriggerCollapsed : dashboard.menuTrigger}
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          aria-label={collapsed ? `Account: ${currentUser.fullName ?? ""}` : undefined}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-controls={open ? "account-menu" : undefined}
+        >
+          <span className={dashboard.userAvatar} aria-hidden="true">
+            {currentUser.fullName?.substring(0, 1)}
+          </span>
+          {collapsed ? null : (
+            <>
+              <span className={dashboard.triggerText}>
+                <span className={`block ${dashboard.triggerTitle}`}>{currentUser.fullName}</span>
+                <span className={`block ${dashboard.userEmail}`}>{currentUser.username}</span>
+              </span>
+              <FiChevronUp className={dashboard.triggerChevron} aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </Tooltip>
 
       <Menu
         id="account-menu"
@@ -45,7 +57,10 @@ const AccountMenu = ({ currentUser }: Props) => {
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "left" }}
         transformOrigin={{ vertical: "bottom", horizontal: "left" }}
-        PaperProps={{ className: `${dashboard.menuPaper} -mt-1!`, sx: { width: anchorEl?.offsetWidth } }}
+        PaperProps={{
+          className: `${dashboard.menuPaper} -mt-1!`,
+          sx: { width: collapsed ? dashboard.menuWidthCollapsed : anchorEl?.offsetWidth },
+        }}
       >
         <MenuItem component={Link} to="/people" onClick={handleClose} className={dashboard.menuItem}>
           <FiUser className={dashboard.menuItemIcon} aria-hidden="true" />

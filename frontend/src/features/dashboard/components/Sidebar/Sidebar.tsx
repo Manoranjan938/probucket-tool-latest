@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
+import { Tooltip } from "@mui/material";
 import { FiX } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
@@ -21,11 +22,13 @@ type OwnProps = {
   name: string | null;
   /** Drawer state below 1024px; the sidebar is always shown above that */
   open: boolean;
+  /** Icon rail above 1024px: only the icons show, with their names as tooltips */
+  collapsed: boolean;
   onClose: () => void;
 };
 
 // Sidebar of the personal and team dashboards: project switcher, page links and the account menu
-const Sidebar = ({ type, id, name, open, onClose, getSingleProject, currentUser }: OwnProps & Props) => {
+const Sidebar = ({ type, id, name, open, collapsed, onClose, getSingleProject, currentUser }: OwnProps & Props) => {
   const [project, getProjectDetails] = useGetProjectDetails();
 
   // Again when the project switcher opens another project of the same type
@@ -40,25 +43,33 @@ const Sidebar = ({ type, id, name, open, onClose, getSingleProject, currentUser 
   const renderLinks = (items: NavItem[]) => (
     <ul className={dashboard.navList}>
       {visibleNav(items, type, currentUser.rolename).map((item) => (
-        <li key={item.path}>
-          <NavLink
-            to={dashboardLink(type, item.path, id, name)}
-            className={({ isActive }) => (isActive ? dashboard.navLinkActive : dashboard.navLink)}
-          >
-            <item.icon className={dashboard.navIcon} aria-hidden="true" />
-            {item.title}
-          </NavLink>
-        </li>
+        // On the li, as MUI's Tooltip would drop NavLink's className function
+        <Tooltip key={item.path} title={collapsed ? item.title : ""} placement="right">
+          <li>
+            <NavLink
+              to={dashboardLink(type, item.path, id, name)}
+              className={({ isActive }) =>
+                `${isActive ? dashboard.navLinkActive : dashboard.navLink} ${collapsed ? dashboard.navLinkCollapsed : ""}`
+              }
+              aria-label={collapsed ? item.title : undefined}
+            >
+              <item.icon className={dashboard.navIcon} aria-hidden="true" />
+              {collapsed ? null : item.title}
+            </NavLink>
+          </li>
+        </Tooltip>
       ))}
     </ul>
   );
 
+  const sidebarClass = collapsed ? dashboard.sidebarCollapsed : open ? dashboard.sidebarOpen : dashboard.sidebar;
+
   return (
-    <aside className={open ? dashboard.sidebarOpen : dashboard.sidebar} aria-label="Project navigation">
-      <div className={dashboard.sidebarBrandRow}>
-        <Link to="/projects" className={dashboard.brand}>
+    <aside className={sidebarClass} aria-label="Project navigation">
+      <div className={collapsed ? dashboard.sidebarBrandRowCollapsed : dashboard.sidebarBrandRow}>
+        <Link to="/projects" className={dashboard.brand} aria-label={collapsed ? "ProBucket" : undefined}>
           <img src={logo} alt="" className={dashboard.brandLogo} />
-          <span className={dashboard.brandName}>ProBucket</span>
+          {collapsed ? null : <span className={dashboard.brandName}>ProBucket</span>}
         </Link>
         <button type="button" className={dashboard.menuButton} onClick={onClose} aria-label="Close menu">
           <FiX />
@@ -66,17 +77,17 @@ const Sidebar = ({ type, id, name, open, onClose, getSingleProject, currentUser 
       </div>
 
       <div className={dashboard.sidebarSection}>
-        <ProjectSwitcher project={project} />
+        <ProjectSwitcher project={project} collapsed={collapsed} />
       </div>
 
       <nav className={dashboard.nav}>
         {renderLinks(mainNav)}
-        <p className={dashboard.navLabel}>Manage</p>
+        {collapsed ? <hr className={dashboard.navDivider} /> : <p className={dashboard.navLabel}>Manage</p>}
         {renderLinks(manageNav)}
       </nav>
 
       <div className={dashboard.sidebarFooter}>
-        <AccountMenu />
+        <AccountMenu collapsed={collapsed} />
       </div>
     </aside>
   );

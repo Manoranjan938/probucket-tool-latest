@@ -8,32 +8,38 @@ const base =
 
 /* Layout */
 export const layout = "min-h-screen bg-brand-surface-alt";
-export const content = "min-h-screen pl-[260px] max-[1023px]:pl-0";
+export const content = "min-h-screen pl-[260px] transition-[padding-left] duration-200 ease-[ease] motion-reduce:transition-none max-[1023px]:pl-0";
+export const contentCollapsed = `${content} pl-[72px]!`;
 export const main = "p-8 max-[640px]:p-4";
 export const backdrop = "fixed inset-0 z-30 border-none bg-[rgba(31,29,58,0.35)] cursor-pointer min-[1024px]:hidden";
 
-/* Sidebar (a drawer below 1024px) */
-const sidebarBase = `${base} fixed inset-y-0 left-0 z-40 flex flex-col w-[260px] border-r border-brand-border bg-brand-surface transition-[transform,visibility] duration-200 ease-[ease] motion-reduce:transition-none`;
+/* Sidebar (a drawer below 1024px, can collapse to an icon rail above that) */
+const sidebarBase = `${base} fixed inset-y-0 left-0 z-40 flex flex-col w-[260px] overflow-hidden border-r border-brand-border bg-brand-surface transition-[transform,visibility,width] duration-200 ease-[ease] motion-reduce:transition-none`;
 export const sidebar = `${sidebarBase} max-[1023px]:invisible max-[1023px]:-translate-x-full`;
 export const sidebarOpen = `${sidebarBase} max-[1023px]:shadow-brand`;
+export const sidebarCollapsed = `${sidebar} w-[72px]!`;
 export const sidebarBrandRow = "flex items-center justify-between h-16 px-5 shrink-0";
+export const sidebarBrandRowCollapsed = `${sidebarBrandRow} justify-center! px-0!`;
 export const brand = "flex items-center gap-2 no-underline text-brand-ink";
 export const brandLogo = "w-[28px] h-[28px]";
-export const brandName = "text-[19px] font-bold tracking-[-0.01em]";
+export const brandName = "text-[19px] font-bold tracking-[-0.01em] whitespace-nowrap";
 export const sidebarSection = "px-3";
-export const nav = "flex-1 overflow-y-auto px-3 py-2";
+export const nav = "flex-1 overflow-x-hidden overflow-y-auto px-3 py-2";
 export const navList = "flex flex-col gap-0.5 m-0 p-0 list-none";
 export const navLabel = "mt-6 mb-1.5 px-3 text-[12px] font-bold tracking-[0.08em] uppercase text-brand-muted";
+export const navDivider = "my-3 mx-2 border-0 border-t border-brand-border";
 const navLinkBase =
-  "flex items-center gap-3 h-10 px-3 rounded-lg text-[15px] font-semibold no-underline transition-[background-color,color] duration-150 ease-[ease] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-primary motion-reduce:transition-none";
+  "flex items-center gap-3 h-10 px-3 rounded-lg text-[15px] font-semibold no-underline whitespace-nowrap transition-[background-color,color] duration-150 ease-[ease] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-primary motion-reduce:transition-none";
 export const navLink = `${navLinkBase} text-brand-text hover:bg-brand-surface-alt hover:text-brand-ink`;
 export const navLinkActive = `${navLinkBase} bg-brand-soft text-brand-strong`;
+export const navLinkCollapsed = "justify-center px-0!";
 export const navIcon = "shrink-0 text-[18px]";
 export const sidebarFooter = "shrink-0 p-3 border-t border-brand-border";
 
 /* Buttons that open a menu (project switcher, account) */
 export const menuTrigger =
   "flex items-center gap-3 w-full p-2 border border-transparent rounded-[10px] bg-transparent [font-family:inherit] text-left cursor-pointer transition-[background-color,border-color] duration-150 ease-[ease] hover:bg-brand-surface-alt aria-expanded:border-brand-border aria-expanded:bg-brand-surface-alt focus-visible:outline-2 focus-visible:outline-brand-primary motion-reduce:transition-none";
+export const menuTriggerCollapsed = `${menuTrigger} justify-center p-1!`;
 export const triggerText = "flex-1 min-w-0";
 export const triggerTitle = "truncate text-[15px] font-semibold text-brand-ink capitalize";
 export const triggerSubtitle = "truncate text-[13px] text-brand-muted capitalize";
@@ -46,6 +52,8 @@ export const userEmail = "truncate text-[13px] text-brand-muted";
 
 /* MUI Menu contents (MUI renders the menu in a portal, outside the sidebar) */
 export const menuPaper = "mt-1 min-w-[240px] border border-brand-border rounded-xl! shadow-brand!";
+// Width of a menu opened from the icon rail, where the trigger is too narrow to size it
+export const menuWidthCollapsed = 240;
 export const menuHeading = "px-4 pt-2 pb-1 text-[12px] font-bold tracking-[0.08em] uppercase text-brand-muted";
 export const menuItem = "gap-3 min-h-10! px-4! [font-family:inherit]! text-[14px]! font-semibold! text-brand-ink! no-underline";
 export const menuItemIcon = "shrink-0 text-[16px] text-brand-muted";
@@ -58,6 +66,7 @@ export const topBar = `${base} sticky top-0 z-20 flex items-center gap-3 h-16 px
 export const iconButton =
   "flex shrink-0 items-center justify-center w-10 h-10 border-none rounded-[10px] bg-transparent text-[20px] text-brand-text no-underline cursor-pointer transition-[background-color,color] duration-150 ease-[ease] hover:bg-brand-surface-alt hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-primary motion-reduce:transition-none";
 export const menuButton = `${iconButton} min-[1024px]:hidden`;
+export const collapseButton = `${iconButton} max-[1023px]:hidden`;
 export const pageTitle = "flex-1 min-w-0 truncate text-[20px] font-bold tracking-[-0.01em] text-brand-ink";
 export const search =
   "flex items-center gap-2 w-[260px] h-10 px-3 border border-brand-border rounded-[10px] bg-brand-surface-alt text-brand-muted focus-within:border-brand-primary focus-within:bg-brand-surface focus-within:shadow-[0_0_0_3px_var(--color-brand-soft)] max-[768px]:hidden";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
-import { Divider, Menu, MenuItem, Skeleton } from "@mui/material";
+import { Divider, Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
 import { FiCheck, FiChevronDown, FiFolder } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
@@ -14,10 +14,14 @@ import { dashboardLink, type DashboardType } from "features/dashboard/data";
 import type { AppDispatch, RootState } from "app/store";
 import type { Project } from "features/projects/types";
 
-type OwnProps = { project: Partial<Project> };
+type OwnProps = {
+  project: Partial<Project>;
+  /** Only the avatar shows, with the project name as a tooltip */
+  collapsed: boolean;
+};
 
 // The current project at the top of the sidebar; opens a menu to switch to another project
-const ProjectSwitcher = ({ project, currentUser, myProjects, getProjects }: OwnProps & Props) => {
+const ProjectSwitcher = ({ project, collapsed, currentUser, myProjects, getProjects }: OwnProps & Props) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [, getAllProjectDetails] = useGetAllProjects();
@@ -53,40 +57,50 @@ const ProjectSwitcher = ({ project, currentUser, myProjects, getProjects }: OwnP
 
   return (
     <>
-      <button
-        type="button"
-        className={dashboard.menuTrigger}
-        onClick={handleOpen}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? "project-menu" : undefined}
-      >
-        <span className={dashboard.projectAvatar} aria-hidden="true">
-          {project.projectName?.substring(0, 1)}
-        </span>
-        {/* Placeholder text until the sidebar has loaded the project */}
-        {project.projectName ? (
-          <span className={dashboard.triggerText}>
-            <span className={`block ${dashboard.triggerTitle}`}>{project.projectName}</span>
-            <span className={`block ${dashboard.triggerSubtitle}`}>
-              {project.projectType ? `${project.projectType} project` : null}
-            </span>
+      <Tooltip title={collapsed && !open ? project.projectName ?? "" : ""} placement="right">
+        <button
+          type="button"
+          className={collapsed ? dashboard.menuTriggerCollapsed : dashboard.menuTrigger}
+          onClick={handleOpen}
+          aria-label={collapsed ? `Project: ${project.projectName ?? ""}` : undefined}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-controls={open ? "project-menu" : undefined}
+        >
+          <span className={dashboard.projectAvatar} aria-hidden="true">
+            {project.projectName?.substring(0, 1)}
           </span>
-        ) : (
-          <span className={dashboard.triggerText} aria-busy="true">
-            <Skeleton variant="text" width="70%" sx={{ fontSize: 15 }} />
-            <Skeleton variant="text" width="50%" sx={{ fontSize: 13 }} />
-          </span>
-        )}
-        <FiChevronDown className={dashboard.triggerChevron} aria-hidden="true" />
-      </button>
+          {collapsed ? null : (
+            <>
+              {/* Placeholder text until the sidebar has loaded the project */}
+              {project.projectName ? (
+                <span className={dashboard.triggerText}>
+                  <span className={`block ${dashboard.triggerTitle}`}>{project.projectName}</span>
+                  <span className={`block ${dashboard.triggerSubtitle}`}>
+                    {project.projectType ? `${project.projectType} project` : null}
+                  </span>
+                </span>
+              ) : (
+                <span className={dashboard.triggerText} aria-busy="true">
+                  <Skeleton variant="text" width="70%" sx={{ fontSize: 15 }} />
+                  <Skeleton variant="text" width="50%" sx={{ fontSize: 13 }} />
+                </span>
+              )}
+              <FiChevronDown className={dashboard.triggerChevron} aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </Tooltip>
 
       <Menu
         id="project-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        PaperProps={{ className: dashboard.menuPaper, sx: { width: anchorEl?.offsetWidth } }}
+        PaperProps={{
+          className: dashboard.menuPaper,
+          sx: { width: collapsed ? dashboard.menuWidthCollapsed : anchorEl?.offsetWidth },
+        }}
       >
         <li className={dashboard.menuHeading} role="presentation">Switch project</li>
         {myProjects.length === 0 && loading ? (
