@@ -1,34 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@mui/material";
-import { FiCheckCircle, FiCornerDownRight, FiFlag, FiInbox } from "react-icons/fi";
+import { FiCheckCircle, FiInbox } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
-import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
-import { priorityColors, taskStatuses } from "features/tasks/data";
+import TaskRow from "features/dashboard/components/TaskRow/TaskRow";
+import TaskRowsSkeleton from "features/dashboard/components/TaskRow/TaskRowsSkeleton";
+import type { TaskListItem } from "features/tasks/types";
 
 const MAX_TASKS = 6;
 
 interface OpenTasksProps {
-  /** projectIdentifier – the "name" query parameter */
-  name: string | null;
+  /** undefined while loading */
+  tasks: TaskListItem[] | undefined;
   /** The project's Your work page */
   worksLink: string;
 }
 
 // Tasks that aren't completed yet. The backend sorts the list by priority and sends no dates,
 // so this shows the first few open tasks rather than the most recent ones.
-const OpenTasks = ({ name, worksLink }: OpenTasksProps) => {
-  const [tasks, getTaskLists] = useGetTaskLists();
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    // The backend answers 400 "Task not found" when the project has no tasks
-    getTaskLists(name).catch(() => setFailed(true));
-  }, [name]);
-
-  const loading = tasks === undefined && !failed;
+const OpenTasks = ({ tasks, worksLink }: OpenTasksProps) => {
   const allTasks = tasks ?? [];
   const openTasks = allTasks.filter((task) => task.status !== "COMPLETED");
 
@@ -39,37 +30,13 @@ const OpenTasks = ({ name, worksLink }: OpenTasksProps) => {
         <Link to={worksLink} className={dashboard.cardLink}>View all</Link>
       </div>
 
-      {loading ? (
-        <div aria-busy="true">
-          {[0, 1, 2, 3].map((item) => (
-            <Skeleton key={item} variant="text" sx={{ fontSize: 15, my: "10px" }} />
-          ))}
-        </div>
+      {tasks === undefined ? (
+        <TaskRowsSkeleton />
       ) : openTasks.length > 0 ? (
         <ul className={dashboard.taskList}>
-          {openTasks.slice(0, MAX_TASKS).map((task) => {
-            const status = taskStatuses[task.status] ?? taskStatuses.TODO;
-            return (
-              <li key={task.taskSequence} className={dashboard.taskRow}>
-                <span className={dashboard.taskKey}>{task.taskSequence}</span>
-                {task.subtask ? (
-                  <FiCornerDownRight
-                    className="shrink-0 text-[13px] text-brand-muted"
-                    title={`Subtask of ${task.parentTaskId}`}
-                    aria-label={`Subtask of ${task.parentTaskId}`}
-                  />
-                ) : null}
-                <span className={dashboard.taskName} title={task.taskName}>{task.taskName}</span>
-                {task.priority ? (
-                  <FiFlag
-                    className={`${dashboard.priorityIcon} ${priorityColors[task.priority] ?? priorityColors.LOW}`}
-                    aria-label={`${task.priority.toLowerCase()} priority`}
-                  />
-                ) : null}
-                <span className={`${dashboard.statusPill} ${status.soft} ${status.text}`}>{status.label}</span>
-              </li>
-            );
-          })}
+          {openTasks.slice(0, MAX_TASKS).map((task) => (
+            <TaskRow key={task.taskSequence} task={task} />
+          ))}
         </ul>
       ) : allTasks.length > 0 ? (
         <div className={dashboard.emptyCard}>

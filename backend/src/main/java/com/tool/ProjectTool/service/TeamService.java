@@ -132,6 +132,7 @@ public class TeamService {
 				teamLi.setAddedDate(String.valueOf(row[3]));
 				teamLi.setRole(String.valueOf(row[5]));
 				teamLi.setStatus((Integer) row[4]);
+				teamLi.setMemberId(String.valueOf(row[6]));
 
 				teamList.add(teamLi);
 			}

@@ -14,11 +14,21 @@ public class TaskListResponse {
 	
 	private String assignee;
 	
+	private String assigneeName;
+	
 	private boolean subtask;
 	
 	private String parentTaskId;
 	
 	private int subtaskCount;
+
+	public String getAssigneeName() {
+		return assigneeName;
+	}
+
+	public void setAssigneeName(String assigneeName) {
+		this.assigneeName = assigneeName;
+	}
 
 	public boolean isSubtask() {
 		return subtask;

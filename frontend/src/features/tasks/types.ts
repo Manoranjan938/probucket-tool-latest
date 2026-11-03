@@ -10,6 +10,9 @@ export interface Subtask {
 
 /** model/response/TaskListResponse.java */
 export interface TaskListItem extends Subtask {
+  /** The assignee's user id; empty when nobody is assigned */
+  assignee: string;
+  assigneeName: string | null;
   subtask: boolean;
   /** Sequence of the parent task; null on parent tasks */
   parentTaskId: string | null;

@@ -2,9 +2,11 @@ package com.tool.ProjectTool.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,10 +89,19 @@ public class ProjectTaskService {
 			List<TaskListResponse> taskLists = new ArrayList<>();
 
 			Map<String, Integer> subtaskCounts = new HashMap<>();
+			Set<String> assigneeIds = new HashSet<>();
 			for (ProjectTask project : tasks) {
 				if (project.isSubtask()) {
 					subtaskCounts.merge(project.getParentTaskId(), 1, Integer::sum);
 				}
+				if (project.getAssignee() != null) {
+					assigneeIds.add(project.getAssignee());
+				}
+			}
+
+			Map<String, String> assigneeNames = new HashMap<>();
+			for (Users user : userRepo.findByUserIdIn(assigneeIds)) {
+				assigneeNames.put(user.getUserId(), user.getName());
 			}
 
 			for (ProjectTask project : tasks) {
@@ -100,6 +111,8 @@ public class ProjectTaskService {
 				tas.setTaskSequence(project.getProjectSequence());
 				tas.setPriority(project.getPriority());
 				tas.setStatus(project.getStatus());
+				tas.setAssignee(project.getAssignee());
+				tas.setAssigneeName(assigneeNames.get(project.getAssignee()));
 				tas.setSubtask(project.isSubtask());
 				tas.setParentTaskId(project.getParentTaskId());
 				tas.setSubtaskCount(subtaskCounts.getOrDefault(project.getProjectSequence(), 0));

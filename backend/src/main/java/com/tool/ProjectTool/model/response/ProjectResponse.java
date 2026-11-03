@@ -1,5 +1,7 @@
 package com.tool.ProjectTool.model.response;
 
+import java.util.Date;
+
 public class ProjectResponse {
 
 	private String projectName;
@@ -13,6 +15,8 @@ public class ProjectResponse {
 	private String projectType;
 
 	private String projectAvatar;
+	
+	private Date createdOn;
 
 	public String getProjectName() {
 		return projectName;
@@ -60,6 +64,14 @@ public class ProjectResponse {
 
 	public void setProjectIdentifier(String projectIdentifier) {
 		this.projectIdentifier = projectIdentifier;
+	}
+
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
 	}
 
 }

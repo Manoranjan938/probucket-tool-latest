@@ -9,6 +9,8 @@ public class TeamMembersList {
 	
 	private Long userid;
 	
+	private String memberId;
+	
 	private String role;
 	
 	private String addedDate;
@@ -29,6 +31,14 @@ public class TeamMembersList {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getMemberId() {
+		return memberId;
+	}
+
+	public void setMemberId(String memberId) {
+		this.memberId = memberId;
 	}
 
 	public Long getUserid() {

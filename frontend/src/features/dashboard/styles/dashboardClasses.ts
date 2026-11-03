@@ -85,6 +85,29 @@ export const statLabel = "text-[14px]";
 
 export const homeGrid = "grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6 items-start max-[1100px]:grid-cols-[minmax(0,1fr)]";
 
+export const homeColumn = "flex flex-col gap-6 min-w-0";
+export const cardNote = "mt-4 pt-3 border-t border-brand-border text-[14px]";
+export const cardEmptyText = "text-[14px]";
+
+/* Rows with a thin bar: open by priority, team workload */
+export const barList = "flex flex-col gap-4 m-0 p-0 list-none";
+export const barRow = "flex flex-col gap-1.5";
+export const barHeader = "flex items-center justify-between gap-3 text-[14px]";
+export const barLabel = "flex items-center gap-2 min-w-0 text-brand-ink";
+export const barName = "truncate";
+export const barAvatar =
+  "flex shrink-0 items-center justify-center w-6 h-6 rounded-[50%] bg-brand-soft text-[12px] font-semibold uppercase text-brand-strong";
+export const barValue = "shrink-0 font-semibold text-brand-ink";
+export const barTrack = "h-2 overflow-hidden rounded-[4px] bg-brand-soft";
+export const barFill = "block h-full rounded-[4px] bg-brand-primary";
+
+/* Project details card */
+export const detailList = "flex flex-col gap-3 m-0";
+export const detailRow = "flex items-center justify-between gap-3 text-[14px]";
+export const detailValue = "m-0 min-w-0 truncate font-semibold text-brand-ink capitalize";
+export const detailKey =
+  "m-0 px-2 py-0.5 rounded-md bg-brand-surface-alt border border-brand-border font-mono text-[13px] font-semibold uppercase text-brand-ink";
+
 /* Progress card */
 export const progressValue = "text-[32px] font-bold leading-[1.1] tracking-[-0.02em] text-brand-ink";
 export const progressCaption = "mb-4 text-[14px]";
@@ -104,6 +127,7 @@ export const priorityIcon = "shrink-0 text-[14px]";
 
 /* Empty states inside a card */
 export const emptyCard = "flex flex-col items-center py-8 text-center";
+export const emptyCardCompact = "flex flex-col items-center py-4 text-center";
 export const emptyIcon =
   "flex items-center justify-center w-14 h-14 mb-4 rounded-[50%] bg-brand-soft text-[24px] text-brand-strong";
 export const emptyTitle = "mb-1 text-[16px] font-bold text-brand-ink";

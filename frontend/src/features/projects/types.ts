@@ -8,6 +8,8 @@ export interface Project {
   leadBy: string;
   projectType: string;
   projectAvatar: string;
+  /** ISO date; only sent with the details of a single project */
+  createdOn?: string;
 }
 
 /** model/request/ProjectRequest.java */

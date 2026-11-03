@@ -2,6 +2,7 @@ package com.tool.ProjectTool.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.tool.ProjectTool.entity.ProjectTask;
+import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
@@ -60,6 +63,25 @@ class ProjectTaskServiceTest {
 		request.setParentTaskId(parent);
 		request.setTaskName("Child");
 		return request;
+	}
+
+	@Test
+	void boardListSendsTheAssigneeAndTheirName() {
+		ProjectTask assigned = task("AB-1", false, null);
+		assigned.setAssignee("user-1");
+		Users user = new Users();
+		user.setUserId("user-1");
+		user.setName("Asha");
+		when(projectTaskRepo.findByProjectIdentifierOrderByPriority("AB"))
+				.thenReturn(List.of(assigned, task("AB-2", false, null)));
+		when(userRepo.findByUserIdIn(Set.of("user-1"))).thenReturn(List.of(user));
+
+		List<TaskListResponse> tasks = service.getTaskLists("AB");
+
+		assertEquals("user-1", tasks.get(0).getAssignee());
+		assertEquals("Asha", tasks.get(0).getAssigneeName());
+		assertNull(tasks.get(1).getAssignee());
+		assertNull(tasks.get(1).getAssigneeName());
 	}
 
 	@Test

@@ -4,7 +4,7 @@ import HomeOverviewSkeleton from "features/dashboard/components/HomeOverview/Hom
 
 // Shown in the dashboard content area while the home page's code is loading
 const TeamDashboardHomeSkeleton = () => {
-  return <HomeOverviewSkeleton />;
+  return <HomeOverviewSkeleton team />;
 };
 
 export default TeamDashboardHomeSkeleton;

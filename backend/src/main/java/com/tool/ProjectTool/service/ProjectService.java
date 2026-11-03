@@ -167,6 +167,7 @@ public class ProjectService {
 			response.setProjectAvatar(project.getProjectImage());
 			response.setProjectId(project.getProjectId());
 			response.setProjectIdentifier(project.getProjectIdentifier());
+			response.setCreatedOn(project.getCreatedAt());
 
 			return response;
 		}

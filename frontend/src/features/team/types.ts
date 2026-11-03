@@ -3,6 +3,8 @@ export interface TeamMember {
   email: string;
   name: string;
   userid: number;
+  /** The same id tasks use for their assignee */
+  memberId: string;
   /** null (or the string "null") until a role is set */
   role: string | null;
   addedDate: string;
