@@ -30,6 +30,7 @@ public class ProjectService {
 
 	static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	static SecureRandom rnd = new SecureRandom();
+	private static final String DEFAULT_IDENTIFIER = "P";
 
 	String randomString(int len) {
 		StringBuilder sb = new StringBuilder(len);
@@ -47,13 +48,26 @@ public class ProjectService {
 				v = true;
 			}
 
-			else if (str.charAt(i) != ' ' && v == true) {
+			else if (Character.isLetterOrDigit(str.charAt(i)) && v == true) {
 				result += (str.charAt(i));
 				v = false;
 			}
 		}
 
 		return result;
+	}
+
+	// Task ids are built from the identifier and everything looks projects up by it, so it has to be unique
+	private String uniqueIdentifier(String projectName) {
+		String letters = firstLetterWord(projectName).toUpperCase();
+		String base = letters.isEmpty() ? DEFAULT_IDENTIFIER : letters;
+
+		String identifier = base;
+		for (int number = 2; projectRepo.existsByProjectIdentifier(identifier); number++) {
+			identifier = base + number;
+		}
+
+		return identifier;
 	}
 
 	public String saveProject(ProjectRequest request) {
@@ -86,9 +100,7 @@ public class ProjectService {
 
 			userRepo.save(user);
 
-			String letters = firstLetterWord(request.getProjectName());
-
-			project.setProjectIdentifier(letters.toUpperCase());
+			project.setProjectIdentifier(uniqueIdentifier(request.getProjectName()));
 			project.setBacklog(backlog);
 			backlog.setProject(project);
 			backlog.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());

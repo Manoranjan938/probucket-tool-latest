@@ -13,6 +13,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
 	public ProjectEntity findByProjectId(String id);
 
+	public boolean existsByProjectIdentifier(String projectIdentifier);
+
 	@Query(value = "select * from projects p where user_id =:userId", nativeQuery = true)
 	public List<ProjectEntity> getProjectsByUserId(long userId);
 
