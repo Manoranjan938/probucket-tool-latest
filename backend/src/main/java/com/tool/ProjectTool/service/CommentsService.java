@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.Comment;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
@@ -31,6 +33,10 @@ public class CommentsService {
 	@Autowired
 	private ProjectTaskRepository taskRepo;
 
+	@Autowired
+	private ActivityService activityService;
+
+	@Transactional
 	public String addComment(CommentRequest commentReq) {
 
 		Comment comment = new Comment();
@@ -44,6 +50,7 @@ public class CommentsService {
 				comment.setCommentedOnType(task.getId());
 
 				commentRepo.save(comment);
+				activityService.recordTaskActivity(ActivityType.COMMENT_ADDED, task, null, null);
 				return "Comment added successfully";
 			}
 			throw new TaskIdNotFoundException("Task Id not found");

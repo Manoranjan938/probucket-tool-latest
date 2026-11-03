@@ -3,6 +3,7 @@ import { Skeleton } from "@mui/material";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
+import TimelineSkeleton from "features/activity/components/Timeline/TimelineSkeleton";
 import BarRowsSkeleton from "features/dashboard/components/BarRow/BarRowsSkeleton";
 import TaskRowsSkeleton from "features/dashboard/components/TaskRow/TaskRowsSkeleton";
 import TaskStatsSkeleton from "features/dashboard/components/TaskStats/TaskStatsSkeleton";
@@ -56,6 +57,10 @@ const HomeOverviewSkeleton = ({ team = false }: { team?: boolean }) => {
             {[0, 1, 2].map((item) => (
               <Skeleton key={item} variant="text" sx={{ fontSize: 14, my: "6px" }} />
             ))}
+          </div>
+          <div className={dashboard.card}>
+            <CardTitleSkeleton width={130} />
+            <TimelineSkeleton />
           </div>
         </div>
       </div>

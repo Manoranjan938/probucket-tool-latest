@@ -31,6 +31,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.tool.ProjectTool.controller.ActivityController;
 import com.tool.ProjectTool.controller.AuthController;
 import com.tool.ProjectTool.controller.ProjectController;
 import com.tool.ProjectTool.controller.UserController;
@@ -40,6 +41,7 @@ import com.tool.ProjectTool.security.CustomAuthenticationEntryPoint;
 import com.tool.ProjectTool.security.SecurityConstants;
 import com.tool.ProjectTool.security.TokenCookieProvider;
 import com.tool.ProjectTool.security.TokenProvider;
+import com.tool.ProjectTool.service.ActivityService;
 import com.tool.ProjectTool.service.CustomUserService;
 import com.tool.ProjectTool.service.ProjectService;
 import com.tool.ProjectTool.service.RefreshTokenService;
@@ -48,7 +50,7 @@ import com.tool.ProjectTool.service.ValidationErrorService;
 
 import jakarta.servlet.http.Cookie;
 
-@WebMvcTest({ AuthController.class, ProjectController.class, UserController.class })
+@WebMvcTest({ ActivityController.class, AuthController.class, ProjectController.class, UserController.class })
 @Import({ SecurityConfig.class, CustomAuthenticationEntryPoint.class, TokenCookieProvider.class,
 		ValidationErrorService.class })
 class AccessRulesTest {
@@ -82,6 +84,9 @@ class AccessRulesTest {
 	private ProjectService projectService;
 
 	@MockitoBean
+	private ActivityService activityService;
+
+	@MockitoBean
 	private RefreshTokenService refreshTokenService;
 
 	private Authentication loggedIn(String role) {
@@ -106,6 +111,12 @@ class AccessRulesTest {
 				.andExpect(header().string("Access-Control-Allow-Origin", ORIGIN))
 				.andExpect(jsonPath("$.success").value(false))
 				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+	}
+
+	@Test
+	void activityNeedsALogin() throws Exception {
+		mockMvc.perform(get("/api/v1/activity/getProjectActivity/AB")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/api/v1/activity/getTaskActivity/AB-1")).andExpect(status().isUnauthorized());
 	}
 
 	@Test

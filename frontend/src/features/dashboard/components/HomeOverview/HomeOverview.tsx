@@ -12,6 +12,7 @@ import TaskProgress from "features/dashboard/components/TaskProgress/TaskProgres
 import DueTasks from "features/dashboard/components/DueTasks/DueTasks";
 import OpenTasks from "features/dashboard/components/OpenTasks/OpenTasks";
 import AssignedToMe from "features/dashboard/components/AssignedToMe/AssignedToMe";
+import RecentActivity from "features/dashboard/components/RecentActivity/RecentActivity";
 import TeamWorkload from "features/dashboard/components/TeamWorkload/TeamWorkload";
 import PriorityBreakdown from "features/dashboard/components/PriorityBreakdown/PriorityBreakdown";
 import ProjectDetailsCard from "features/dashboard/components/ProjectDetailsCard/ProjectDetailsCard";
@@ -100,6 +101,7 @@ const HomeOverview = ({ type, team, children, currentUser, currentProject }: Own
           <TaskProgress counts={counts} />
           <PriorityBreakdown tasks={tasks} />
           <ProjectDetailsCard project={project} memberCount={team?.length} />
+          <RecentActivity name={name} tasks={tasks} />
         </div>
       </div>
     </div>

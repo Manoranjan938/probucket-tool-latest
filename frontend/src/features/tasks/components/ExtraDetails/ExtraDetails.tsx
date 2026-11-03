@@ -12,18 +12,33 @@ import DueDateDialog from "features/tasks/components/DueDateDialog/DueDateDialog
 import useUpdateTask from "features/tasks/hooks/useUpdateTask";
 import { formatDate, formatEnum, priorityColors, toastOptions } from "features/tasks/data";
 import type { RootState } from "app/store";
-import type { TeamMember } from "features/team/types";
+
+interface AssigneeOption {
+  name: string;
+  email: string;
+}
 
 // The task's assignee, priority and dates, with dialogs to change the assignee and the due date
-const ExtraDetails = ({ onChanged, myTeams, currentTask }: { onChanged: () => void } & Props) => {
+const ExtraDetails = ({ onChanged, myTeams, currentTask, currentProject }: { onChanged: () => void } & Props) => {
   const [showAssigneeDialog, setShowAssigneeDialog] = useState(false);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
-  const [assignee, setAssignee] = useState<TeamMember | null>(null);
+  const [assignee, setAssignee] = useState<AssigneeOption | null>(null);
   const [saving, setSaving] = useState(false);
   const [updateTask] = useUpdateTask();
   const { enqueueSnackbar } = useSnackbar();
 
   const assigneeName = currentTask.assignee && currentTask.assignee !== "NA" ? currentTask.assignee : null;
+
+  // The team board fills the team list, so on a personal project it can still hold another project's members.
+  // The project lead isn't a team member, but can be assigned too.
+  const team = currentProject.projectType?.toLowerCase() === "team" ? myTeams : [];
+  const { leadEmail, leadBy } = currentProject;
+  const assigneeOptions: AssigneeOption[] = [
+    ...(leadEmail && !team.some((member) => member.email === leadEmail)
+      ? [{ name: `${leadBy} (Lead)`, email: leadEmail }]
+      : []),
+    ...team.map(({ name, email }) => ({ name, email })),
+  ];
 
   const handleClose = () => {
     setShowAssigneeDialog(false);
@@ -139,15 +154,15 @@ const ExtraDetails = ({ onChanged, myTeams, currentTask }: { onChanged: () => vo
               fullWidth
               value={assignee}
               onChange={(event, value) => setAssignee(value)}
-              options={myTeams}
+              options={assigneeOptions}
               autoHighlight
               getOptionLabel={(option) => option.name}
-              isOptionEqualToValue={(option, value) => option.userid === value.userid}
-              noOptionsText="No team members in this project"
+              isOptionEqualToValue={(option, value) => option.email === value.email}
+              noOptionsText="Nobody to assign in this project"
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Team member"
+                  label="Assign to"
                   inputProps={{
                     ...params.inputProps,
                     autoComplete: "new-password", // disable autocomplete and autofill
@@ -171,6 +186,7 @@ const ExtraDetails = ({ onChanged, myTeams, currentTask }: { onChanged: () => vo
 const mapStateToProps = (state: RootState) => ({
   myTeams: state.teams.allTeamMember,
   currentTask: state.tasks.selectedTask,
+  currentProject: state.project.project,
 });
 
 const withConnect = connect(mapStateToProps, null);

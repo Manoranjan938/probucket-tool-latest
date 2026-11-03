@@ -15,20 +15,24 @@ export interface TaskListItem extends Subtask {
   assigneeName: string | null;
   /** yyyy-mm-dd */
   dueDate: string | null;
+  /** ISO date */
+  createdOn: string | null;
+  /** ISO date; null until the task is changed for the first time */
+  updatedOn: string | null;
   subtask: boolean;
   /** Sequence of the parent task; null on parent tasks */
   parentTaskId: string | null;
   subtaskCount: number;
 }
 
-/** model/response/TaskDetails.java – java.util.Date is sent as epoch milliseconds */
+/** model/response/TaskDetails.java – java.util.Date is sent as an ISO date */
 export interface TaskDetails extends Subtask {
   subtask: boolean;
   /** Sequence of the parent task; null on parent tasks */
   parentTaskId: string | null;
   taskDesc: string;
-  createdOn: number;
-  updatedOn: number;
+  createdOn: string;
+  updatedOn: string;
   /** yyyy-mm-dd */
   dueDate: string | null;
 }

@@ -168,6 +168,7 @@ public class ProjectService {
 			response.setProjectId(project.getProjectId());
 			response.setProjectIdentifier(project.getProjectIdentifier());
 			response.setCreatedOn(project.getCreatedAt());
+			response.setLeadEmail(project.getUser() != null ? project.getUser().getEmail() : null);
 
 			return response;
 		}

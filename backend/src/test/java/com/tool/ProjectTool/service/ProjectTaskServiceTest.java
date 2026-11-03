@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.Backlog;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
@@ -51,6 +55,9 @@ class ProjectTaskServiceTest {
 
 	@Mock
 	private ProjectRepository projRepo;
+
+	@Mock
+	private ActivityService activityService;
 
 	@InjectMocks
 	private ProjectTaskService service;
@@ -84,6 +91,137 @@ class ProjectTaskServiceTest {
 		request.setTaskId("AB-1");
 		request.setDueDate(dueDate);
 		return request;
+	}
+
+	private ProjectTask unchangedTask() {
+		ProjectTask existing = task("AB-1", false, null);
+		existing.setStatus("TODO");
+		existing.setPriority("LOW");
+		existing.setTaskDesc("Words");
+		existing.setAssignee("user-1");
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+		return existing;
+	}
+
+	private UpdateProjectTaskRequest sameAs(ProjectTask existing) {
+		UpdateProjectTaskRequest request = new UpdateProjectTaskRequest();
+		request.setTaskId(existing.getProjectSequence());
+		request.setStatus(existing.getStatus());
+		request.setPriority(existing.getPriority());
+		request.setDescription(existing.getTaskDesc());
+		return request;
+	}
+
+	private void verifyNothingRecorded() {
+		verify(activityService, never()).recordTaskActivity(any(), any(), any(), any());
+	}
+
+	@Test
+	void savingWithoutChangesRecordsNothing() {
+		ProjectTask existing = unchangedTask();
+
+		service.updateTask(sameAs(existing));
+
+		verifyNothingRecorded();
+	}
+
+	@Test
+	void emptyAndMissingDescriptionsCountAsTheSame() {
+		ProjectTask existing = unchangedTask();
+		existing.setTaskDesc(null);
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setDescription("");
+
+		service.updateTask(request);
+
+		verifyNothingRecorded();
+	}
+
+	@Test
+	void eachChangedFieldIsRecordedOnce() {
+		ProjectTask existing = unchangedTask();
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setStatus("INPROGRESS");
+		request.setPriority("HIGH");
+
+		service.updateTask(request);
+
+		verify(activityService).recordTaskActivity(ActivityType.STATUS_CHANGED, existing, "TODO", "INPROGRESS");
+		verify(activityService).recordTaskActivity(ActivityType.PRIORITY_CHANGED, existing, "LOW", "HIGH");
+		verify(activityService, times(2)).recordTaskActivity(any(), any(), any(), any());
+	}
+
+	@Test
+	void descriptionChangeNeverRecordsTheText() {
+		ProjectTask existing = unchangedTask();
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setDescription("Private words");
+
+		service.updateTask(request);
+
+		verify(activityService).recordTaskActivity(ActivityType.DESCRIPTION_CHANGED, existing, null, null);
+	}
+
+	@Test
+	void assigneeChangeRecordsBothNames() {
+		ProjectTask existing = unchangedTask();
+		Users oldUser = new Users();
+		oldUser.setUserId("user-1");
+		oldUser.setName("Asha");
+		Users newUser = new Users();
+		newUser.setUserId("user-2");
+		newUser.setName("Ravi");
+		when(userRepo.findByUserId("user-1")).thenReturn(oldUser);
+		when(userRepo.findByEmail("ravi@example.com")).thenReturn(newUser);
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setAssignee("ravi@example.com");
+
+		service.updateTask(request);
+
+		verify(activityService).recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, existing, "Asha", "Ravi");
+		assertEquals("user-2", existing.getAssignee());
+	}
+
+	@Test
+	void reassigningTheSamePersonRecordsNothing() {
+		ProjectTask existing = unchangedTask();
+		Users same = new Users();
+		same.setUserId("user-1");
+		when(userRepo.findByEmail("asha@example.com")).thenReturn(same);
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setAssignee("asha@example.com");
+
+		service.updateTask(request);
+
+		verifyNothingRecorded();
+	}
+
+	@Test
+	void dueDateChangesAreRecordedWithBothDates() {
+		ProjectTask existing = task("AB-1", false, null);
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+
+		service.updateDueDate(dueDateChange("2026-11-20"));
+		verify(activityService).recordTaskActivity(ActivityType.DUE_DATE_CHANGED, existing, null, "2026-11-20");
+
+		service.updateDueDate(dueDateChange("2026-11-20"));
+		service.updateDueDate(dueDateChange(""));
+		verify(activityService).recordTaskActivity(ActivityType.DUE_DATE_CHANGED, existing, "2026-11-20", null);
+		verify(activityService, times(2)).recordTaskActivity(any(), any(), any(), any());
+	}
+
+	@Test
+	void creatingTasksIsRecorded() {
+		Backlog backlog = new Backlog();
+		backlog.setPTSequence(0);
+		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+		when(projectTaskRepo.findByProjectSequence("AB-9")).thenReturn(task("AB-9", false, null));
+
+		service.addProjectTask(newTask(""));
+		verify(activityService).recordTaskActivity(eq(ActivityType.TASK_CREATED), any(), isNull(), isNull());
+
+		service.createSubtask(subtaskOf("AB-9"));
+		verify(activityService).recordTaskActivity(eq(ActivityType.SUBTASK_CREATED), any(), isNull(), eq("AB-9"));
 	}
 
 	@Test

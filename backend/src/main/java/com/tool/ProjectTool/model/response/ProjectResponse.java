@@ -17,6 +17,8 @@ public class ProjectResponse {
 	private String projectAvatar;
 	
 	private Date createdOn;
+	
+	private String leadEmail;
 
 	public String getProjectName() {
 		return projectName;
@@ -64,6 +66,14 @@ public class ProjectResponse {
 
 	public void setProjectIdentifier(String projectIdentifier) {
 		this.projectIdentifier = projectIdentifier;
+	}
+
+	public String getLeadEmail() {
+		return leadEmail;
+	}
+
+	public void setLeadEmail(String leadEmail) {
+		this.leadEmail = leadEmail;
 	}
 
 	public Date getCreatedOn() {

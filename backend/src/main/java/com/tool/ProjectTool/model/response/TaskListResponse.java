@@ -1,5 +1,7 @@
 package com.tool.ProjectTool.model.response;
 
+import java.util.Date;
+
 public class TaskListResponse {
 
 	private String taskName;
@@ -19,11 +21,32 @@ public class TaskListResponse {
 	// yyyy-mm-dd, null when the task has no due date
 	private String dueDate;
 	
+	private Date createdOn;
+	
+	// Null until the task is changed for the first time
+	private Date updatedOn;
+	
 	private boolean subtask;
 	
 	private String parentTaskId;
 	
 	private int subtaskCount;
+
+	public Date getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Date createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public Date getUpdatedOn() {
+		return updatedOn;
+	}
+
+	public void setUpdatedOn(Date updatedOn) {
+		this.updatedOn = updatedOn;
+	}
 
 	public String getDueDate() {
 		return dueDate;

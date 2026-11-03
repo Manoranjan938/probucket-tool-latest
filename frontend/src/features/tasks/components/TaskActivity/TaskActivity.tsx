@@ -21,7 +21,7 @@ const TaskActivity = () => {
           >
             Comments
           </button>
-          {/* <button
+          <button
             type="button"
             role="tab"
             aria-selected={showTab === 2}
@@ -29,7 +29,7 @@ const TaskActivity = () => {
             onClick={() => setShowTab(2)}
           >
             History
-          </button> */}
+          </button>
         </div>
       </div>
       <div>

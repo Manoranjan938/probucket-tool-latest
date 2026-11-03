@@ -31,6 +31,7 @@ import com.tool.ProjectTool.model.response.EmailResponse;
 import com.tool.ProjectTool.model.response.NewTeamMemberResponse;
 import com.tool.ProjectTool.model.response.ProjectResponse;
 import com.tool.ProjectTool.model.response.TeamMembersList;
+import com.tool.ProjectTool.repo.ProjectRepository;
 import com.tool.ProjectTool.repo.TeamRepository;
 import com.tool.ProjectTool.repo.UserRepository;
 
@@ -45,6 +46,12 @@ public class TeamService {
 	
 	@Autowired
 	private TeamRepository teamRepo;
+	
+	@Autowired
+	private ProjectRepository projectRepo;
+	
+	@Autowired
+	private ActivityService activityService;
 	
 	@Autowired
 	private BCryptPasswordEncoder passEncode;
@@ -110,6 +117,11 @@ public class TeamService {
 		team.setUserId(newUs.getId());
 		
 		teamRepo.save(team);
+		
+		ProjectEntity project = projectRepo.findByProjectId(teamReq.getProjectId());
+		if (project != null) {
+			activityService.recordMemberAdded(project.getProjectIdentifier(), newUser.getName());
+		}
 		
 		sendNewTeamMemberConfirmationEmail(teamReq.getEmail(), token);
 		

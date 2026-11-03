@@ -8,11 +8,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.Backlog;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.ProjectTask;
@@ -53,6 +56,10 @@ public class ProjectTaskService {
 	@Autowired
 	private ProjectRepository projRepo;
 
+	@Autowired
+	private ActivityService activityService;
+
+	@Transactional
 	public String addProjectTask(ProjectTaskRequest request) {
 
 		LocalDate dueDate = parseDueDate(request.getDueDate());
@@ -85,6 +92,7 @@ public class ProjectTaskService {
 			projTask.setSubtask(false);
 
 			projectTaskRepo.save(projTask);
+			activityService.recordTaskActivity(ActivityType.TASK_CREATED, projTask, null, null);
 
 			return "Task created successfully";
 		} catch (Exception e) {
@@ -124,6 +132,8 @@ public class ProjectTaskService {
 				tas.setAssignee(project.getAssignee());
 				tas.setAssigneeName(assigneeNames.get(project.getAssignee()));
 				tas.setDueDate(formatDueDate(project.getDueDate()));
+				tas.setCreatedOn(project.getCreatedAt());
+				tas.setUpdatedOn(project.getUpdatedAt());
 				tas.setSubtask(project.isSubtask());
 				tas.setParentTaskId(project.getParentTaskId());
 				tas.setSubtaskCount(subtaskCounts.getOrDefault(project.getProjectSequence(), 0));
@@ -201,12 +211,15 @@ public class ProjectTaskService {
 		throw new TaskIdNotFoundException("Task sequence not found");
 	}
 
+	@Transactional
 	public String updateTask(UpdateProjectTaskRequest updateTask) {
 
 		ProjectTask task = projectTaskRepo.findByProjectSequence(updateTask.getTaskId());
 		Users user = userRepo.findByEmail(updateTask.getAssignee());
 
 		if (task != null) {
+
+			recordChanges(task, updateTask, user);
 
 			if(user != null) {
 				task.setAssignee(user.getUserId());
@@ -223,12 +236,42 @@ public class ProjectTaskService {
 		throw new TaskIdNotFoundException("Task id not found");
 	}
 
+	// Callers send the whole task, so this only records the fields that really differ
+	private void recordChanges(ProjectTask task, UpdateProjectTaskRequest update, Users newAssignee) {
+
+		if (!Objects.equals(task.getStatus(), update.getStatus())) {
+			activityService.recordTaskActivity(ActivityType.STATUS_CHANGED, task, task.getStatus(), update.getStatus());
+		}
+		if (!Objects.equals(task.getPriority(), update.getPriority())) {
+			activityService.recordTaskActivity(ActivityType.PRIORITY_CHANGED, task, task.getPriority(), update.getPriority());
+		}
+		if (newAssignee != null && !newAssignee.getUserId().equals(task.getAssignee())) {
+			Users oldAssignee = userRepo.findByUserId(task.getAssignee());
+			activityService.recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, task,
+					oldAssignee != null ? oldAssignee.getName() : null, newAssignee.getName());
+		}
+		// Null and empty both mean no description. The text itself is not recorded.
+		if (!Objects.equals(emptyToNull(task.getTaskDesc()), emptyToNull(update.getDescription()))) {
+			activityService.recordTaskActivity(ActivityType.DESCRIPTION_CHANGED, task, null, null);
+		}
+	}
+
+	private String emptyToNull(String value) {
+		return value == null || value.isEmpty() ? null : value;
+	}
+
+	@Transactional
 	public String updateDueDate(UpdateDueDateRequest request) {
 
 		LocalDate dueDate = parseDueDate(request.getDueDate());
 		ProjectTask task = projectTaskRepo.findByProjectSequence(request.getTaskId());
 
 		if (task != null) {
+
+			if (!Objects.equals(task.getDueDate(), dueDate)) {
+				activityService.recordTaskActivity(ActivityType.DUE_DATE_CHANGED, task,
+						formatDueDate(task.getDueDate()), formatDueDate(dueDate));
+			}
 
 			task.setDueDate(dueDate);
 
@@ -264,6 +307,7 @@ public class ProjectTaskService {
 		return dueDate != null ? dueDate.toString() : null;
 	}
 
+	@Transactional
 	public String createSubtask(RequestCreateSubtask subtaskRequest) {
 
 		ProjectTask parent = projectTaskRepo.findByProjectSequence(subtaskRequest.getParentTaskId());
@@ -308,6 +352,7 @@ public class ProjectTaskService {
 			projTask.setDueDate(dueDate);
 
 			projectTaskRepo.save(projTask);
+			activityService.recordTaskActivity(ActivityType.SUBTASK_CREATED, projTask, null, subtaskRequest.getParentTaskId());
 
 			return "SubTask created successfully";
 		} catch (Exception e) {

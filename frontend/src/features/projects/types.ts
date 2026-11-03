@@ -10,6 +10,8 @@ export interface Project {
   projectAvatar: string;
   /** ISO date; only sent with the details of a single project */
   createdOn?: string;
+  /** Only sent with the details of a single project */
+  leadEmail?: string;
 }
 
 /** model/request/ProjectRequest.java */
