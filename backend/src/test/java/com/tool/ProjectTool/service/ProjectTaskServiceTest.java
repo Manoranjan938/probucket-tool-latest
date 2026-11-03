@@ -10,20 +10,26 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.tool.ProjectTool.entity.Backlog;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
+import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
+import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
 import com.tool.ProjectTool.model.response.TaskDetails;
 import com.tool.ProjectTool.model.response.TaskListResponse;
 import com.tool.ProjectTool.repo.BacklogRepository;
@@ -63,6 +69,106 @@ class ProjectTaskServiceTest {
 		request.setParentTaskId(parent);
 		request.setTaskName("Child");
 		return request;
+	}
+
+	private ProjectTaskRequest newTask(String dueDate) {
+		ProjectTaskRequest request = new ProjectTaskRequest();
+		request.setProjectIdentifier("AB");
+		request.setTaskName("Task");
+		request.setDueDate(dueDate);
+		return request;
+	}
+
+	private UpdateDueDateRequest dueDateChange(String dueDate) {
+		UpdateDueDateRequest request = new UpdateDueDateRequest();
+		request.setTaskId("AB-1");
+		request.setDueDate(dueDate);
+		return request;
+	}
+
+	@Test
+	void newTaskKeepsItsDueDate() {
+		Backlog backlog = new Backlog();
+		backlog.setPTSequence(0);
+		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+
+		service.addProjectTask(newTask("2026-11-20"));
+
+		ArgumentCaptor<ProjectTask> saved = ArgumentCaptor.forClass(ProjectTask.class);
+		verify(projectTaskRepo).save(saved.capture());
+		assertEquals(LocalDate.of(2026, 11, 20), saved.getValue().getDueDate());
+	}
+
+	@Test
+	void newTaskWithoutADueDateHasNone() {
+		Backlog backlog = new Backlog();
+		backlog.setPTSequence(0);
+		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+
+		service.addProjectTask(newTask(""));
+
+		ArgumentCaptor<ProjectTask> saved = ArgumentCaptor.forClass(ProjectTask.class);
+		verify(projectTaskRepo).save(saved.capture());
+		assertNull(saved.getValue().getDueDate());
+	}
+
+	@Test
+	void invalidDueDateIsReportedAsSuch() {
+		for (String invalid : List.of("soon", "2026-13-01", "2026-02-30", "0002-11-20", "2999-01-01")) {
+			assertThrows(BadRequestException.class, () -> service.addProjectTask(newTask(invalid)), invalid);
+			assertThrows(BadRequestException.class, () -> service.updateDueDate(dueDateChange(invalid)), invalid);
+		}
+		verify(projectTaskRepo, never()).save(any());
+	}
+
+	@Test
+	void dueDateCanBeSetAndRemoved() {
+		ProjectTask existing = task("AB-1", false, null);
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+
+		service.updateDueDate(dueDateChange("2026-11-20"));
+		assertEquals(LocalDate.of(2026, 11, 20), existing.getDueDate());
+
+		service.updateDueDate(dueDateChange(""));
+		assertNull(existing.getDueDate());
+
+		existing.setDueDate(LocalDate.of(2026, 11, 20));
+		service.updateDueDate(dueDateChange(null));
+		assertNull(existing.getDueDate());
+	}
+
+	@Test
+	void changingTheDueDateOfAnUnknownTaskFails() {
+		assertThrows(TaskIdNotFoundException.class, () -> service.updateDueDate(dueDateChange("2026-11-20")));
+	}
+
+	@Test
+	void updatingATaskKeepsItsDueDate() {
+		ProjectTask existing = task("AB-1", false, null);
+		existing.setDueDate(LocalDate.of(2026, 11, 20));
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+		UpdateProjectTaskRequest request = new UpdateProjectTaskRequest();
+		request.setTaskId("AB-1");
+		request.setStatus("COMPLETED");
+
+		service.updateTask(request);
+
+		assertEquals(LocalDate.of(2026, 11, 20), existing.getDueDate());
+	}
+
+	@Test
+	void boardListAndDetailsSendTheDueDateWithoutATime() {
+		ProjectTask dated = task("AB-1", false, null);
+		dated.setDueDate(LocalDate.of(2026, 11, 20));
+		when(projectTaskRepo.findByProjectIdentifierOrderByPriority("AB"))
+				.thenReturn(List.of(dated, task("AB-2", false, null)));
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(dated);
+
+		List<TaskListResponse> tasks = service.getTaskLists("AB");
+
+		assertEquals("2026-11-20", tasks.get(0).getDueDate());
+		assertNull(tasks.get(1).getDueDate());
+		assertEquals("2026-11-20", service.getTaskDetails("AB-1").getDueDate());
 	}
 
 	@Test

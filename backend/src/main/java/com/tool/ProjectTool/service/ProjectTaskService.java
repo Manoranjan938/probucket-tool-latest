@@ -1,5 +1,7 @@
 package com.tool.ProjectTool.service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +22,7 @@ import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
 import com.tool.ProjectTool.model.response.HomeTaskCounts;
 import com.tool.ProjectTool.model.response.StatisticsResponse;
@@ -34,6 +37,10 @@ import com.tool.ProjectTool.repo.UserRepository;
 @Service
 public class ProjectTaskService {
 
+	private static final int MIN_DUE_YEAR = 2000;
+
+	private static final int MAX_DUE_YEAR = 2100;
+
 	@Autowired
 	private BacklogRepository backlogRepo;
 
@@ -47,6 +54,8 @@ public class ProjectTaskService {
 	private ProjectRepository projRepo;
 
 	public String addProjectTask(ProjectTaskRequest request) {
+
+		LocalDate dueDate = parseDueDate(request.getDueDate());
 
 		try {
 			Backlog back = backlogRepo.findByProjectIdentifier(request.getProjectIdentifier());
@@ -72,6 +81,7 @@ public class ProjectTaskService {
 			projTask.setTaskName(request.getTaskName());
 			;
 			projTask.setSprintId(request.getSprintId());
+			projTask.setDueDate(dueDate);
 			projTask.setSubtask(false);
 
 			projectTaskRepo.save(projTask);
@@ -113,6 +123,7 @@ public class ProjectTaskService {
 				tas.setStatus(project.getStatus());
 				tas.setAssignee(project.getAssignee());
 				tas.setAssigneeName(assigneeNames.get(project.getAssignee()));
+				tas.setDueDate(formatDueDate(project.getDueDate()));
 				tas.setSubtask(project.isSubtask());
 				tas.setParentTaskId(project.getParentTaskId());
 				tas.setSubtaskCount(subtaskCounts.getOrDefault(project.getProjectSequence(), 0));
@@ -161,6 +172,7 @@ public class ProjectTaskService {
 
 			getTask.setSubtask(task.isSubtask());
 			getTask.setParentTaskId(task.getParentTaskId());
+			getTask.setDueDate(formatDueDate(task.getDueDate()));
 
 			if (user == null) {
 				getTask.setTaskName(task.getTaskName());
@@ -211,6 +223,47 @@ public class ProjectTaskService {
 		throw new TaskIdNotFoundException("Task id not found");
 	}
 
+	public String updateDueDate(UpdateDueDateRequest request) {
+
+		LocalDate dueDate = parseDueDate(request.getDueDate());
+		ProjectTask task = projectTaskRepo.findByProjectSequence(request.getTaskId());
+
+		if (task != null) {
+
+			task.setDueDate(dueDate);
+
+			projectTaskRepo.save(task);
+			return dueDate != null ? "Due date updated" : "Due date removed";
+
+		}
+
+		throw new TaskIdNotFoundException("Task id not found");
+	}
+
+	private LocalDate parseDueDate(String value) {
+
+		if (value == null || value.isBlank()) {
+			return null;
+		}
+
+		try {
+			LocalDate dueDate = LocalDate.parse(value);
+
+			// A date input passes through years like 0002 while the user is still typing
+			if (dueDate.getYear() < MIN_DUE_YEAR || dueDate.getYear() > MAX_DUE_YEAR) {
+				throw new BadRequestException("Invalid due date");
+			}
+
+			return dueDate;
+		} catch (DateTimeParseException e) {
+			throw new BadRequestException("Invalid due date");
+		}
+	}
+
+	private String formatDueDate(LocalDate dueDate) {
+		return dueDate != null ? dueDate.toString() : null;
+	}
+
 	public String createSubtask(RequestCreateSubtask subtaskRequest) {
 
 		ProjectTask parent = projectTaskRepo.findByProjectSequence(subtaskRequest.getParentTaskId());
@@ -222,6 +275,8 @@ public class ProjectTaskService {
 		if (parent.isSubtask()) {
 			throw new BadRequestException("A subtask can't have its own subtasks");
 		}
+
+		LocalDate dueDate = parseDueDate(subtaskRequest.getDueDate());
 
 		try {
 			Backlog back = backlogRepo.findByProjectIdentifier(subtaskRequest.getProjectId());
@@ -250,6 +305,7 @@ public class ProjectTaskService {
 			projTask.setSubtask(true);
 			projTask.setTaskType("Task");
 			projTask.setParentTaskId(subtaskRequest.getParentTaskId());
+			projTask.setDueDate(dueDate);
 
 			projectTaskRepo.save(projTask);
 

@@ -49,5 +49,54 @@ export const formatDate = (value: number | string | undefined) => {
     : date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 };
 
+/** How many days ahead a task counts as due soon */
+export const DUE_SOON_DAYS = 7;
+
+/** The range the backend accepts (ProjectTaskService.parseDueDate) */
+export const MIN_DUE_DATE = "2000-01-01";
+export const MAX_DUE_DATE = "2100-12-31";
+
+export type DueState = "overdue" | "today" | "soon" | "later";
+
+/** Colours of the due date badge */
+export const dueStyles: Record<DueState, string> = {
+  overdue: "bg-due-overdue-soft text-due-overdue",
+  today: "bg-due-soon-soft text-due-soon",
+  soon: "bg-due-soon-soft text-due-soon",
+  later: "bg-status-todo-soft text-brand-text",
+};
+
+/** A date in the user's own timezone as yyyy-mm-dd, which sorts and compares correctly as text */
+const toIsoDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+/** A due date has no time, so it is compared with the user's own today. A completed task is never overdue. */
+export const getDueState = (dueDate: string, status?: string): DueState => {
+  if (status === "COMPLETED") {
+    return "later";
+  }
+  const now = new Date();
+  const today = toIsoDate(now);
+  const lastSoonDay = toIsoDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() + DUE_SOON_DAYS));
+
+  if (dueDate < today) {
+    return "overdue";
+  }
+  if (dueDate === today) {
+    return "today";
+  }
+  return dueDate <= lastSoonDay ? "soon" : "later";
+};
+
+/** "2026-11-05" as e.g. "5 Nov", with the year if it isn't this year. new Date("2026-11-05") would read it as UTC. */
+export const formatDueDate = (dueDate: string) => {
+  const [year, month, day] = dueDate.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: year === new Date().getFullYear() ? undefined : "numeric",
+  });
+};
+
 /** Toasts in the same corner as the Snackbars on the other pages */
 export const toastOptions: OptionsObject = { anchorOrigin: { vertical: "bottom", horizontal: "right" } };

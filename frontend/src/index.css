@@ -27,6 +27,10 @@
   --color-status-progress-soft: #eaf1fe;
   --color-status-done: #16a34a;
   --color-status-done-soft: #e9f7ef;
+  --color-due-overdue: #b42318;
+  --color-due-overdue-soft: #fef1ef;
+  --color-due-soon: #8a5a00;
+  --color-due-soon-soft: #fdf3dc;
   --color-priority-high: #e5603e;
   --color-priority-medium: #d99a00;
   --color-priority-low: #8a889f;

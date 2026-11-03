@@ -7,14 +7,17 @@ import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
+import DueBadge from "features/tasks/components/DueBadge/DueBadge";
+import DueDateDialog from "features/tasks/components/DueDateDialog/DueDateDialog";
 import useUpdateTask from "features/tasks/hooks/useUpdateTask";
 import { formatDate, formatEnum, priorityColors, toastOptions } from "features/tasks/data";
 import type { RootState } from "app/store";
 import type { TeamMember } from "features/team/types";
 
-// The task's assignee, priority and dates, with a dialog to change the assignee
+// The task's assignee, priority and dates, with dialogs to change the assignee and the due date
 const ExtraDetails = ({ onChanged, myTeams, currentTask }: { onChanged: () => void } & Props) => {
   const [showAssigneeDialog, setShowAssigneeDialog] = useState(false);
+  const [showDueDateDialog, setShowDueDateDialog] = useState(false);
   const [assignee, setAssignee] = useState<TeamMember | null>(null);
   const [saving, setSaving] = useState(false);
   const [updateTask] = useUpdateTask();
@@ -88,6 +91,19 @@ const ExtraDetails = ({ onChanged, myTeams, currentTask }: { onChanged: () => vo
           </span>
         </div>
         <div className={task.detailRow}>
+          <span className={task.detailLabel}>Due date</span>
+          <span className={task.detailValue}>
+            {currentTask.dueDate ? (
+              <DueBadge dueDate={currentTask.dueDate} status={currentTask.status} />
+            ) : (
+              <span className="font-normal text-brand-muted">None</span>
+            )}
+            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setShowDueDateDialog(true)}>
+              {currentTask.dueDate ? "Change" : "Set"}
+            </button>
+          </span>
+        </div>
+        <div className={task.detailRow}>
           <span className={task.detailLabel}>Created</span>
           <span className={task.detailValue}>{formatDate(currentTask.createdOn) || "–"}</span>
         </div>
@@ -96,6 +112,14 @@ const ExtraDetails = ({ onChanged, myTeams, currentTask }: { onChanged: () => vo
           <span className={task.detailValue}>{formatDate(currentTask.updatedOn) || "–"}</span>
         </div>
       </div>
+
+      <DueDateDialog
+        open={showDueDateDialog}
+        onClose={() => setShowDueDateDialog(false)}
+        onChanged={onChanged}
+        taskId={currentTask.taskSequence}
+        dueDate={currentTask.dueDate}
+      />
 
       <Dialog
         open={showAssigneeDialog}

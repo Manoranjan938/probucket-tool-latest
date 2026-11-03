@@ -5,6 +5,7 @@ import { FiX } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
+import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
 import useCreateTask from "features/tasks/hooks/useCreateTask";
 import { toastOptions } from "features/tasks/data";
@@ -22,6 +23,8 @@ interface NewTaskProps {
 const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) => {
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
+  const [dueDate, setDueDate] = useState("");
+  const [dueDateError, setDueDateError] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [createProjectTask] = useCreateTask();
@@ -30,6 +33,8 @@ const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) 
   const handleClose = () => {
     setTaskName("");
     setPriority("LOW");
+    setDueDate("");
+    setDueDateError("");
     setError("");
     onClose();
   };
@@ -41,6 +46,10 @@ const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) 
       setError("Please describe the task");
       return;
     }
+    if (!isDueDateInputValid(e.currentTarget)) {
+      setDueDateError("Please enter a valid date");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -50,6 +59,7 @@ const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) 
         priority,
         sprintId: "",
         status: "",
+        dueDate,
       });
       enqueueSnackbar("Task created", { ...toastOptions, variant: "success" });
       onCreated();
@@ -95,6 +105,16 @@ const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) 
             <span className={task.label}>Priority</span>
             <PriorityPicker name="new-task-priority" value={priority} onChange={setPriority} />
           </div>
+          <DueDateField
+            id="new-task-due-date"
+            label="Due date (optional)"
+            value={dueDate}
+            onChange={(value) => {
+              setDueDate(value);
+              setDueDateError("");
+            }}
+            error={dueDateError}
+          />
         </div>
 
         <div className={task.dialogFooter}>

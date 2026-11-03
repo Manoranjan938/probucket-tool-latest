@@ -9,6 +9,7 @@ import * as dashboard from "features/dashboard/styles/dashboardClasses";
 import TaskStats from "features/dashboard/components/TaskStats/TaskStats";
 import TaskStatsSkeleton from "features/dashboard/components/TaskStats/TaskStatsSkeleton";
 import TaskProgress from "features/dashboard/components/TaskProgress/TaskProgress";
+import DueTasks from "features/dashboard/components/DueTasks/DueTasks";
 import OpenTasks from "features/dashboard/components/OpenTasks/OpenTasks";
 import AssignedToMe from "features/dashboard/components/AssignedToMe/AssignedToMe";
 import TeamWorkload from "features/dashboard/components/TeamWorkload/TeamWorkload";
@@ -91,6 +92,7 @@ const HomeOverview = ({ type, team, children, currentUser, currentProject }: Own
       <div className={dashboard.homeGrid}>
         <div className={dashboard.homeColumn}>
           {type === "team" ? <AssignedToMe tasks={tasks} userId={currentUser.id} worksLink={worksLink} /> : null}
+          <DueTasks tasks={tasks} worksLink={worksLink} />
           <OpenTasks tasks={tasks} worksLink={worksLink} />
           {type === "team" ? <TeamWorkload tasks={tasks} team={team === null ? [] : team} /> : null}
         </div>

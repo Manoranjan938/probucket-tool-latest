@@ -7,6 +7,7 @@ import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
+import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
 import useCreateNewSubtask from "features/tasks/hooks/useCreateNewSubtask";
 import { toastOptions } from "features/tasks/data";
@@ -24,6 +25,8 @@ type OwnProps = {
 const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: OwnProps & Props) => {
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
+  const [dueDate, setDueDate] = useState("");
+  const [dueDateError, setDueDateError] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [createNewSubtask] = useCreateNewSubtask();
@@ -32,6 +35,8 @@ const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: O
   const handleClose = () => {
     setTaskName("");
     setPriority("LOW");
+    setDueDate("");
+    setDueDateError("");
     setError("");
     onClose();
   };
@@ -43,6 +48,10 @@ const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: O
       setError("Please describe the subtask");
       return;
     }
+    if (!isDueDateInputValid(e.currentTarget)) {
+      setDueDateError("Please enter a valid date");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -52,6 +61,7 @@ const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: O
         taskName: name,
         priority,
         status: "",
+        dueDate,
       });
       enqueueSnackbar(resp.data.message || "Subtask created", { ...toastOptions, variant: "success" });
       onCreated();
@@ -102,6 +112,16 @@ const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: O
             <span className={task.label}>Priority</span>
             <PriorityPicker name="new-subtask-priority" value={priority} onChange={setPriority} />
           </div>
+          <DueDateField
+            id="new-subtask-due-date"
+            label="Due date (optional)"
+            value={dueDate}
+            onChange={(value) => {
+              setDueDate(value);
+              setDueDateError("");
+            }}
+            error={dueDateError}
+          />
         </div>
 
         <div className={task.dialogFooter}>

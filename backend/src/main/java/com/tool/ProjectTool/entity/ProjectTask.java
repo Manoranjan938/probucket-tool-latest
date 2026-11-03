@@ -1,5 +1,6 @@
 package com.tool.ProjectTool.entity;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import jakarta.persistence.CascadeType;
@@ -36,7 +37,7 @@ public class ProjectTask {
 	
 	private String status;
 	
-	private Date dueDate;
+	private LocalDate dueDate;
 	
 	private String taskType;
 	
@@ -100,11 +101,11 @@ public class ProjectTask {
 		this.status = status;
 	}
 
-	public Date getDueDate() {
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
 
-	public void setDueDate(Date dueDate) {
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
 

@@ -59,6 +59,8 @@ export const cardAssign =
   "flex items-center justify-center w-6 h-6 ml-auto border border-dashed border-brand-muted rounded-[50%] text-[11px] text-brand-muted";
 
 /* Priority */
+export const dueBadge =
+  "inline-flex shrink-0 items-center gap-1 self-start px-2 py-0.5 rounded-full text-[12px] font-semibold whitespace-nowrap";
 export const priority = "inline-flex items-center gap-1 text-[12px] font-semibold capitalize";
 
 /* Status pill */

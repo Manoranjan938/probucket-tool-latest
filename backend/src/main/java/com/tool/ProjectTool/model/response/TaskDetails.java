@@ -25,6 +25,17 @@ public class TaskDetails {
 	private boolean subtask;
 	
 	private String parentTaskId;
+	
+	// yyyy-mm-dd, null when the task has no due date
+	private String dueDate;
+
+	public String getDueDate() {
+		return dueDate;
+	}
+
+	public void setDueDate(String dueDate) {
+		this.dueDate = dueDate;
+	}
 
 	public boolean isSubtask() {
 		return subtask;

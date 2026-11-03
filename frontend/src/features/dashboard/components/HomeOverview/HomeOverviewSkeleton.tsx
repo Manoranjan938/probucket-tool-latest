@@ -40,6 +40,7 @@ const HomeOverviewSkeleton = ({ team = false }: { team?: boolean }) => {
         <div className={dashboard.homeColumn}>
           {team ? <TaskListCardSkeleton /> : null}
           <TaskListCardSkeleton />
+          <TaskListCardSkeleton />
           {team ? <BarsCardSkeleton /> : null}
         </div>
         <div className={dashboard.homeColumn}>

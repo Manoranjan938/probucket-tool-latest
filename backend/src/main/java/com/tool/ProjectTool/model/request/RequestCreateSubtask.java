@@ -11,6 +11,17 @@ public class RequestCreateSubtask {
 	private String priority;
 	
 	private String status;
+	
+	// yyyy-mm-dd, optional
+	private String dueDate;
+
+	public String getDueDate() {
+		return dueDate;
+	}
+
+	public void setDueDate(String dueDate) {
+		this.dueDate = dueDate;
+	}
 
 	public String getParentTaskId() {
 		return parentTaskId;

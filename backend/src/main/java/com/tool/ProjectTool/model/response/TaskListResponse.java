@@ -16,11 +16,22 @@ public class TaskListResponse {
 	
 	private String assigneeName;
 	
+	// yyyy-mm-dd, null when the task has no due date
+	private String dueDate;
+	
 	private boolean subtask;
 	
 	private String parentTaskId;
 	
 	private int subtaskCount;
+
+	public String getDueDate() {
+		return dueDate;
+	}
+
+	public void setDueDate(String dueDate) {
+		this.dueDate = dueDate;
+	}
 
 	public String getAssigneeName() {
 		return assigneeName;

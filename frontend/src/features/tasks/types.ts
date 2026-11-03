@@ -13,6 +13,8 @@ export interface TaskListItem extends Subtask {
   /** The assignee's user id; empty when nobody is assigned */
   assignee: string;
   assigneeName: string | null;
+  /** yyyy-mm-dd */
+  dueDate: string | null;
   subtask: boolean;
   /** Sequence of the parent task; null on parent tasks */
   parentTaskId: string | null;
@@ -27,6 +29,8 @@ export interface TaskDetails extends Subtask {
   taskDesc: string;
   createdOn: number;
   updatedOn: number;
+  /** yyyy-mm-dd */
+  dueDate: string | null;
 }
 
 /** model/response/StatisticsResponse.java */
@@ -43,6 +47,8 @@ export interface ProjectTaskRequest {
   sprintId: string;
   priority: string;
   status: string;
+  /** yyyy-mm-dd, optional */
+  dueDate?: string;
 }
 
 /** model/request/RequestCreateSubtask.java */
@@ -52,6 +58,15 @@ export interface CreateSubtaskRequest {
   taskName: string;
   priority: string;
   status: string;
+  /** yyyy-mm-dd, optional */
+  dueDate?: string;
+}
+
+/** model/request/UpdateDueDateRequest.java */
+export interface UpdateDueDateRequest {
+  taskId: string;
+  /** yyyy-mm-dd, empty removes the due date */
+  dueDate: string;
 }
 
 /** model/request/UpdateProjectTaskRequest.java */
