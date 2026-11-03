@@ -14,6 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.tool.ProjectTool.entity.Users;
@@ -34,6 +35,9 @@ public class UserService {
 
 	@Autowired
 	private UserRepository userRepo;
+
+	@Autowired
+	private RefreshTokenService refreshTokenService;
 
 	@Autowired
 	private BCryptPasswordEncoder passEncode;
@@ -184,6 +188,8 @@ public class UserService {
 		throw new UserNotFoundException("User not found with this email" + email);
 	}
 
+	// A password reset means the account may be compromised, so every device has to log in again
+	@Transactional
 	public String resetPassword(String token, String pass) {
 
 		Users user = userRepo.findByVerifyToken(token);
@@ -194,6 +200,7 @@ public class UserService {
 			user.setPassword(passEncode.encode(pass));
 
 			userRepo.save(user);
+			refreshTokenService.revokeAllSessions(user.getUserId());
 
 			return "Password updated successdully";
 		}
@@ -201,7 +208,9 @@ public class UserService {
 		throw new UserNotFoundException("User does not exist or invalid token");
 	}
 	
-	public String updatePassword(UpdatePasswordRequest passReq) {
+	// The device changing the password stays logged in, the others have to log in again
+	@Transactional
+	public String updatePassword(UpdatePasswordRequest passReq, String sessionId) {
 		
 		Users user = userRepo.findByUserId(passReq.getUserId());
 		if(user != null) {
@@ -209,6 +218,7 @@ public class UserService {
 			user.setPassword(passEncode.encode(passReq.getPassword()));
 			
 			userRepo.save(user);
+			refreshTokenService.revokeOtherSessions(user.getUserId(), sessionId);
 			return "Password updated successdully";
 		}
 		

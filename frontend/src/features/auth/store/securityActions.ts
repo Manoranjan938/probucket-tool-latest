@@ -24,9 +24,17 @@ export const restoreSession = () => async (dispatch: Dispatch<SecurityAction>) =
 };
 
 // JavaScript can't touch an HttpOnly cookie, so only the backend can clear it.
-// Rejects if that fails, because the user would still be logged in.
+// These reject if that fails, because the user would still be logged in.
 export const logout = () => async (dispatch: Dispatch<SecurityAction>) => {
   await axios.post("/auth/logout");
+  dispatch({
+    type: SET_CURRENT_USER,
+    payload: {},
+  });
+};
+
+export const logoutEverywhere = () => async (dispatch: Dispatch<SecurityAction>) => {
+  await axios.post("/auth/logoutEverywhere");
   dispatch({
     type: SET_CURRENT_USER,
     payload: {},

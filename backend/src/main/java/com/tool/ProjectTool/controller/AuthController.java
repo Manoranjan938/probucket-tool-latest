@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,13 +22,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.exception.ApiErrorCode;
 import com.tool.ProjectTool.model.request.LoginRequest;
 import com.tool.ProjectTool.model.request.UserRequest;
 import com.tool.ProjectTool.model.response.ApiResponse;
 import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.AuthUserResponse;
+import com.tool.ProjectTool.model.response.RefreshSession;
+import com.tool.ProjectTool.security.SecurityConstants;
 import com.tool.ProjectTool.security.TokenCookieProvider;
 import com.tool.ProjectTool.security.TokenProvider;
+import com.tool.ProjectTool.service.CustomUserService;
+import com.tool.ProjectTool.service.RefreshTokenService;
 import com.tool.ProjectTool.service.UserService;
 import com.tool.ProjectTool.service.ValidationErrorService;
 
@@ -49,7 +55,32 @@ public class AuthController {
 	private TokenCookieProvider tokenCookieProvider;
 
 	@Autowired
+	private RefreshTokenService refreshTokenService;
+
+	@Autowired
+	private CustomUserService customService;
+
+	@Autowired
 	private AuthenticationManager authManager;
+
+	private HttpHeaders sessionCookies(Users user, RefreshSession session) {
+		HttpHeaders headers = new HttpHeaders();
+		String accessToken = tokenProvider.generateToken(user, session.sessionId());
+
+		headers.add(HttpHeaders.SET_COOKIE, tokenCookieProvider.createAccessCookie(accessToken).toString());
+		if (session.refreshToken() != null) {
+			headers.add(HttpHeaders.SET_COOKIE, tokenCookieProvider.createRefreshCookie(session.refreshToken()).toString());
+		}
+
+		return headers;
+	}
+
+	private HttpHeaders clearedCookies() {
+		HttpHeaders headers = new HttpHeaders();
+		tokenCookieProvider.clearCookies().forEach(cookie -> headers.add(HttpHeaders.SET_COOKIE, cookie.toString()));
+
+		return headers;
+	}
 
 	@PostMapping("/newUser")
 	public ResponseEntity<?> createLocalUser(@Valid @RequestBody UserRequest user, BindingResult result) {
@@ -70,20 +101,55 @@ public class AuthController {
 		Authentication auth = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(logRequest.getUsername(), logRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(auth);
-		String jwt = tokenProvider.generateToken(auth);
-		AuthUserResponse user = new AuthUserResponse((Users) auth.getPrincipal());
+		Users user = (Users) auth.getPrincipal();
+		RefreshSession session = refreshTokenService.startSession(user.getUserId());
 
 		return ResponseEntity.ok()
-				.header(HttpHeaders.SET_COOKIE, tokenCookieProvider.createCookie(jwt).toString())
-				.body(ApiResponseBuilder.ok("Login successful", user).getBody());
+				.headers(sessionCookies(user, session))
+				.body(ApiResponseBuilder.ok("Login successful", new AuthUserResponse(user)).getBody());
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<?> refreshSession(
+			@CookieValue(name = SecurityConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+
+		RefreshSession session = refreshToken != null ? refreshTokenService.rotate(refreshToken) : null;
+
+		if (session == null) {
+			return ResponseEntity.status(ApiErrorCode.UNAUTHORIZED.getStatus())
+					.headers(clearedCookies())
+					.body(ApiResponseBuilder.error(ApiErrorCode.UNAUTHORIZED, "Session ended, please log in again")
+							.getBody());
+		}
+
+		Users user = customService.loadUserByUserId(session.userId());
+
+		return ResponseEntity.ok()
+				.headers(sessionCookies(user, session))
+				.body(ApiResponseBuilder.ok("Session refreshed").getBody());
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<?> logoutUser() {
+	public ResponseEntity<?> logoutUser(
+			@CookieValue(name = SecurityConstants.REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+
+		if (refreshToken != null) {
+			refreshTokenService.revokeSession(refreshToken);
+		}
 
 		return ResponseEntity.ok()
-				.header(HttpHeaders.SET_COOKIE, tokenCookieProvider.clearCookie().toString())
+				.headers(clearedCookies())
 				.body(ApiResponseBuilder.ok("Logout successful").getBody());
+	}
+
+	@PostMapping("/logoutEverywhere")
+	public ResponseEntity<?> logoutEverywhere(@AuthenticationPrincipal Users user) {
+
+		refreshTokenService.revokeAllSessions(user.getUserId());
+
+		return ResponseEntity.ok()
+				.headers(clearedCookies())
+				.body(ApiResponseBuilder.ok("Logged out on all devices").getBody());
 	}
 
 	@GetMapping("/me")

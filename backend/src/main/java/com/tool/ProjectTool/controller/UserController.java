@@ -3,6 +3,7 @@ package com.tool.ProjectTool.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,8 @@ import com.tool.ProjectTool.model.request.UpdatePasswordRequest;
 import com.tool.ProjectTool.model.request.UpdateUserRequest;
 import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.UserResponse;
+import com.tool.ProjectTool.security.SecurityConstants;
+import com.tool.ProjectTool.security.TokenProvider;
 import com.tool.ProjectTool.service.UserService;
 
 @RestController
@@ -24,7 +27,10 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
+
+	@Autowired
+	private TokenProvider tokenProvider;
+
 	@GetMapping("/me/{email}")
 	@PreAuthorize("#email == principal.email")
 	public ResponseEntity<?> getUserDetails(@PathVariable("email") String email){
@@ -45,9 +51,12 @@ public class UserController {
 	
 	@PostMapping("/updatePassword")
 	@PreAuthorize("#passReq.userId == principal.userId")
-	public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordRequest passReq){
-		
-		return ApiResponseBuilder.ok(userService.updatePassword(passReq));
+	public ResponseEntity<?> updatePassword(@RequestBody UpdatePasswordRequest passReq,
+			@CookieValue(SecurityConstants.ACCESS_TOKEN_COOKIE) String accessToken){
+
+		String sessionId = tokenProvider.getSessionIdFromJwt(accessToken);
+
+		return ApiResponseBuilder.ok(userService.updatePassword(passReq, sessionId));
 	}
 	
 }

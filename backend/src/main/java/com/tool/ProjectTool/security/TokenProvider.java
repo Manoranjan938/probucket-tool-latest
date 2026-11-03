@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.tool.ProjectTool.entity.Users;
@@ -30,7 +29,7 @@ public class TokenProvider {
 	@Value("${app.jwt.secret}")
 	private String secret;
 
-	@Value("${app.jwt.expiration-ms}")
+	@Value("${app.jwt.access-expiration-ms}")
 	private long expirationTime;
 
 	private SecretKey signingKey;
@@ -47,9 +46,8 @@ public class TokenProvider {
 		signingKey = Keys.hmacShaKeyFor(keyBytes);
 	}
 
-	public String generateToken(Authentication auth) {
+	public String generateToken(Users user, String sessionId) {
 
-		Users user = (Users) auth.getPrincipal();
 		Date now = new Date(System.currentTimeMillis());
 
 		Date expiryDate = new Date(now.getTime() + expirationTime);
@@ -59,6 +57,7 @@ public class TokenProvider {
 		claims.put("rolename", user.getRoleName());
 		claims.put("username", user.getUsername());
 		claims.put("fullName", user.getName());
+		claims.put("sid", sessionId);
 
 		return Jwts.builder().claims(claims).issuedAt(now).expiration(expiryDate)
 				.signWith(signingKey, Jwts.SIG.HS512).compact();
@@ -100,6 +99,14 @@ public class TokenProvider {
 		String role = (String) claims.get("rolename");
 
 		return role;
+	}
+
+	public String getSessionIdFromJwt(String token) {
+		Claims claims = parseClaims(token);
+
+		String sessionId = (String) claims.get("sid");
+
+		return sessionId;
 	}
 
 	private Claims parseClaims(String token) {

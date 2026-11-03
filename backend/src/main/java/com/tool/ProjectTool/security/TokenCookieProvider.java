@@ -1,6 +1,7 @@
 package com.tool.ProjectTool.security;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -9,27 +10,41 @@ import org.springframework.stereotype.Component;
 @Component
 public class TokenCookieProvider {
 
-	@Value("${app.jwt.expiration-ms}")
-	private long expirationTime;
+	private static final String ACCESS_COOKIE_PATH = "/";
+
+	@Value("${app.jwt.access-expiration-ms}")
+	private long accessExpirationTime;
+
+	@Value("${app.jwt.refresh-expiration-ms}")
+	private long refreshExpirationTime;
 
 	@Value("${app.jwt.cookie-secure}")
 	private boolean secure;
 
-	public ResponseCookie createCookie(String token) {
-		return buildCookie(token, Duration.ofMillis(expirationTime));
+	public ResponseCookie createAccessCookie(String token) {
+		return buildCookie(SecurityConstants.ACCESS_TOKEN_COOKIE, token, ACCESS_COOKIE_PATH,
+				Duration.ofMillis(accessExpirationTime));
 	}
 
-	// A max age of zero makes the browser delete the cookie
-	public ResponseCookie clearCookie() {
-		return buildCookie("", Duration.ZERO);
+	public ResponseCookie createRefreshCookie(String token) {
+		return buildCookie(SecurityConstants.REFRESH_TOKEN_COOKIE, token, SecurityConstants.REFRESH_COOKIE_PATH,
+				Duration.ofMillis(refreshExpirationTime));
 	}
 
-	private ResponseCookie buildCookie(String value, Duration maxAge) {
-		return ResponseCookie.from(SecurityConstants.TOKEN_COOKIE, value)
+	// A max age of zero makes the browser delete a cookie, and its path has to match the one it was set with
+	public List<ResponseCookie> clearCookies() {
+		return List.of(
+				buildCookie(SecurityConstants.ACCESS_TOKEN_COOKIE, "", ACCESS_COOKIE_PATH, Duration.ZERO),
+				buildCookie(SecurityConstants.REFRESH_TOKEN_COOKIE, "", SecurityConstants.REFRESH_COOKIE_PATH,
+						Duration.ZERO));
+	}
+
+	private ResponseCookie buildCookie(String name, String value, String path, Duration maxAge) {
+		return ResponseCookie.from(name, value)
 				.httpOnly(true)
 				.secure(secure)
 				.sameSite("Strict")
-				.path("/")
+				.path(path)
 				.maxAge(maxAge)
 				.build();
 	}

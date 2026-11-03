@@ -7,17 +7,17 @@ import image from "shared/assets/images/logo.png";
 import { FaSignOutAlt } from "react-icons/fa";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
-import { logout } from "features/auth/store/securityActions";
+import { logout, logoutEverywhere } from "features/auth/store/securityActions";
 import type { AppDispatch, RootState } from "app/store";
 import { getApiErrorMessage } from "shared/services/apiError";
 
-const Logout = ({ logout, currentUser }: Props) => {
+const Logout = ({ logout, logoutEverywhere, currentUser }: Props) => {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  const handleClickLogout = async () => {
+  const handleClickLogout = async (endSession: () => Promise<void>) => {
     try {
-      await logout();
+      await endSession();
       navigate("/login");
     } catch (err) {
       setError(getApiErrorMessage(err, "Could not log out. Please try again."));
@@ -47,11 +47,14 @@ const Logout = ({ logout, currentUser }: Props) => {
               </div>
             </div>
 
-            <button type="button" className={auth.btnPrimary} onClick={handleClickLogout}>
+            <button type="button" className={auth.btnPrimary} onClick={() => handleClickLogout(logout)}>
               <FaSignOutAlt />
               Log out
             </button>
             {error && <p className={auth.error}>{error}</p>}
+            <button type="button" className={auth.btnGhost} onClick={() => handleClickLogout(logoutEverywhere)}>
+              Log out on all devices
+            </button>
             <Link to="/projects" className={auth.btnGhost}>
               Back to my projects
             </Link>
@@ -69,6 +72,7 @@ const Logout = ({ logout, currentUser }: Props) => {
 function mapDispatchToProps(dispatch: AppDispatch) {
   return {
     logout: () => dispatch(logout()),
+    logoutEverywhere: () => dispatch(logoutEverywhere()),
   };
 }
 
