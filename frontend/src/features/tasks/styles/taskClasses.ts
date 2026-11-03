@@ -57,6 +57,7 @@ export const cardSubtaskCount = "inline-flex items-center gap-1 text-[12px] font
 export const cardKey = "text-[12px] font-semibold uppercase text-brand-muted";
 export const cardAssign =
   "flex items-center justify-center w-6 h-6 ml-auto border border-dashed border-brand-muted rounded-[50%] text-[11px] text-brand-muted";
+export const cardAssignee = `${avatarBase} w-6 h-6 ml-auto bg-brand-strong text-[11px] text-white`;
 
 /* Priority */
 export const dueBadge =

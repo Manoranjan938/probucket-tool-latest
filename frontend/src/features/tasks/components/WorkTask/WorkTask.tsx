@@ -1,4 +1,5 @@
 import React from "react";
+import { Tooltip } from "@mui/material";
 import { FiCornerDownRight, FiFlag, FiGitMerge, FiUserPlus } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
@@ -16,6 +17,8 @@ interface WorkTaskProps {
 
 // A task card on the board; clicking it opens the task details
 const WorkTask = ({ taskDetails, selected, onOpen }: WorkTaskProps) => {
+  const assigneeName = taskDetails.assigneeName ?? "Unknown";
+
   return (
     <button
       type="button"
@@ -47,10 +50,18 @@ const WorkTask = ({ taskDetails, selected, onOpen }: WorkTaskProps) => {
             {taskDetails.subtaskCount}
           </span>
         ) : null}
-        {/* Assigning from the card isn't wired up yet – the assignee is changed in the task details */}
-        <span className={task.cardAssign} aria-hidden="true">
-          <FiUserPlus />
-        </span>
+        {taskDetails.assignee ? (
+          <Tooltip title={assigneeName}>
+            <span className={task.cardAssignee} aria-label={`Assignee: ${assigneeName}`}>
+              {assigneeName.substring(0, 1)}
+            </span>
+          </Tooltip>
+        ) : (
+          // Assigning from the card isn't wired up yet – the assignee is changed in the task details
+          <span className={task.cardAssign} aria-hidden="true">
+            <FiUserPlus />
+          </span>
+        )}
       </span>
     </button>
   );

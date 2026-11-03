@@ -34,6 +34,7 @@ import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
+import com.tool.ProjectTool.model.response.SubtaskList;
 import com.tool.ProjectTool.model.response.TaskDetails;
 import com.tool.ProjectTool.model.response.TaskListResponse;
 import com.tool.ProjectTool.repo.BacklogRepository;
@@ -326,6 +327,22 @@ class ProjectTaskServiceTest {
 		assertEquals("Asha", tasks.get(0).getAssigneeName());
 		assertNull(tasks.get(1).getAssignee());
 		assertNull(tasks.get(1).getAssigneeName());
+	}
+
+	@Test
+	void subtaskListSendsTheAssigneesNameOrNA() {
+		Object[] assigned = { "Assigned", "TASK", "AB-2", "HIGH", "TODO", "user-1", true, "AB-1" };
+		Object[] unassigned = { "Unassigned", "TASK", "AB-3", "LOW", "TODO", null, true, "AB-1" };
+		Users user = new Users();
+		user.setUserId("user-1");
+		user.setName("Asha");
+		when(projectTaskRepo.findSubtaskListByParentId("AB-1")).thenReturn(List.<Object>of(assigned, unassigned));
+		when(userRepo.findByUserIdIn(Set.of("user-1"))).thenReturn(List.of(user));
+
+		List<SubtaskList> subtasks = service.getSubTaskList("AB-1");
+
+		assertEquals("Asha", subtasks.get(0).getAssignee());
+		assertEquals("NA", subtasks.get(1).getAssignee());
 	}
 
 	@Test

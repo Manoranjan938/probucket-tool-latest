@@ -152,6 +152,20 @@ public class ProjectTaskService {
 
 		List<Object> subtaskList = projectTaskRepo.findSubtaskListByParentId(parentId);
 		List<SubtaskList> subtaskLists = new ArrayList<>();
+
+		Set<String> assigneeIds = new HashSet<>();
+		for (Object subtask : subtaskList) {
+			Object assignee = ((Object[]) subtask)[5];
+			if (assignee != null) {
+				assigneeIds.add(String.valueOf(assignee));
+			}
+		}
+
+		Map<String, String> assigneeNames = new HashMap<>();
+		for (Users user : userRepo.findByUserIdIn(assigneeIds)) {
+			assigneeNames.put(user.getUserId(), user.getName());
+		}
+
 		Iterator itr = subtaskList.iterator();
 
 		while (itr.hasNext()) {
@@ -163,7 +177,8 @@ public class ProjectTaskService {
 			sub.setTaskSequence(String.valueOf(row[2]));
 			sub.setPriority(String.valueOf(row[3]));
 			sub.setStatus(String.valueOf(row[4]));
-			sub.setAssignee(String.valueOf(row[5]));
+			// The assignee's name, "NA" when nobody is assigned – same as the task details
+			sub.setAssignee(assigneeNames.getOrDefault(String.valueOf(row[5]), "NA"));
 
 			subtaskLists.add(sub);
 
