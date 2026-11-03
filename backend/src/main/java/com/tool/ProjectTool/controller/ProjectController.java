@@ -28,7 +28,7 @@ import com.tool.ProjectTool.service.ValidationErrorService;
 
 @RestController
 @RequestMapping("/api/v1/project")
-@CrossOrigin({ "${app.cors.allowed-origin}" })
+@CrossOrigin(origins = "${app.cors.allowed-origin}", allowCredentials = "true")
 public class ProjectController {
 
 	@Autowired

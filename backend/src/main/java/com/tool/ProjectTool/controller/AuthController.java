@@ -3,10 +3,12 @@ package com.tool.ProjectTool.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,19 +20,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.model.request.LoginRequest;
 import com.tool.ProjectTool.model.request.UserRequest;
 import com.tool.ProjectTool.model.response.ApiResponse;
 import com.tool.ProjectTool.model.response.ApiResponseBuilder;
-import com.tool.ProjectTool.model.response.LoginResponse;
-import com.tool.ProjectTool.security.SecurityConstants;
+import com.tool.ProjectTool.model.response.AuthUserResponse;
+import com.tool.ProjectTool.security.TokenCookieProvider;
 import com.tool.ProjectTool.security.TokenProvider;
 import com.tool.ProjectTool.service.UserService;
 import com.tool.ProjectTool.service.ValidationErrorService;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin({ "${app.cors.allowed-origin}" })
+@CrossOrigin(origins = "${app.cors.allowed-origin}", allowCredentials = "true")
 public class AuthController {
 
 	@Autowired
@@ -41,6 +44,9 @@ public class AuthController {
 
 	@Autowired
 	private TokenProvider tokenProvider;
+
+	@Autowired
+	private TokenCookieProvider tokenCookieProvider;
 
 	@Autowired
 	private AuthenticationManager authManager;
@@ -64,9 +70,26 @@ public class AuthController {
 		Authentication auth = authManager.authenticate(
 				new UsernamePasswordAuthenticationToken(logRequest.getUsername(), logRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(auth);
-		String jwt = SecurityConstants.TOKEN_PREFIX + tokenProvider.generateToken(auth);
+		String jwt = tokenProvider.generateToken(auth);
+		AuthUserResponse user = new AuthUserResponse((Users) auth.getPrincipal());
 
-		return ApiResponseBuilder.ok("Login successful", new LoginResponse(jwt));
+		return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, tokenCookieProvider.createCookie(jwt).toString())
+				.body(ApiResponseBuilder.ok("Login successful", user).getBody());
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<?> logoutUser() {
+
+		return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, tokenCookieProvider.clearCookie().toString())
+				.body(ApiResponseBuilder.ok("Logout successful").getBody());
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal Users user) {
+
+		return ApiResponseBuilder.ok(new AuthUserResponse(user));
 	}
 
 	@GetMapping("/verify")

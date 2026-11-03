@@ -1,9 +1,9 @@
 import { SET_CURRENT_USER } from "shared/store/types";
-import type { JwtUser, SecurityState } from "features/auth/types";
+import type { AuthUser, SecurityState } from "features/auth/types";
 
 export type SecurityAction = {
   type: typeof SET_CURRENT_USER;
-  payload: Partial<JwtUser>;
+  payload: Partial<AuthUser>;
 };
 
 const initialState: SecurityState = {
@@ -11,7 +11,7 @@ const initialState: SecurityState = {
   validToken: false,
 };
 
-const booleanActionPayload = (payload: Partial<JwtUser>) => {
+const booleanActionPayload = (payload: Partial<AuthUser>) => {
   if (payload) {
     return true;
   } else {

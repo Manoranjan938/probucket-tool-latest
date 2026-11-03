@@ -9,6 +9,7 @@ import MuiAlert, { type AlertProps } from '@mui/material/Alert';
 import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
 import { login } from "features/auth/store/securityActions";
+import type { AuthUser } from "features/auth/types";
 import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 import useLoginRequest from "features/auth/hooks/useLoginRequest";
@@ -22,7 +23,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props,
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
 })
 
-const Login = ({getUsers}: Props) => {
+const Login = ({getUsers, isLoggedIn}: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -96,7 +97,7 @@ const Login = ({getUsers}: Props) => {
       const res = await loginRequest(loginRequests);
       if(res.status === 200){
         // The next page reads the user from the store as soon as it mounts
-        await getUsers(res.data.data.token);
+        getUsers(res.data.data);
         navigate("/projects");
       }
     }catch(err){
@@ -120,7 +121,7 @@ const Login = ({getUsers}: Props) => {
 
   useEffect(() => {
 
-    if (localStorage.getItem("jwtToken")) {
+    if (isLoggedIn) {
       navigate("/projects");
     }else{
       navigate("/login")
@@ -251,15 +252,15 @@ const Login = ({getUsers}: Props) => {
 
 function mapDispatchToProps(dispatch: AppDispatch) {
   return {
-    getUsers: (data: string) => dispatch(login(data)),
+    getUsers: (data: AuthUser) => dispatch(login(data)),
   };
 }
 
 const mapStateToProps = (state: RootState) => ({
-  security: state.security,
+  isLoggedIn: Boolean(state.security.user && state.security.user.id),
 });
 
-const withConnect = connect(null, mapDispatchToProps);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 type Props = ConnectedProps<typeof withConnect>;
 

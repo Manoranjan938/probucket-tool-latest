@@ -54,6 +54,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		// withDefaults() uses the @CrossOrigin settings of the controllers, so preflights and 401s keep their CORS headers
+		// CSRF tokens are not used: the login cookie is SameSite=Strict, so browsers don't send it from other sites
 		http.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)

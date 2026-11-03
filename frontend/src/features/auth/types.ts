@@ -1,22 +1,15 @@
-/** Claims of the JWT issued by the backend (security/TokenProvider.java) */
-export interface JwtUser {
+/** model/response/AuthUserResponse.java */
+export interface AuthUser {
   id: string;
   rolename: string;
   username: string;
   fullName: string;
-  iat: number;
-  exp: number;
 }
 
 /** model/request/LoginRequest.java */
 export interface LoginRequest {
   username: string;
   password: string;
-}
-
-/** model/response/LoginResponse.java */
-export interface LoginResponse {
-  token: string;
 }
 
 /** model/request/UserRequest.java */
@@ -27,7 +20,7 @@ export interface UserRequest {
 }
 
 export interface SecurityState {
-  /** Empty object until a token is decoded, and again after logout */
-  user: Partial<JwtUser>;
+  /** Empty object while nobody is logged in */
+  user: Partial<AuthUser>;
   validToken: boolean;
 }

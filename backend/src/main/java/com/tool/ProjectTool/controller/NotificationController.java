@@ -14,7 +14,7 @@ import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin({ "${app.cors.allowed-origin}" })
+@CrossOrigin(origins = "${app.cors.allowed-origin}", allowCredentials = "true")
 public class NotificationController {
 
 	@GetMapping("/getNotificationList/{userId}")

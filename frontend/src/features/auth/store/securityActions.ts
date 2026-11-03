@@ -1,27 +1,32 @@
-import jwt_decode from "jwt-decode";
 import type { Dispatch } from "redux";
-import setJWTToken from "features/auth/utils/setJWTToken";
+import axios, { CURRENT_USER_URL } from "shared/services/axios";
 import { SET_CURRENT_USER } from "shared/store/types";
-import type { JwtUser } from "features/auth/types";
+import type { AuthUser } from "features/auth/types";
+import type { ApiResponse } from "shared/types";
 import type { SecurityAction } from "./securityReducers";
 
-export const login = (token: string) => async (dispatch: Dispatch<SecurityAction>) => {
-  try {
-    //const token = localStorage.getItem("jwtToken")
-    const decoded = jwt_decode<JwtUser>(token);
+// Every page waits for the session check, so a backend that hangs must not block them for long
+const SESSION_CHECK_TIMEOUT_MS = 10000;
 
-    dispatch({
-      type: SET_CURRENT_USER,
-      payload: decoded,
-    });
-  } catch (err) {
-    console.log(err);
+export const login = (user: AuthUser): SecurityAction => ({
+  type: SET_CURRENT_USER,
+  payload: user,
+});
+
+// Asks the backend who the login cookie belongs to. Any failure means nobody is logged in, so this never rejects.
+export const restoreSession = () => async (dispatch: Dispatch<SecurityAction>) => {
+  try {
+    const res = await axios.get<ApiResponse<AuthUser>>(CURRENT_USER_URL, { timeout: SESSION_CHECK_TIMEOUT_MS });
+    dispatch(login(res.data.data));
+  } catch {
+    // The store already holds the logged-out state
   }
 };
 
-export const logout = () => (dispatch: Dispatch<SecurityAction>) => {
-  localStorage.removeItem("jwtToken");
-  setJWTToken(false);
+// JavaScript can't touch an HttpOnly cookie, so only the backend can clear it.
+// Rejects if that fails, because the user would still be logged in.
+export const logout = () => async (dispatch: Dispatch<SecurityAction>) => {
+  await axios.post("/auth/logout");
   dispatch({
     type: SET_CURRENT_USER,
     payload: {},

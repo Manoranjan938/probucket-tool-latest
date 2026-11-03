@@ -22,7 +22,7 @@ import com.tool.ProjectTool.service.NotesService;
 
 @RestController
 @RequestMapping("/api/v1/note")
-@CrossOrigin({ "${app.cors.allowed-origin}" })
+@CrossOrigin(origins = "${app.cors.allowed-origin}", allowCredentials = "true")
 public class NotesController {
 
 	@Autowired

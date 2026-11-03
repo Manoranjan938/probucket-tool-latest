@@ -21,7 +21,7 @@ import com.tool.ProjectTool.service.CommentsService;
 
 @RestController
 @RequestMapping("/api/v1/comment")
-@CrossOrigin({ "${app.cors.allowed-origin}" })
+@CrossOrigin(origins = "${app.cors.allowed-origin}", allowCredentials = "true")
 public class CommentsController {
 	
 	@Autowired

@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.service.CustomUserService;
@@ -63,14 +65,9 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 	
 	private String getJWTFromRequest(HttpServletRequest request) {
 
-		String bearer = request.getHeader(SecurityConstants.TOKEN_HEADER);
+		Cookie cookie = WebUtils.getCookie(request, SecurityConstants.TOKEN_COOKIE);
 
-		if (StringUtils.hasText(bearer) && bearer.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-
-			return bearer.substring(7, bearer.length());
-		}
-
-		return null;
+		return cookie != null ? cookie.getValue() : null;
 	}
 
 }

@@ -1,15 +1,12 @@
 import axios from "shared/services/axios";
-import setJWTToken from "features/auth/utils/setJWTToken";
-import type { LoginRequest, LoginResponse } from "features/auth/types";
+import type { AuthUser, LoginRequest } from "features/auth/types";
 import type { ApiResponse } from "shared/types";
 
 const useLoginRequest = () => {
   const loginRequest = async (LoginRequest: LoginRequest) => {
     try {
-      const res = await axios.post<ApiResponse<LoginResponse>>("/auth/login", LoginRequest);
-      const { token } = res.data.data;
-      localStorage.setItem("jwtToken", token);
-      setJWTToken(token);
+      // The backend sets the login cookie on this response and returns the logged-in user
+      const res = await axios.post<ApiResponse<AuthUser>>("/auth/login", LoginRequest);
 
       return res;
     } catch (err) {

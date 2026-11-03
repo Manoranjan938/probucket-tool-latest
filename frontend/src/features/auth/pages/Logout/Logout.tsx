@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import * as auth from "features/auth/styles/authClasses";
@@ -9,13 +9,19 @@ import { connect, type ConnectedProps } from "react-redux";
 import { compose } from "redux";
 import { logout } from "features/auth/store/securityActions";
 import type { AppDispatch, RootState } from "app/store";
+import { getApiErrorMessage } from "shared/services/apiError";
 
 const Logout = ({ logout, currentUser }: Props) => {
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const handleClickLogout = () => {
-    logout();
-    navigate("/login");
+  const handleClickLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Could not log out. Please try again."));
+    }
   };
 
   return (
@@ -45,6 +51,7 @@ const Logout = ({ logout, currentUser }: Props) => {
               <FaSignOutAlt />
               Log out
             </button>
+            {error && <p className={auth.error}>{error}</p>}
             <Link to="/projects" className={auth.btnGhost}>
               Back to my projects
             </Link>

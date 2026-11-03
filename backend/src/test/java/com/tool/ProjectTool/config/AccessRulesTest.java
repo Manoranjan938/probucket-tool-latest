@@ -1,5 +1,7 @@
 package com.tool.ProjectTool.config;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,20 +31,32 @@ import com.tool.ProjectTool.controller.ProjectController;
 import com.tool.ProjectTool.controller.UserController;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.security.CustomAuthenticationEntryPoint;
+import com.tool.ProjectTool.security.SecurityConstants;
+import com.tool.ProjectTool.security.TokenCookieProvider;
 import com.tool.ProjectTool.security.TokenProvider;
 import com.tool.ProjectTool.service.CustomUserService;
 import com.tool.ProjectTool.service.ProjectService;
 import com.tool.ProjectTool.service.UserService;
 import com.tool.ProjectTool.service.ValidationErrorService;
 
+import jakarta.servlet.http.Cookie;
+
 @WebMvcTest({ AuthController.class, ProjectController.class, UserController.class })
-@Import({ SecurityConfig.class, CustomAuthenticationEntryPoint.class, ValidationErrorService.class })
+@Import({ SecurityConfig.class, CustomAuthenticationEntryPoint.class, TokenCookieProvider.class,
+		ValidationErrorService.class })
 class AccessRulesTest {
 
 	private static final String ORIGIN = "http://localhost:3000";
 
+	private static final String COOKIE = SecurityConstants.TOKEN_COOKIE;
+
+	private static final String TOKEN = "signed-token";
+
 	@Autowired
 	private MockMvc mockMvc;
+
+	@MockitoBean
+	private AuthenticationManager authManager;
 
 	@MockitoBean
 	private CustomUserService customUserService;
@@ -61,6 +76,13 @@ class AccessRulesTest {
 		user.setUserId("me");
 		user.setEmail("me@example.com");
 		return new UsernamePasswordAuthenticationToken(user, null, List.of(new SimpleGrantedAuthority(role)));
+	}
+
+	private void tokenIsValid() {
+		when(tokenProvider.validateToken(TOKEN)).thenReturn(true);
+		when(tokenProvider.getUserIdFromJwt(TOKEN)).thenReturn("me");
+		when(tokenProvider.getRoleFromJwt(TOKEN)).thenReturn("ROLE_USER");
+		when(customUserService.loadUserByUserId("me")).thenReturn((Users) loggedIn("ROLE_USER").getPrincipal());
 	}
 
 	@Test
@@ -86,9 +108,50 @@ class AccessRulesTest {
 	void preflightDoesNotNeedAToken() throws Exception {
 		mockMvc.perform(options("/api/v1/project/getProjectDetails/1").header("Origin", ORIGIN)
 				.header("Access-Control-Request-Method", "GET")
-				.header("Access-Control-Request-Headers", "authorization"))
+				.header("Access-Control-Request-Headers", "content-type"))
 				.andExpect(status().isOk())
-				.andExpect(header().string("Access-Control-Allow-Origin", ORIGIN));
+				.andExpect(header().string("Access-Control-Allow-Origin", ORIGIN))
+				.andExpect(header().string("Access-Control-Allow-Credentials", "true"));
+	}
+
+	@Test
+	void loginPutsTheTokenInAnHttpOnlyCookieAndNotInTheBody() throws Exception {
+		when(authManager.authenticate(any())).thenReturn(loggedIn("ROLE_USER"));
+		when(tokenProvider.generateToken(any())).thenReturn(TOKEN);
+
+		mockMvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+				.content("{\"username\":\"me@example.com\",\"password\":\"x\"}"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Set-Cookie", allOf(containsString(COOKIE + "=" + TOKEN),
+						containsString("HttpOnly"), containsString("SameSite=Strict"), containsString("Path=/"))))
+				.andExpect(jsonPath("$.data.id").value("me"))
+				.andExpect(jsonPath("$.data.token").doesNotExist());
+	}
+
+	@Test
+	void theLoginCookieAuthenticatesARequest() throws Exception {
+		tokenIsValid();
+
+		mockMvc.perform(get("/api/v1/auth/me").cookie(new Cookie(COOKIE, TOKEN)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.id").value("me"));
+	}
+
+	@Test
+	void theAuthorizationHeaderDoesNotAuthenticate() throws Exception {
+		tokenIsValid();
+
+		mockMvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + TOKEN))
+				.andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+	}
+
+	@Test
+	void logoutIsPublicAndClearsTheCookie() throws Exception {
+		mockMvc.perform(post("/api/v1/auth/logout"))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Set-Cookie", allOf(containsString(COOKIE + "="),
+						containsString("Max-Age=0"), containsString("HttpOnly"))));
 	}
 
 	@Test
