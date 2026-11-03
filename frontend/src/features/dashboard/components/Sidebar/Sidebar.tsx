@@ -28,7 +28,17 @@ type OwnProps = {
 };
 
 // Sidebar of the personal and team dashboards: project switcher, page links and the account menu
-const Sidebar = ({ type, id, name, open, collapsed, onClose, getSingleProject, currentUser }: OwnProps & Props) => {
+const Sidebar = ({
+  type,
+  id,
+  name,
+  open,
+  collapsed,
+  onClose,
+  getSingleProject,
+  currentUser,
+  currentProject,
+}: OwnProps & Props) => {
   const [project, getProjectDetails] = useGetProjectDetails();
 
   // Again when the project switcher opens another project of the same type
@@ -77,7 +87,8 @@ const Sidebar = ({ type, id, name, open, collapsed, onClose, getSingleProject, c
       </div>
 
       <div className={dashboard.sidebarSection}>
-        <ProjectSwitcher project={project} collapsed={collapsed} />
+        {/* From the store, so renaming the project in its settings shows here straight away */}
+        <ProjectSwitcher project={currentProject} collapsed={collapsed} />
       </div>
 
       <nav className={dashboard.nav}>
@@ -101,6 +112,7 @@ function mapDispatchToProps(dispatch: AppDispatch) {
 
 const mapStateToProps = (state: RootState) => ({
   currentUser: state.security.user,
+  currentProject: state.project.project,
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

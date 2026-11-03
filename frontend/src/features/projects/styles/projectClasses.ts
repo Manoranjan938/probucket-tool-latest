@@ -105,9 +105,9 @@ export const field = "[&+&]:mt-5";
 export const label = "block mb-1.5 text-[14px] font-semibold text-brand-ink";
 export const labelHint = "font-normal text-brand-muted";
 const inputBase =
-  "w-full px-3.5 border border-brand-border rounded-[10px] bg-brand-surface [font-family:inherit] text-[15px] text-brand-ink transition-[border-color,box-shadow] duration-150 ease-[ease] placeholder:text-brand-muted focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_var(--color-brand-soft)] aria-invalid:border-brand-danger aria-invalid:focus:shadow-[0_0_0_3px_rgba(217,58,58,0.12)] motion-reduce:transition-none";
+  "w-full px-3.5 border border-brand-border rounded-[10px] bg-brand-surface [font-family:inherit] text-[15px] text-brand-ink transition-[border-color,box-shadow] duration-150 ease-[ease] placeholder:text-brand-muted disabled:cursor-not-allowed disabled:bg-brand-surface-alt focus:outline-none focus:border-brand-primary focus:shadow-[0_0_0_3px_var(--color-brand-soft)] aria-invalid:border-brand-danger aria-invalid:focus:shadow-[0_0_0_3px_rgba(217,58,58,0.12)] motion-reduce:transition-none";
 export const input = `${inputBase} h-[46px] py-0`;
-export const textarea = `${inputBase} min-h-[120px] py-3 leading-[1.5] resize-y`;
+export const textarea = `${inputBase} block min-h-[120px] py-3 leading-[1.5] resize-y disabled:resize-none`;
 export const error = "mt-1.5 text-[13px] font-medium text-brand-danger";
 
 export const summary = "self-start p-5 border border-brand-border rounded-xl bg-brand-surface-alt";
@@ -121,15 +121,30 @@ export const summaryValue = "truncate text-[15px] font-semibold text-brand-ink";
 /* Project settings (inside the dashboard) */
 export const settings = "flex flex-col gap-5 max-w-[720px] text-brand-text leading-[1.5] [&_*]:box-border";
 export const settingsCard = "border border-brand-border rounded-brand bg-brand-surface";
-export const settingsCardHeader = "px-6 pt-5 pb-1 max-[480px]:px-4";
+export const settingsCardDanger = `${settingsCard} border-[#f2d5d5]!`;
+export const settingsCardHeader = "flex items-start justify-between gap-3 px-6 pt-5 pb-1 max-[480px]:px-4";
 export const settingsCardTitle = "text-[16px] font-bold text-brand-ink";
 export const settingsCardText = "text-[14px]";
-export const settingsForm = "flex items-end gap-4 px-6 py-5 max-[480px]:flex-wrap max-[480px]:px-4";
+export const settingsCardBody = "px-6 pt-3 pb-6 max-[480px]:px-4";
+export const settingsForm = "flex items-start gap-4 px-6 py-5 max-[480px]:px-4";
 export const settingsAvatar =
   "flex shrink-0 items-center justify-center w-14 h-14 rounded-xl bg-brand-soft text-[24px] font-bold text-brand-strong uppercase";
-export const settingsField = "flex flex-col gap-1.5 flex-1 min-w-[200px]";
+export const settingsField = "flex-1 min-w-0";
+export const settingsFieldRow = "flex items-center gap-3 max-[480px]:flex-wrap";
+export const settingsHint = "mt-1.5 text-[13px] text-brand-muted";
+export const settingsName = "self-center min-w-0 truncate text-[18px] font-bold text-brand-ink capitalize";
 export const settingsButton =
-  "inline-flex shrink-0 items-center justify-center h-[46px] px-5 border border-transparent rounded-[10px] bg-brand-strong [font-family:inherit] text-[15px] font-semibold text-white cursor-pointer transition-[background-color] duration-150 ease-[ease] hover:bg-[#4f49b8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-primary motion-reduce:transition-none max-[480px]:w-full";
+  "inline-flex shrink-0 items-center justify-center h-[46px] px-5 border border-transparent rounded-[10px] bg-brand-strong [font-family:inherit] text-[15px] font-semibold text-white cursor-pointer transition-[background-color] duration-150 ease-[ease] hover:bg-[#4f49b8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-brand-strong motion-reduce:transition-none max-[480px]:w-full";
+export const settingsButtonGhost =
+  "inline-flex shrink-0 items-center justify-center h-9 px-3.5 border border-brand-border rounded-lg bg-brand-surface [font-family:inherit] text-[14px] font-semibold text-brand-ink no-underline whitespace-nowrap cursor-pointer transition-[border-color,color] duration-150 ease-[ease] hover:border-brand-primary hover:text-brand-strong focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-brand-border disabled:hover:text-brand-ink motion-reduce:transition-none";
+export const settingsRows = "m-0 px-6 pt-1 pb-2 list-none max-[480px]:px-4";
+export const settingsRow =
+  "flex items-center justify-between gap-4 py-3.5 [&+&]:border-t [&+&]:border-brand-border max-[480px]:flex-wrap";
+export const settingsRowText = "flex-1 min-w-[200px]";
+export const settingsRowTitle = "text-[14px] font-semibold text-brand-ink";
+export const settingsRowNote = "text-[14px]";
+export const settingsRowActions = "flex shrink-0 items-center gap-2.5";
+export const settingsIconRow = "flex items-center gap-4 flex-wrap";
 export const detailList = "m-0 px-6 pb-2 border-t border-brand-border max-[480px]:px-4";
 export const detailRow =
   "grid grid-cols-[140px_minmax(0,1fr)] items-center gap-4 py-3.5 text-[14px] [&+&]:border-t [&+&]:border-brand-border max-[480px]:grid-cols-[100px_minmax(0,1fr)]";

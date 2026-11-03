@@ -3,7 +3,7 @@ import type { IconType } from "react-icons";
 
 import * as profile from "features/profile/styles/profileClasses";
 
-import ComingSoonBadge from "features/profile/components/ComingSoonBadge/ComingSoonBadge";
+import ComingSoonBadge from "shared/components/ComingSoonBadge/ComingSoonBadge";
 
 interface ComingSoonCardProps {
   icon: IconType;

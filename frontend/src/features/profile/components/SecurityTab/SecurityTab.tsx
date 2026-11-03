@@ -3,8 +3,8 @@ import React from "react";
 import * as profile from "features/profile/styles/profileClasses";
 
 import ChangePasswordCard from "features/profile/components/ChangePasswordCard/ChangePasswordCard";
-import ComingSoonBadge from "features/profile/components/ComingSoonBadge/ComingSoonBadge";
 import LogoutEverywhereCard from "features/profile/components/LogoutEverywhereCard/LogoutEverywhereCard";
+import ComingSoonBadge from "shared/components/ComingSoonBadge/ComingSoonBadge";
 
 // The Security tab
 // TODO(profile-backend): the devices list – see features/profile/BACKEND_TODO.md

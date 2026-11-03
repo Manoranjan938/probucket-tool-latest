@@ -23,6 +23,12 @@ export interface ProjectRequest {
   userId: string;
 }
 
+/** model/request/UpdateProjectRequest.java – its defaultAssignee is ignored by the backend, so it isn't sent */
+export interface UpdateProjectRequest {
+  projectId: string;
+  projectName: string;
+}
+
 export interface ProjectState {
   allProjects: Project[];
   /** Empty object until the project details are loaded */

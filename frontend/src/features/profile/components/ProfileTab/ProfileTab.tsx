@@ -3,9 +3,9 @@ import { FiActivity, FiCheckSquare, FiSun } from "react-icons/fi";
 
 import * as profile from "features/profile/styles/profileClasses";
 
-import ComingSoonBadge from "features/profile/components/ComingSoonBadge/ComingSoonBadge";
 import ComingSoonCard from "features/profile/components/ComingSoonCard/ComingSoonCard";
 import { roleLabels } from "features/profile/data";
+import ComingSoonBadge from "shared/components/ComingSoonBadge/ComingSoonBadge";
 import type { AuthUser } from "features/auth/types";
 
 // The Profile tab: what is known about the user, read-only until the backend can save it

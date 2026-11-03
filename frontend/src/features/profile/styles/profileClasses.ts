@@ -40,8 +40,6 @@ export const comingSoonCard =
   "flex flex-col gap-2 px-6 py-5 border border-brand-border rounded-brand bg-brand-surface max-[480px]:px-4";
 export const comingSoonIcon =
   "flex items-center justify-center w-9 h-9 rounded-[10px] bg-brand-surface-alt text-[17px] text-brand-muted";
-export const comingSoonBadge =
-  "inline-flex shrink-0 items-center self-start px-2 py-0.5 rounded-full bg-brand-surface-alt border border-brand-border text-[12px] font-semibold text-brand-muted whitespace-nowrap";
 
 /* Read-only details */
 export const detailList = "m-0 px-6 pt-3 pb-2 max-[480px]:px-4";
