@@ -26,12 +26,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.Backlog;
+import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateBugDetailsRequest;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
 import com.tool.ProjectTool.model.response.SubtaskList;
@@ -268,6 +270,179 @@ class ProjectTaskServiceTest {
 
 		service.createSubtask(subtaskOf("AB-9"));
 		verify(activityService).recordTaskActivity(eq(ActivityType.SUBTASK_CREATED), any(), isNull(), eq("AB-9"));
+	}
+
+	// A project made from the given template, with no tasks yet
+	private void projectFrom(String template) {
+		ProjectEntity project = new ProjectEntity();
+		project.setProjectTemplateType(template);
+		Backlog backlog = new Backlog();
+		backlog.setPTSequence(0);
+		backlog.setProject(project);
+		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+	}
+
+	private ProjectTask savedTask() {
+		ArgumentCaptor<ProjectTask> saved = ArgumentCaptor.forClass(ProjectTask.class);
+		verify(projectTaskRepo).save(saved.capture());
+		return saved.getValue();
+	}
+
+	private ProjectTaskRequest bugRequest() {
+		ProjectTaskRequest request = newTask("");
+		request.setTaskType("BUG");
+		request.setStepsToReproduce(" 1. Open the board ");
+		request.setExpectedResult("It loads");
+		request.setActualResult("It spins");
+		request.setSeverity("MAJOR");
+		return request;
+	}
+
+	@Test
+	void projectManagementProjectsOnlyTakeTasks() {
+		projectFrom("project");
+		assertThrows(BadRequestException.class, () -> service.addProjectTask(bugRequest()));
+
+		service.addProjectTask(newTask(""));
+		assertEquals("TASK", savedTask().getTaskType());
+	}
+
+	@Test
+	void bugProjectsDefaultToBugsAndKeepTheBugFields() {
+		projectFrom("bug");
+		ProjectTaskRequest request = bugRequest();
+		request.setTaskType("");
+
+		service.addProjectTask(request);
+
+		ProjectTask saved = savedTask();
+		assertEquals("BUG", saved.getTaskType());
+		assertEquals("1. Open the board", saved.getStepsToReproduce());
+		assertEquals("It loads", saved.getExpectedResult());
+		assertEquals("It spins", saved.getActualResult());
+		assertEquals("MAJOR", saved.getSeverity());
+	}
+
+	@Test
+	void bugProjectsRefuseTasks() {
+		projectFrom("bug");
+		ProjectTaskRequest request = newTask("");
+		request.setTaskType("TASK");
+
+		assertThrows(BadRequestException.class, () -> service.addProjectTask(request));
+		verify(projectTaskRepo, never()).save(any());
+	}
+
+	@Test
+	void mixedProjectsTakeBothAndDropBugFieldsFromTasks() {
+		projectFrom("project and bug");
+		ProjectTaskRequest request = bugRequest();
+		request.setTaskType("TASK");
+
+		service.addProjectTask(request);
+
+		ProjectTask saved = savedTask();
+		assertEquals("TASK", saved.getTaskType());
+		assertNull(saved.getStepsToReproduce());
+		assertNull(saved.getSeverity());
+	}
+
+	@Test
+	void unknownTypeOrSeverityIsRefused() {
+		projectFrom("project and bug");
+		ProjectTaskRequest unknownType = newTask("");
+		unknownType.setTaskType("EPIC");
+		ProjectTaskRequest unknownSeverity = bugRequest();
+		unknownSeverity.setSeverity("BLOCKER");
+
+		assertThrows(BadRequestException.class, () -> service.addProjectTask(unknownType));
+		assertThrows(BadRequestException.class, () -> service.addProjectTask(unknownSeverity));
+	}
+
+	@Test
+	void severityIsOptional() {
+		projectFrom("bug");
+		ProjectTaskRequest request = bugRequest();
+		request.setSeverity("");
+
+		service.addProjectTask(request);
+
+		assertNull(savedTask().getSeverity());
+	}
+
+	@Test
+	void subtasksAreAlwaysTasks() {
+		projectFrom("bug");
+		ProjectTask parent = task("AB-9", false, null);
+		parent.setTaskType("BUG");
+		when(projectTaskRepo.findByProjectSequence("AB-9")).thenReturn(parent);
+
+		service.createSubtask(subtaskOf("AB-9"));
+
+		assertEquals("TASK", savedTask().getTaskType());
+	}
+
+	private ProjectTask existingBug() {
+		ProjectTask bug = task("AB-1", false, null);
+		bug.setTaskType("BUG");
+		bug.setStepsToReproduce("Steps");
+		bug.setExpectedResult("Expected");
+		bug.setActualResult("Actual");
+		bug.setSeverity("MINOR");
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(bug);
+		return bug;
+	}
+
+	private UpdateBugDetailsRequest bugDetails(String steps, String severity) {
+		UpdateBugDetailsRequest request = new UpdateBugDetailsRequest();
+		request.setTaskId("AB-1");
+		request.setStepsToReproduce(steps);
+		request.setExpectedResult("Expected");
+		request.setActualResult("Actual");
+		request.setSeverity(severity);
+		return request;
+	}
+
+	@Test
+	void bugDetailsChangesAreSavedAndRecordedWithoutTheText() {
+		ProjectTask bug = existingBug();
+
+		service.updateBugDetails(bugDetails("New steps", "CRITICAL"));
+
+		assertEquals("New steps", bug.getStepsToReproduce());
+		assertEquals("CRITICAL", bug.getSeverity());
+		verify(activityService).recordTaskActivity(ActivityType.SEVERITY_CHANGED, bug, "MINOR", "CRITICAL");
+		verify(activityService).recordTaskActivity(ActivityType.BUG_DETAILS_CHANGED, bug, null, null);
+		verify(activityService, times(2)).recordTaskActivity(any(), any(), any(), any());
+	}
+
+	@Test
+	void unchangedBugDetailsRecordNothing() {
+		existingBug();
+
+		service.updateBugDetails(bugDetails(" Steps ", "MINOR"));
+
+		verifyNothingRecorded();
+	}
+
+	@Test
+	void severityCanBeCleared() {
+		ProjectTask bug = existingBug();
+
+		service.updateBugDetails(bugDetails("Steps", ""));
+
+		assertNull(bug.getSeverity());
+		verify(activityService).recordTaskActivity(ActivityType.SEVERITY_CHANGED, bug, "MINOR", null);
+	}
+
+	@Test
+	void onlyBugsHaveBugDetails() {
+		ProjectTask plain = task("AB-1", false, null);
+		plain.setTaskType("TASK");
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(plain);
+
+		assertThrows(BadRequestException.class, () -> service.updateBugDetails(bugDetails("Steps", "MINOR")));
+		verify(projectTaskRepo, never()).save(any());
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import ProjectWorks from "features/tasks/components/ProjectWorks/ProjectWorks";
 import TaskDetailsView from "features/tasks/components/TaskDetailsView/TaskDetailsView";
 import { BoardSkeleton } from "features/tasks/pages/Works/WorksSkeleton";
 import { useGetTasksQuery } from "features/tasks/api/tasksApi";
+import useTaskNoun from "features/tasks/hooks/useTaskNoun";
 import { useAppDispatch, useAppSelector } from "app/hooks";
 import { clearSelectedTask, selectTask } from "features/tasks/store/tasksSlice";
 
@@ -18,6 +19,7 @@ const Works = ({ title }: { title: string }) => {
   const openTask = useAppSelector((state) => state.tasks.selectedTaskSequence);
   const dispatch = useAppDispatch();
   const [showNewTask, setShowNewTask] = useState(false);
+  const noun = useTaskNoun();
 
   const { pathname, search } = useLocation();
   const query = new URLSearchParams(search);
@@ -55,7 +57,7 @@ const Works = ({ title }: { title: string }) => {
         </div>
         <button type="button" className={`${task.btnPrimary} ${task.toolbarButton}`} onClick={() => setShowNewTask(true)}>
           <FiPlus aria-hidden="true" />
-          New task
+          New {noun}
         </button>
       </div>
 
@@ -77,7 +79,7 @@ const Works = ({ title }: { title: string }) => {
           <p className={task.emptyText}>Create your first task to start planning the work on this project.</p>
           <button type="button" className={task.btnPrimary} onClick={() => setShowNewTask(true)}>
             <FiPlus aria-hidden="true" />
-            Create task
+            Create {noun}
           </button>
         </div>
       )}

@@ -125,4 +125,45 @@ public class TaskDetails {
 		this.taskDesc = taskDesc;
 	}
 
+	// Only set on bugs
+	private String stepsToReproduce;
+
+	private String expectedResult;
+
+	private String actualResult;
+
+	private String severity;
+
+	public String getStepsToReproduce() {
+		return stepsToReproduce;
+	}
+
+	public void setStepsToReproduce(String stepsToReproduce) {
+		this.stepsToReproduce = stepsToReproduce;
+	}
+
+	public String getExpectedResult() {
+		return expectedResult;
+	}
+
+	public void setExpectedResult(String expectedResult) {
+		this.expectedResult = expectedResult;
+	}
+
+	public String getActualResult() {
+		return actualResult;
+	}
+
+	public void setActualResult(String actualResult) {
+		this.actualResult = actualResult;
+	}
+
+	public String getSeverity() {
+		return severity;
+	}
+
+	public void setSeverity(String severity) {
+		this.severity = severity;
+	}
+
 }

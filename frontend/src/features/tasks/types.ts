@@ -35,6 +35,12 @@ export interface TaskDetails extends Subtask {
   updatedOn: string;
   /** yyyy-mm-dd */
   dueDate: string | null;
+  /** Only set on bugs */
+  stepsToReproduce: string | null;
+  expectedResult: string | null;
+  actualResult: string | null;
+  /** MINOR, MAJOR or CRITICAL; null when not set */
+  severity: string | null;
 }
 
 /** model/response/StatisticsResponse.java */
@@ -57,6 +63,22 @@ export interface ProjectTaskRequest {
   description?: string;
   /** Email of the person to assign, optional */
   assignee?: string;
+  /** TASK or BUG; empty takes the project's default */
+  taskType?: string;
+  /** The rest is only kept on a bug */
+  stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  severity?: string;
+}
+
+/** model/request/UpdateBugDetailsRequest.java – empty texts and an empty severity clear them */
+export interface UpdateBugDetailsRequest {
+  taskId: string;
+  stepsToReproduce: string;
+  expectedResult: string;
+  actualResult: string;
+  severity: string;
 }
 
 /** model/request/RequestCreateSubtask.java */

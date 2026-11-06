@@ -25,6 +25,7 @@ import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateBugDetailsRequest;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
 import com.tool.ProjectTool.model.response.HomeTaskCounts;
@@ -59,6 +60,10 @@ public class ProjectTaskService {
 	@Autowired
 	private ActivityService activityService;
 
+	public static final String TASK = "TASK";
+	public static final String BUG = "BUG";
+	private static final Set<String> SEVERITIES = Set.of("MINOR", "MAJOR", "CRITICAL");
+
 	@Transactional
 	public String addProjectTask(ProjectTaskRequest request) {
 
@@ -71,10 +76,15 @@ public class ProjectTaskService {
 				throw new BadRequestException("The person to assign was not found");
 			}
 		}
+		Backlog back = backlogRepo.findByProjectIdentifier(request.getProjectIdentifier());
+		if (back == null) {
+			throw new ProjectNotFoundException("Project not found");
+		}
+		String taskType = resolveTaskType(back.getProject(), request.getTaskType());
+		boolean bug = BUG.equals(taskType);
+		String severity = bug ? checkSeverity(request.getSeverity()) : null;
 
 		try {
-			Backlog back = backlogRepo.findByProjectIdentifier(request.getProjectIdentifier());
-
 			ProjectTask projTask = new ProjectTask();
 			projTask.setBacklog(back);
 
@@ -98,7 +108,14 @@ public class ProjectTaskService {
 			projTask.setSprintId(request.getSprintId());
 			projTask.setDueDate(dueDate);
 			projTask.setSubtask(false);
-			projTask.setTaskDesc(emptyToNull(request.getDescription() == null ? null : request.getDescription().trim()));
+			projTask.setTaskDesc(trimToNull(request.getDescription()));
+			projTask.setTaskType(taskType);
+			if (bug) {
+				projTask.setStepsToReproduce(trimToNull(request.getStepsToReproduce()));
+				projTask.setExpectedResult(trimToNull(request.getExpectedResult()));
+				projTask.setActualResult(trimToNull(request.getActualResult()));
+				projTask.setSeverity(severity);
+			}
 			if (assignee != null) {
 				projTask.setAssignee(assignee.getUserId());
 			}
@@ -113,6 +130,38 @@ public class ProjectTaskService {
 		} catch (Exception e) {
 			throw new ProjectNotFoundException("Project not found");
 		}
+	}
+
+	// What a project takes follows the template chosen when it was created: "bug" only bugs,
+	// "project and bug" both, anything else (incl. older projects) only tasks. Empty means the project's default.
+	private String resolveTaskType(ProjectEntity project, String requested) {
+		String template = project != null ? project.getProjectTemplateType() : null;
+		boolean bugsOnly = "bug".equals(template);
+		boolean takesBugs = bugsOnly || "project and bug".equals(template);
+
+		String type = requested == null || requested.isBlank() ? (bugsOnly ? BUG : TASK) : requested;
+		if (!TASK.equals(type) && !BUG.equals(type)) {
+			throw new BadRequestException("Unknown task type");
+		}
+		if (BUG.equals(type) && !takesBugs) {
+			throw new BadRequestException("This project doesn't track bugs");
+		}
+		if (TASK.equals(type) && bugsOnly) {
+			throw new BadRequestException("This project only tracks bugs");
+		}
+		return type;
+	}
+
+	private String checkSeverity(String severity) {
+		String value = emptyToNull(severity);
+		if (value != null && !SEVERITIES.contains(value)) {
+			throw new BadRequestException("Unknown severity");
+		}
+		return value;
+	}
+
+	private String trimToNull(String value) {
+		return emptyToNull(value == null ? null : value.trim());
 	}
 
 	public List<TaskListResponse> getTaskLists(String backlogId) {
@@ -150,6 +199,7 @@ public class ProjectTaskService {
 				tas.setCreatedOn(project.getCreatedAt());
 				tas.setUpdatedOn(project.getUpdatedAt());
 				tas.setSubtask(project.isSubtask());
+				tas.setTaskType(project.getTaskType());
 				tas.setParentTaskId(project.getParentTaskId());
 				tas.setSubtaskCount(subtaskCounts.getOrDefault(project.getProjectSequence(), 0));
 
@@ -213,6 +263,11 @@ public class ProjectTaskService {
 			getTask.setSubtask(task.isSubtask());
 			getTask.setParentTaskId(task.getParentTaskId());
 			getTask.setDueDate(formatDueDate(task.getDueDate()));
+			getTask.setTaskType(task.getTaskType());
+			getTask.setStepsToReproduce(task.getStepsToReproduce());
+			getTask.setExpectedResult(task.getExpectedResult());
+			getTask.setActualResult(task.getActualResult());
+			getTask.setSeverity(task.getSeverity());
 
 			if (user == null) {
 				getTask.setTaskName(task.getTaskName());
@@ -296,6 +351,40 @@ public class ProjectTaskService {
 
 	private String emptyToNull(String value) {
 		return value == null || value.isEmpty() ? null : value;
+	}
+
+	// The changes and their history rows share a transaction
+	@Transactional
+	public String updateBugDetails(UpdateBugDetailsRequest request) {
+
+		ProjectTask task = projectTaskRepo.findByProjectSequence(request.getTaskId());
+		if (task == null) {
+			throw new TaskIdNotFoundException("Task id not found");
+		}
+		if (!BUG.equals(task.getTaskType())) {
+			throw new BadRequestException("Only a bug has bug details");
+		}
+
+		String severity = checkSeverity(request.getSeverity());
+		String steps = trimToNull(request.getStepsToReproduce());
+		String expected = trimToNull(request.getExpectedResult());
+		String actual = trimToNull(request.getActualResult());
+
+		if (!Objects.equals(task.getSeverity(), severity)) {
+			activityService.recordTaskActivity(ActivityType.SEVERITY_CHANGED, task, task.getSeverity(), severity);
+		}
+		// Like the description, the texts themselves are not recorded
+		if (!Objects.equals(task.getStepsToReproduce(), steps) || !Objects.equals(task.getExpectedResult(), expected)
+				|| !Objects.equals(task.getActualResult(), actual)) {
+			activityService.recordTaskActivity(ActivityType.BUG_DETAILS_CHANGED, task, null, null);
+		}
+
+		task.setSeverity(severity);
+		task.setStepsToReproduce(steps);
+		task.setExpectedResult(expected);
+		task.setActualResult(actual);
+		projectTaskRepo.save(task);
+		return "Bug details updated";
 	}
 
 	@Transactional
@@ -385,7 +474,8 @@ public class ProjectTaskService {
 			;
 			// projTask.setSprintId(request.getSprintId());
 			projTask.setSubtask(true);
-			projTask.setTaskType("Task");
+			// Subtasks are pieces of work, even under a bug
+			projTask.setTaskType(TASK);
 			projTask.setParentTaskId(subtaskRequest.getParentTaskId());
 			projTask.setDueDate(dueDate);
 

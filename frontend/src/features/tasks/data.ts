@@ -34,6 +34,23 @@ export const priorityColors: Record<string, string> = {
 /** Priorities the task dialogs offer, lowest first */
 export const priorities = ["LOW", "MEDIUM", "HIGH"];
 
+/** Older tasks have "Task" or no type, so only BUG is told apart */
+export const isBug = (taskType: string | null | undefined) => taskType === "BUG";
+
+/** The types a project takes, from the template it was created with; the first is the default */
+export const taskTypesFor = (template: string | undefined) =>
+  template === "bug" ? ["BUG"] : template === "project and bug" ? ["TASK", "BUG"] : ["TASK"];
+
+/** Bug severities, least severe first */
+export const severities = ["MINOR", "MAJOR", "CRITICAL"];
+
+/** Text colour of a severity, matching the priority flags */
+export const severityColors: Record<string, string> = {
+  CRITICAL: "text-priority-high",
+  MAJOR: "text-priority-medium",
+  MINOR: "text-priority-low",
+};
+
 /** "LOW" -> "Low" */
 export const formatEnum = (value: string | undefined) =>
   value ? value.charAt(0) + value.slice(1).toLowerCase() : "";

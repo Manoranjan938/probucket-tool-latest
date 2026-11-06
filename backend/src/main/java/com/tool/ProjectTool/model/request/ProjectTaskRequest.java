@@ -32,6 +32,21 @@ public class ProjectTaskRequest {
 	// Email of the person to assign, optional
 	private String assignee;
 
+	// TASK or BUG; empty takes the project's default
+	private String taskType;
+
+	// The rest is only kept on a bug
+	@Size(max = MAX_DESCRIPTION, message = "Steps to reproduce are too long")
+	private String stepsToReproduce;
+
+	@Size(max = MAX_DESCRIPTION, message = "Expected result is too long")
+	private String expectedResult;
+
+	@Size(max = MAX_DESCRIPTION, message = "Actual result is too long")
+	private String actualResult;
+
+	private String severity;
+
 	public String getDescription() {
 		return description;
 	}
@@ -95,5 +110,45 @@ public class ProjectTaskRequest {
 	public void setSprintId(String sprintId) {
 		this.sprintId = sprintId;
 	}
-	
+
+	public String getTaskType() {
+		return taskType;
+	}
+
+	public void setTaskType(String taskType) {
+		this.taskType = taskType;
+	}
+
+	public String getStepsToReproduce() {
+		return stepsToReproduce;
+	}
+
+	public void setStepsToReproduce(String stepsToReproduce) {
+		this.stepsToReproduce = stepsToReproduce;
+	}
+
+	public String getExpectedResult() {
+		return expectedResult;
+	}
+
+	public void setExpectedResult(String expectedResult) {
+		this.expectedResult = expectedResult;
+	}
+
+	public String getActualResult() {
+		return actualResult;
+	}
+
+	public void setActualResult(String actualResult) {
+		this.actualResult = actualResult;
+	}
+
+	public String getSeverity() {
+		return severity;
+	}
+
+	public void setSeverity(String severity) {
+		this.severity = severity;
+	}
+
 }

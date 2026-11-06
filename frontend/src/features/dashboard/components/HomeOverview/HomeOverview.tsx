@@ -16,6 +16,7 @@ import TeamWorkload from "features/dashboard/components/TeamWorkload/TeamWorkloa
 import PriorityBreakdown from "features/dashboard/components/PriorityBreakdown/PriorityBreakdown";
 import ProjectDetailsCard from "features/dashboard/components/ProjectDetailsCard/ProjectDetailsCard";
 import NewTask from "features/tasks/components/NewTask/NewTask";
+import useTaskNoun from "features/tasks/hooks/useTaskNoun";
 import { useGetHomeTaskCountsQuery } from "features/dashboard/api/dashboardApi";
 import { useGetTasksQuery } from "features/tasks/api/tasksApi";
 import useCurrentProject from "features/projects/hooks/useCurrentProject";
@@ -35,6 +36,7 @@ const HomeOverview = ({ type, team, children }: Props) => {
   const currentUser = useAppSelector((state) => state.security.user);
   const { search } = useLocation();
   const [showNewTask, setShowNewTask] = useState(false);
+  const noun = useTaskNoun();
   const query = new URLSearchParams(search);
   const projectId = query.get("project");
   const name = query.get("name");
@@ -65,7 +67,7 @@ const HomeOverview = ({ type, team, children }: Props) => {
         </div>
         <button type="button" className={dashboard.btnPrimary} onClick={() => setShowNewTask(true)}>
           <FiPlus aria-hidden="true" />
-          New task
+          New {noun}
         </button>
       </div>
 

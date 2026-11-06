@@ -6,6 +6,7 @@ import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
 import TaskRow from "features/dashboard/components/TaskRow/TaskRow";
 import TaskRowsSkeleton from "features/dashboard/components/TaskRow/TaskRowsSkeleton";
+import useTaskNoun from "features/tasks/hooks/useTaskNoun";
 import type { TaskListItem } from "features/tasks/types";
 
 const MAX_TASKS = 6;
@@ -22,6 +23,7 @@ interface OpenTasksProps {
 // Tasks that aren't completed yet. The backend sorts the list by priority and sends no dates,
 // so this shows the first few open tasks rather than the most recent ones.
 const OpenTasks = ({ tasks, worksLink, onNewTask }: OpenTasksProps) => {
+  const noun = useTaskNoun();
   const allTasks = tasks ?? [];
   const openTasks = allTasks.filter((task) => task.status !== "COMPLETED");
 
@@ -53,7 +55,7 @@ const OpenTasks = ({ tasks, worksLink, onNewTask }: OpenTasksProps) => {
           <p className={dashboard.emptyText}>Create your first task to start planning the work on this project.</p>
           <button type="button" className={dashboard.btnPrimary} onClick={onNewTask}>
             <FiPlus aria-hidden="true" />
-            Create task
+            Create {noun}
           </button>
         </div>
       )}

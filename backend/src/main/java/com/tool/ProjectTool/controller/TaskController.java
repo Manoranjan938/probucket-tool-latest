@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateBugDetailsRequest;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
 import com.tool.ProjectTool.model.response.ApiResponse;
@@ -79,6 +80,17 @@ public class TaskController {
 		return ApiResponseBuilder.ok(taskService.updateTask(updateTask));
 	}
 	
+	@PostMapping("/updateBugDetails")
+	public ResponseEntity<?> updateBugDetails(@Valid @RequestBody UpdateBugDetailsRequest request, BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+
+		return ApiResponseBuilder.ok(taskService.updateBugDetails(request));
+	}
+
 	@PostMapping("/updateDueDate")
 	public ResponseEntity<?> updateDueDate(@RequestBody UpdateDueDateRequest request) {
 

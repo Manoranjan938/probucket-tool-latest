@@ -5,6 +5,7 @@ import * as task from "features/tasks/styles/taskClasses";
 
 import WorkTask from "features/tasks/components/WorkTask/WorkTask";
 import { taskStatuses } from "features/tasks/data";
+import useTaskNoun from "features/tasks/hooks/useTaskNoun";
 import type { TaskListItem } from "features/tasks/types";
 
 const columns = ["TODO", "INPROGRESS", "COMPLETED"];
@@ -19,6 +20,7 @@ interface ProjectWorksProps {
 
 // The task board: one column per status
 const ProjectWorks = ({ tasks, selectedTask, onOpenTask, onNewTask }: ProjectWorksProps) => {
+  const noun = useTaskNoun();
   return (
     <div className={task.board}>
       {columns.map((status) => {
@@ -38,7 +40,7 @@ const ProjectWorks = ({ tasks, selectedTask, onOpenTask, onNewTask }: ProjectWor
                   <FiMoreHorizontal />
                 </button>
                 {status === "TODO" ? (
-                  <button type="button" className={task.iconButton} onClick={onNewTask} aria-label="New task">
+                  <button type="button" className={task.iconButton} onClick={onNewTask} aria-label={`New ${noun}`}>
                     <FiPlus />
                   </button>
                 ) : null}

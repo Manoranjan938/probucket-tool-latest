@@ -1,11 +1,12 @@
 import React from "react";
 import { Tooltip } from "@mui/material";
+import { FaBug } from "react-icons/fa";
 import { FiCornerDownRight, FiFlag, FiGitMerge, FiUserPlus } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import DueBadge from "features/tasks/components/DueBadge/DueBadge";
-import { formatEnum, priorityColors } from "features/tasks/data";
+import { formatEnum, isBug, priorityColors } from "features/tasks/data";
 import type { TaskListItem } from "features/tasks/types";
 
 interface WorkTaskProps {
@@ -34,6 +35,12 @@ const WorkTask = ({ taskDetails, selected, onOpen }: WorkTaskProps) => {
       <span className={task.cardName}>{taskDetails.taskName}</span>
       {taskDetails.dueDate ? <DueBadge dueDate={taskDetails.dueDate} status={taskDetails.status} /> : null}
       <span className={task.cardFooter}>
+        {isBug(taskDetails.taskType) ? (
+          <span className={task.cardBug}>
+            <FaBug aria-hidden="true" />
+            Bug
+          </span>
+        ) : null}
         <span className={task.cardKey}>{taskDetails.taskSequence}</span>
         {taskDetails.priority ? (
           <span className={`${task.priority} ${priorityColors[taskDetails.priority] ?? priorityColors.LOW}`}>

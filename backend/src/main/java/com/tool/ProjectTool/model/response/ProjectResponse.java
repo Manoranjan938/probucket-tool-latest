@@ -84,4 +84,15 @@ public class ProjectResponse {
 		this.createdOn = createdOn;
 	}
 
+	// project, bug or "project and bug"; only sent with the details of a single project
+	private String projectTemplate;
+
+	public String getProjectTemplate() {
+		return projectTemplate;
+	}
+
+	public void setProjectTemplate(String projectTemplate) {
+		this.projectTemplate = projectTemplate;
+	}
+
 }

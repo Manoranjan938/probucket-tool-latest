@@ -12,6 +12,8 @@ export interface Project {
   createdOn?: string;
   /** Only sent with the details of a single project */
   leadEmail?: string;
+  /** "project", "bug" or "project and bug"; only sent with the details of a single project */
+  projectTemplate?: string;
 }
 
 /** model/request/ProjectRequest.java */

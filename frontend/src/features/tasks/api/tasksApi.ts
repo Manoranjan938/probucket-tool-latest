@@ -6,6 +6,7 @@ import type {
   TaskDetails,
   TaskListItem,
   TaskStatistics,
+  UpdateBugDetailsRequest,
   UpdateDueDateRequest,
   UpdateTaskRequest,
 } from "features/tasks/types";
@@ -49,6 +50,10 @@ const tasksApi = api.injectEndpoints({
       query: (updateRequest) => ({ url: "/task/updateTask", method: "POST", data: updateRequest }),
       invalidatesTags: taskChanges,
     }),
+    updateBugDetails: build.mutation<ApiResponse, UpdateBugDetailsRequest>({
+      query: (request) => ({ url: "/task/updateBugDetails", method: "POST", data: request }),
+      invalidatesTags: taskChanges,
+    }),
     updateDueDate: build.mutation<ApiResponse, UpdateDueDateRequest>({
       query: (request) => ({ url: "/task/updateDueDate", method: "POST", data: request }),
       invalidatesTags: taskChanges,
@@ -64,5 +69,6 @@ export const {
   useCreateTaskMutation,
   useCreateSubtaskMutation,
   useUpdateTaskMutation,
+  useUpdateBugDetailsMutation,
   useUpdateDueDateMutation,
 } = tasksApi;

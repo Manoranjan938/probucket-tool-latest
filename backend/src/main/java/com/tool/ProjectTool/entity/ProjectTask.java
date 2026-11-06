@@ -200,5 +200,49 @@ public class ProjectTask {
 	protected void onUpdate() {
 		this.updatedAt = new Date();
 	}
-	
+
+	// Only set on bugs (taskType BUG). Severity is MINOR, MAJOR or CRITICAL, or null when not set.
+	@Column(columnDefinition = "text")
+	private String stepsToReproduce;
+
+	@Column(columnDefinition = "text")
+	private String expectedResult;
+
+	@Column(columnDefinition = "text")
+	private String actualResult;
+
+	private String severity;
+
+	public String getStepsToReproduce() {
+		return stepsToReproduce;
+	}
+
+	public void setStepsToReproduce(String stepsToReproduce) {
+		this.stepsToReproduce = stepsToReproduce;
+	}
+
+	public String getExpectedResult() {
+		return expectedResult;
+	}
+
+	public void setExpectedResult(String expectedResult) {
+		this.expectedResult = expectedResult;
+	}
+
+	public String getActualResult() {
+		return actualResult;
+	}
+
+	public void setActualResult(String actualResult) {
+		this.actualResult = actualResult;
+	}
+
+	public String getSeverity() {
+		return severity;
+	}
+
+	public void setSeverity(String severity) {
+		this.severity = severity;
+	}
+
 }

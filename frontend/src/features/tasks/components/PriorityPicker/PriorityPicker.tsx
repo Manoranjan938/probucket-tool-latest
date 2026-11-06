@@ -1,8 +1,7 @@
 import React from "react";
 import { FiFlag } from "react-icons/fi";
 
-import * as task from "features/tasks/styles/taskClasses";
-
+import SegmentedPicker from "features/tasks/components/SegmentedPicker/SegmentedPicker";
 import { formatEnum, priorities, priorityColors } from "features/tasks/data";
 
 interface PriorityPickerProps {
@@ -12,26 +11,16 @@ interface PriorityPickerProps {
   onChange: (value: string) => void;
 }
 
+const options = priorities.map((priority) => ({
+  value: priority,
+  label: formatEnum(priority),
+  icon: FiFlag,
+  iconClass: priorityColors[priority],
+}));
+
 // Low / Medium / High as a segmented control (radio buttons)
-const PriorityPicker = ({ name, value, onChange }: PriorityPickerProps) => {
-  return (
-    <div role="radiogroup" aria-label="Priority" className={task.segmented}>
-      {priorities.map((priority) => (
-        <label key={priority} className={task.segment}>
-          <input
-            type="radio"
-            name={name}
-            value={priority}
-            checked={value === priority}
-            onChange={() => onChange(priority)}
-            className="sr-only"
-          />
-          <FiFlag className={priorityColors[priority]} aria-hidden="true" />
-          {formatEnum(priority)}
-        </label>
-      ))}
-    </div>
-  );
-};
+const PriorityPicker = ({ name, value, onChange }: PriorityPickerProps) => (
+  <SegmentedPicker name={name} label="Priority" options={options} value={value} onChange={onChange} />
+);
 
 export default PriorityPicker;

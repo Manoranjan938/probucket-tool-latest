@@ -55,6 +55,8 @@ export const cardFooter = "flex items-center gap-2";
 export const cardParent = "inline-flex items-center gap-1 text-[12px] font-semibold text-brand-muted";
 export const cardSubtaskCount = "inline-flex items-center gap-1 text-[12px] font-semibold text-brand-muted";
 export const cardKey = "text-[12px] font-semibold uppercase text-brand-muted";
+export const cardBug =
+  "inline-flex items-center gap-1 px-1.5 py-px rounded-md bg-due-overdue-soft text-[11px] font-bold uppercase tracking-[0.02em] text-due-overdue";
 export const cardAssign =
   "flex items-center justify-center w-6 h-6 ml-auto border border-dashed border-brand-muted rounded-[50%] text-[11px] text-brand-muted";
 export const cardAssignee = `${avatarBase} w-6 h-6 ml-auto bg-brand-strong text-[11px] text-white`;
@@ -88,6 +90,8 @@ export const detailsHeader = "flex items-center gap-2 h-14 shrink-0 px-5 border-
 export const detailsKey = "flex items-center gap-2 text-[14px] font-semibold uppercase text-brand-muted";
 export const taskTypeIcon =
   "flex items-center justify-center w-5 h-5 rounded-[5px] bg-[#2cceb8] text-[12px] text-white";
+export const bugTypeIcon =
+  "flex items-center justify-center w-5 h-5 rounded-[5px] bg-due-overdue text-[11px] text-white";
 export const detailsActions = "flex items-center gap-0.5 ml-auto";
 export const detailsDivider = "w-px h-5 mx-1 bg-brand-border";
 export const detailsBody = "flex-1 overflow-y-auto";
@@ -162,6 +166,8 @@ export const newTaskButtons = "flex items-center gap-2 ml-auto";
 export const checkboxLabel = "inline-flex items-center gap-2 mr-auto text-[14px] text-brand-ink cursor-pointer";
 export const checkbox = "w-4 h-4 accent-brand-strong cursor-pointer";
 export const fieldHint = "text-[12px] text-brand-muted";
+// Expected and actual result side by side; the fields' own top margin is replaced by the gap
+export const bugResults = "grid grid-cols-2 gap-4 mt-4 *:mt-0! max-[720px]:grid-cols-1";
 
 /* Activity tabs and comments */
 export const tabs = "flex items-center gap-1 p-1 w-fit rounded-[10px] bg-brand-surface-alt";

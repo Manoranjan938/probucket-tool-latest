@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { IconType } from "react-icons";
 import {
   FiActivity,
+  FiAlertTriangle,
   FiCalendar,
   FiCheck,
   FiCircle,
@@ -72,6 +73,17 @@ const describe = (activity: Activity, target: ReactNode): ReactNode => {
       return <>edited the description of {target}</>;
     case "COMMENT_ADDED":
       return <>commented on {target}</>;
+    case "SEVERITY_CHANGED":
+      if (!newValue) {
+        return <>cleared the severity of {target}</>;
+      }
+      return oldValue ? (
+        <>changed the severity of {target} from <Strong>{formatEnum(oldValue)}</Strong> to <Strong>{formatEnum(newValue)}</Strong></>
+      ) : (
+        <>set the severity of {target} to <Strong>{formatEnum(newValue)}</Strong></>
+      );
+    case "BUG_DETAILS_CHANGED":
+      return <>edited the bug details of {target}</>;
     case "MEMBER_ADDED":
       return <>added <Strong>{newValue}</Strong> to the team</>;
     default:
@@ -89,6 +101,12 @@ const priorityTones: Record<string, string> = {
   HIGH: styles.toneOverdue,
   MEDIUM: styles.toneSoon,
   LOW: styles.toneNeutral,
+};
+
+const severityTones: Record<string, string> = {
+  CRITICAL: styles.toneOverdue,
+  MAJOR: styles.toneSoon,
+  MINOR: styles.toneNeutral,
 };
 
 // The icon and its colour, by the kind of change
@@ -110,6 +128,10 @@ const appearance = ({ type, newValue }: Activity): { icon: IconType; tone: strin
       return { icon: FiEdit2, tone: styles.toneNeutral };
     case "COMMENT_ADDED":
       return { icon: FiMessageSquare, tone: styles.toneComment };
+    case "SEVERITY_CHANGED":
+      return { icon: FiAlertTriangle, tone: (newValue && severityTones[newValue]) || styles.toneNeutral };
+    case "BUG_DETAILS_CHANGED":
+      return { icon: FiEdit2, tone: styles.toneNeutral };
     case "MEMBER_ADDED":
       return { icon: FiUserPlus, tone: styles.toneBrand };
     default:

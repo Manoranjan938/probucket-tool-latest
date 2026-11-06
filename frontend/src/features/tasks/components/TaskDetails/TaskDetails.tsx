@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
 import { useSnackbar } from "notistack";
+import { FaBug } from "react-icons/fa";
 import { FiCheck, FiChevronDown, FiCornerLeftUp, FiEye, FiGitMerge, FiMaximize2, FiMinimize2, FiMoreHorizontal, FiPaperclip, FiShare2, FiX } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
@@ -10,8 +11,9 @@ import ExtraDetails from "features/tasks/components/ExtraDetails/ExtraDetails";
 import TaskActivity from "features/tasks/components/TaskActivity/TaskActivity";
 import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion/TaskStatusCompletion";
 import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
+import BugDetails from "features/tasks/components/BugDetails/BugDetails";
 import { useGetSubtasksQuery, useGetTaskDetailsQuery, useUpdateTaskMutation } from "features/tasks/api/tasksApi";
-import { MAX_DESCRIPTION, taskStatuses, toastOptions } from "features/tasks/data";
+import { isBug, MAX_DESCRIPTION, taskStatuses, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 import type { TaskDetails as TaskDetailsData } from "features/tasks/types";
 
@@ -196,6 +198,7 @@ const TaskDetails = ({
     </section>
   );
 
+  const bugDetails = isBug(currentTask.taskType) ? <BugDetails bug={currentTask} /> : null;
   const details = <ExtraDetails />;
   // Subtasks can't have their own, so these only show on a subtask for data from before that rule
   const showSubtasks = !isSubtask || allSubtask.length > 0;
@@ -219,7 +222,11 @@ const TaskDetails = ({
     <div className={task.details}>
       <div className={task.detailsHeader}>
         <span className={task.detailsKey}>
-          <span className={task.taskTypeIcon} aria-hidden="true"><FiCheck /></span>
+          {isBug(currentTask.taskType) ? (
+            <span className={task.bugTypeIcon} title="Bug"><FaBug aria-label="Bug" /></span>
+          ) : (
+            <span className={task.taskTypeIcon} aria-hidden="true"><FiCheck /></span>
+          )}
           {sequence}
         </span>
         <div className={task.detailsActions}>
@@ -265,6 +272,7 @@ const TaskDetails = ({
             {actions}
             {details}
             {descriptionSection}
+            {bugDetails}
             {subtasks}
             {progress}
             <TaskActivity />
@@ -276,6 +284,7 @@ const TaskDetails = ({
               <h2 className={task.taskTitle}>{currentTask.taskName}</h2>
               {actions}
               {descriptionSection}
+              {bugDetails}
               {subtasks}
               <TaskActivity />
             </div>

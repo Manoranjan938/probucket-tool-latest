@@ -1,20 +1,29 @@
 import React, { useRef, useState } from "react";
 import { Autocomplete, Dialog, TextField } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { FiX } from "react-icons/fi";
+import { FaBug } from "react-icons/fa";
+import { FiCheckSquare, FiX } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
+import SegmentedPicker from "features/tasks/components/SegmentedPicker/SegmentedPicker";
+import SeverityPicker from "features/tasks/components/SeverityPicker/SeverityPicker";
 import { useCreateTaskMutation } from "features/tasks/api/tasksApi";
 import useAssigneeOptions, { type AssigneeOption } from "features/tasks/hooks/useAssigneeOptions";
-import { MAX_DESCRIPTION, toastOptions } from "features/tasks/data";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
+import { isBug, MAX_DESCRIPTION, taskTypesFor, toastOptions } from "features/tasks/data";
 import { useAppSelector } from "app/hooks";
 import { getApiErrorMessage } from "shared/services/apiError";
 
 // task_name is a varchar(255)
 const MAX_TITLE = 255;
+
+const typeOptions = [
+  { value: "TASK", label: "Task", icon: FiCheckSquare },
+  { value: "BUG", label: "Bug", icon: FaBug, iconClass: "text-due-overdue" },
+];
 
 interface NewTaskProps {
   open: boolean;
@@ -23,10 +32,18 @@ interface NewTaskProps {
   projectIdentifier: string | null;
 }
 
-// Dialog that creates a task in the To do column: title and description on the left, the settings on the right
+// Dialog that creates a task or a bug in the To do column: what it's about on the left, the settings on the right.
+// The project's template decides whether it's a task, a bug, or the user's choice.
 const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   const currentUser = useAppSelector((state) => state.security.user);
   const { options: assigneeOptions, isTeam } = useAssigneeOptions();
+  const taskTypes = taskTypesFor(useCurrentProject().currentData?.projectTemplate);
+  // undefined until the user picks one, so the project's default applies
+  const [pickedType, setPickedType] = useState<string>();
+  const [stepsToReproduce, setStepsToReproduce] = useState("");
+  const [expectedResult, setExpectedResult] = useState("");
+  const [actualResult, setActualResult] = useState("");
+  const [severity, setSeverity] = useState("");
   const [taskName, setTaskName] = useState("");
   const [description, setDescription] = useState("");
   // undefined until the user picks someone, so the default below applies
@@ -44,10 +61,23 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   // On a personal project the only person to assign is you, so that's the default
   const defaultAssignee = isTeam ? null : assigneeOptions.find((option) => option.email === currentUser.username) ?? null;
   const assignee = pickedAssignee === undefined ? defaultAssignee : pickedAssignee;
+  const taskType = pickedType && taskTypes.includes(pickedType) ? pickedType : taskTypes[0];
+  const bug = isBug(taskType);
+  const noun = bug ? "bug" : "task";
 
-  const handleClose = () => {
+  // What describes this one item; the settings are kept for the next one with "Create another"
+  const clearContent = () => {
     setTaskName("");
     setDescription("");
+    setStepsToReproduce("");
+    setExpectedResult("");
+    setActualResult("");
+  };
+
+  const handleClose = () => {
+    clearContent();
+    setPickedType(undefined);
+    setSeverity("");
     setPickedAssignee(undefined);
     setPriority("LOW");
     setDueDate("");
@@ -61,7 +91,7 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
     e.preventDefault();
     const name = taskName.trim();
     if (!name) {
-      setError("Please describe the task");
+      setError(`Please describe the ${noun}`);
       return;
     }
     if (!isDueDateInputValid(e.currentTarget)) {
@@ -76,23 +106,25 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
         taskName: name,
         description: description.trim(),
         assignee: assignee?.email ?? "",
+        taskType,
+        ...(bug
+          ? { stepsToReproduce: stepsToReproduce.trim(), expectedResult: expectedResult.trim(), actualResult: actualResult.trim(), severity }
+          : {}),
         priority,
         sprintId: "",
         status: "",
         dueDate,
       }).unwrap();
-      enqueueSnackbar("Task created", { ...toastOptions, variant: "success" });
+      enqueueSnackbar(bug ? "Bug created" : "Task created", { ...toastOptions, variant: "success" });
       if (createAnother) {
-        // The settings stay for the next task; only what describes this one is cleared
-        setTaskName("");
-        setDescription("");
+        clearContent();
         titleRef.current?.focus();
       } else {
         handleClose();
       }
     } catch (err) {
       console.log(err);
-      enqueueSnackbar(getApiErrorMessage(err, "Couldn't create the task. Please try again."), { ...toastOptions, variant: "error" });
+      enqueueSnackbar(getApiErrorMessage(err, `Couldn't create the ${noun}. Please try again.`), { ...toastOptions, variant: "error" });
     } finally {
       setSaving(false);
     }
@@ -109,7 +141,7 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
     >
       <form onSubmit={handleSubmit} noValidate>
         <div className={task.dialogHeader}>
-          <h2 id="new-task-title" className={task.dialogTitle}>New task</h2>
+          <h2 id="new-task-title" className={task.dialogTitle}>New {noun}</h2>
           <button type="button" className={task.iconButton} onClick={handleClose} aria-label="Close">
             <FiX />
           </button>
@@ -145,13 +177,62 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className={task.textarea}
-                placeholder="Add the details someone needs to start on this task"
+                placeholder={bug ? "What's wrong, and where?" : "Add the details someone needs to start on this task"}
                 maxLength={MAX_DESCRIPTION}
               />
             </div>
+            {bug ? (
+              <>
+                <div className={task.field}>
+                  <label htmlFor="new-task-steps" className={task.label}>Steps to reproduce (optional)</label>
+                  <textarea
+                    id="new-task-steps"
+                    rows={4}
+                    value={stepsToReproduce}
+                    onChange={(e) => setStepsToReproduce(e.target.value)}
+                    className={task.textarea}
+                    placeholder={"1. Go to …\n2. Click …\n3. See the error"}
+                    maxLength={MAX_DESCRIPTION}
+                  />
+                </div>
+                <div className={task.bugResults}>
+                  <div className={task.field}>
+                    <label htmlFor="new-task-expected" className={task.label}>Expected result</label>
+                    <textarea
+                      id="new-task-expected"
+                      rows={3}
+                      value={expectedResult}
+                      onChange={(e) => setExpectedResult(e.target.value)}
+                      className={task.textarea}
+                      placeholder="What should happen"
+                      maxLength={MAX_DESCRIPTION}
+                    />
+                  </div>
+                  <div className={task.field}>
+                    <label htmlFor="new-task-actual" className={task.label}>Actual result</label>
+                    <textarea
+                      id="new-task-actual"
+                      rows={3}
+                      value={actualResult}
+                      onChange={(e) => setActualResult(e.target.value)}
+                      className={task.textarea}
+                      placeholder="What happens instead"
+                      maxLength={MAX_DESCRIPTION}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : null}
           </div>
 
           <div className={task.newTaskSide}>
+            {/* Only projects that track both tasks and bugs offer the choice */}
+            {taskTypes.length > 1 ? (
+              <div className={task.field}>
+                <span className={task.label}>Type</span>
+                <SegmentedPicker name="new-task-type" label="Type" options={typeOptions} value={taskType} onChange={setPickedType} />
+              </div>
+            ) : null}
             <div className={task.field}>
               <label htmlFor="new-task-assignee" className={task.label}>Assignee</label>
               <Autocomplete
@@ -182,6 +263,12 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
               <span className={task.label}>Priority</span>
               <PriorityPicker name="new-task-priority" value={priority} onChange={setPriority} />
             </div>
+            {bug ? (
+              <div className={task.field}>
+                <span className={task.label}>Severity (optional)</span>
+                <SeverityPicker name="new-task-severity" value={severity} onChange={setSeverity} />
+              </div>
+            ) : null}
             <DueDateField
               id="new-task-due-date"
               label="Due date (optional)"
@@ -208,7 +295,7 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
           <div className={task.newTaskButtons}>
             <button type="button" className={task.btnGhost} onClick={handleClose}>Cancel</button>
             <button type="submit" className={task.btnPrimary} disabled={saving}>
-              {saving ? "Creating…" : "Create task"}
+              {saving ? "Creating…" : `Create ${noun}`}
             </button>
           </div>
         </div>
