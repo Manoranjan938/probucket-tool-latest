@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import type { PropsWithChildren } from "react";
 import { useLocation } from "react-router-dom";
+import { FiPlus } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
@@ -14,6 +15,7 @@ import RecentActivity from "features/dashboard/components/RecentActivity/RecentA
 import TeamWorkload from "features/dashboard/components/TeamWorkload/TeamWorkload";
 import PriorityBreakdown from "features/dashboard/components/PriorityBreakdown/PriorityBreakdown";
 import ProjectDetailsCard from "features/dashboard/components/ProjectDetailsCard/ProjectDetailsCard";
+import NewTask from "features/tasks/components/NewTask/NewTask";
 import { useGetHomeTaskCountsQuery } from "features/dashboard/api/dashboardApi";
 import { useGetTasksQuery } from "features/tasks/api/tasksApi";
 import useCurrentProject from "features/projects/hooks/useCurrentProject";
@@ -32,6 +34,7 @@ type Props = PropsWithChildren<{
 const HomeOverview = ({ type, team, children }: Props) => {
   const currentUser = useAppSelector((state) => state.security.user);
   const { search } = useLocation();
+  const [showNewTask, setShowNewTask] = useState(false);
   const query = new URLSearchParams(search);
   const projectId = query.get("project");
   const name = query.get("name");
@@ -51,13 +54,19 @@ const HomeOverview = ({ type, team, children }: Props) => {
 
   return (
     <div className={dashboard.home}>
-      <div>
-        <h2 className={dashboard.greeting}>Welcome back{firstName ? `, ${firstName}` : ""}</h2>
-        <p className={dashboard.greetingText}>
-          Here's how{" "}
-          {project?.projectName ? <span className={dashboard.greetingProject}>{project.projectName}</span> : "your project"} is
-          going.
-        </p>
+      <div className={dashboard.homeHeader}>
+        <div>
+          <h2 className={dashboard.greeting}>Welcome back{firstName ? `, ${firstName}` : ""}</h2>
+          <p className={dashboard.greetingText}>
+            Here's how{" "}
+            {project?.projectName ? <span className={dashboard.greetingProject}>{project.projectName}</span> : "your project"} is
+            going.
+          </p>
+        </div>
+        <button type="button" className={dashboard.btnPrimary} onClick={() => setShowNewTask(true)}>
+          <FiPlus aria-hidden="true" />
+          New task
+        </button>
       </div>
 
       {countsLoaded ? <TaskStats counts={counts} /> : <TaskStatsSkeleton />}
@@ -68,7 +77,7 @@ const HomeOverview = ({ type, team, children }: Props) => {
         <div className={dashboard.homeColumn}>
           {type === "team" ? <AssignedToMe tasks={tasks} userId={currentUser.id} worksLink={worksLink} /> : null}
           <DueTasks tasks={tasks} worksLink={worksLink} />
-          <OpenTasks tasks={tasks} worksLink={worksLink} />
+          <OpenTasks tasks={tasks} worksLink={worksLink} onNewTask={() => setShowNewTask(true)} />
           {type === "team" ? <TeamWorkload tasks={tasks} team={team === null ? [] : team} /> : null}
         </div>
         <div className={dashboard.homeColumn}>
@@ -78,6 +87,9 @@ const HomeOverview = ({ type, team, children }: Props) => {
           <RecentActivity name={name} tasks={tasks} />
         </div>
       </div>
+
+      {/* The same dialog as on the board; the cards above reload once the task is created */}
+      <NewTask open={showNewTask} onClose={() => setShowNewTask(false)} projectIdentifier={name} />
     </div>
   );
 };

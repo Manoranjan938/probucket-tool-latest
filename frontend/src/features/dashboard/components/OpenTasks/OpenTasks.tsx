@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FiCheckCircle, FiInbox } from "react-icons/fi";
+import { FiCheckCircle, FiInbox, FiPlus } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
@@ -15,11 +15,13 @@ interface OpenTasksProps {
   tasks: TaskListItem[] | undefined;
   /** The project's Your work page */
   worksLink: string;
+  /** Opens the New task dialog */
+  onNewTask: () => void;
 }
 
 // Tasks that aren't completed yet. The backend sorts the list by priority and sends no dates,
 // so this shows the first few open tasks rather than the most recent ones.
-const OpenTasks = ({ tasks, worksLink }: OpenTasksProps) => {
+const OpenTasks = ({ tasks, worksLink, onNewTask }: OpenTasksProps) => {
   const allTasks = tasks ?? [];
   const openTasks = allTasks.filter((task) => task.status !== "COMPLETED");
 
@@ -48,8 +50,11 @@ const OpenTasks = ({ tasks, worksLink }: OpenTasksProps) => {
         <div className={dashboard.emptyCard}>
           <span className={dashboard.emptyIcon} aria-hidden="true"><FiInbox /></span>
           <p className={dashboard.emptyTitle}>No tasks yet</p>
-          <p className={dashboard.emptyText}>Create your first task on the board.</p>
-          <Link to={worksLink} className={dashboard.btnPrimary}>Go to Your work</Link>
+          <p className={dashboard.emptyText}>Create your first task to start planning the work on this project.</p>
+          <button type="button" className={dashboard.btnPrimary} onClick={onNewTask}>
+            <FiPlus aria-hidden="true" />
+            Create task
+          </button>
         </div>
       )}
     </section>

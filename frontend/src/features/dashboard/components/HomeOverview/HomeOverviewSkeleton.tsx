@@ -30,9 +30,13 @@ const BarsCardSkeleton = () => (
 const HomeOverviewSkeleton = ({ team = false }: { team?: boolean }) => {
   return (
     <div className={dashboard.home} aria-busy="true">
-      <div>
-        <Skeleton variant="text" width={260} sx={{ fontSize: 24, maxWidth: "100%" }} />
-        <Skeleton variant="text" width={300} sx={{ fontSize: 15, maxWidth: "100%" }} />
+      <div className={dashboard.homeHeader}>
+        <div>
+          <Skeleton variant="text" width={260} sx={{ fontSize: 24, maxWidth: "100%" }} />
+          <Skeleton variant="text" width={300} sx={{ fontSize: 15, maxWidth: "100%" }} />
+        </div>
+        {/* The New task button */}
+        <Skeleton variant="rounded" width={118} height={40} sx={{ borderRadius: "10px" }} />
       </div>
 
       <TaskStatsSkeleton />

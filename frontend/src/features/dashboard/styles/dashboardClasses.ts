@@ -75,6 +75,8 @@ export const searchInput =
 
 /* Home page */
 export const home = `${base} flex flex-col gap-6 max-w-[1200px]`;
+// Greeting with the New task button; the button wraps below it on narrow screens
+export const homeHeader = "flex items-start justify-between gap-4 flex-wrap";
 export const greeting = "mb-1 text-[24px] font-bold leading-[1.25] tracking-[-0.02em] text-brand-ink";
 export const greetingText = "text-[15px]";
 export const greetingProject = "font-semibold text-brand-ink capitalize";
