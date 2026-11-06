@@ -184,6 +184,51 @@ class ProjectTaskServiceTest {
 	}
 
 	@Test
+	void unassignedTaskCannotChangeStatus() {
+		ProjectTask existing = unchangedTask();
+		existing.setAssignee(null);
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setStatus("INPROGRESS");
+
+		assertThrows(BadRequestException.class, () -> service.updateTask(request));
+
+		assertEquals("TODO", existing.getStatus());
+		verify(projectTaskRepo, never()).save(any());
+		verifyNothingRecorded();
+	}
+
+	@Test
+	void unassignedTaskCanStillBeSavedWithItsStatus() {
+		ProjectTask existing = unchangedTask();
+		existing.setAssignee(null);
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setPriority("HIGH");
+
+		service.updateTask(request);
+
+		verify(projectTaskRepo).save(existing);
+		assertEquals("HIGH", existing.getPriority());
+	}
+
+	@Test
+	void assigningAndChangingStatusTogetherIsAllowed() {
+		ProjectTask existing = unchangedTask();
+		existing.setAssignee(null);
+		Users newUser = new Users();
+		newUser.setUserId("user-2");
+		newUser.setName("Ravi");
+		when(userRepo.findByEmail("ravi@example.com")).thenReturn(newUser);
+		UpdateProjectTaskRequest request = sameAs(existing);
+		request.setAssignee("ravi@example.com");
+		request.setStatus("INPROGRESS");
+
+		service.updateTask(request);
+
+		assertEquals("INPROGRESS", existing.getStatus());
+		assertEquals("user-2", existing.getAssignee());
+	}
+
+	@Test
 	void reassigningTheSamePersonRecordsNothing() {
 		ProjectTask existing = unchangedTask();
 		Users same = new Users();
@@ -285,6 +330,8 @@ class ProjectTaskServiceTest {
 	void updatingATaskKeepsItsDueDate() {
 		ProjectTask existing = task("AB-1", false, null);
 		existing.setDueDate(LocalDate.of(2026, 11, 20));
+		// Only an assigned task can change its status
+		existing.setAssignee("user-1");
 		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
 		UpdateProjectTaskRequest request = new UpdateProjectTaskRequest();
 		request.setTaskId("AB-1");

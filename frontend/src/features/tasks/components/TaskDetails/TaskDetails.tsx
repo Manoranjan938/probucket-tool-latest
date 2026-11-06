@@ -12,6 +12,7 @@ import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion
 import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
 import { useGetSubtasksQuery, useGetTaskDetailsQuery, useUpdateTaskMutation } from "features/tasks/api/tasksApi";
 import { taskStatuses, toastOptions } from "features/tasks/data";
+import { getApiErrorMessage } from "shared/services/apiError";
 import type { TaskDetails as TaskDetailsData } from "features/tasks/types";
 
 export type DetailsView = "panel" | "modal";
@@ -48,6 +49,10 @@ const TaskDetails = ({
   const loaded = Boolean(loadedTask);
   const isSubtask = Boolean(currentTask.subtask);
   const status = taskStatuses[currentTask.status ?? ""] ?? taskStatuses.TODO;
+  // The status only changes once someone owns the task; the backend refuses it too.
+  // The details send "NA" for an unassigned task.
+  const assigned = Boolean(currentTask.assignee) && currentTask.assignee !== "NA";
+  const lockedHint = "Assign someone to change the status";
 
   useEffect(() => {
     setDescription(currentTask.taskDesc ?? "");
@@ -69,7 +74,7 @@ const TaskDetails = ({
       }).unwrap();
     } catch (err) {
       console.log(err);
-      enqueueSnackbar("Couldn't change the status. Please try again.", { ...toastOptions, variant: "error" });
+      enqueueSnackbar(getApiErrorMessage(err, "Couldn't change the status. Please try again."), { ...toastOptions, variant: "error" });
     } finally {
       setSavingStatus(false);
     }
@@ -77,18 +82,24 @@ const TaskDetails = ({
 
   const statusControl = (
     <>
-      <button
-        type="button"
-        className={`${task.statusButton} ${status.soft} ${status.text}`}
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        disabled={savingStatus}
-        aria-haspopup="menu"
-        aria-expanded={Boolean(anchorEl)}
-        aria-label={`Status: ${status.label}`}
-      >
-        {status.label}
-        <FiChevronDown aria-hidden="true" />
-      </button>
+      {/* The span lets the tooltip show on the disabled button; above it, so it doesn't cover the hint below */}
+      <Tooltip title={assigned ? "" : lockedHint} placement="top">
+        <span className="inline-flex">
+          <button
+            type="button"
+            className={`${task.statusButton} ${status.soft} ${status.text}`}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            disabled={savingStatus || !assigned}
+            aria-haspopup="menu"
+            aria-expanded={Boolean(anchorEl)}
+            aria-label={`Status: ${status.label}`}
+            aria-describedby={assigned ? undefined : "status-hint"}
+          >
+            {status.label}
+            <FiChevronDown aria-hidden="true" />
+          </button>
+        </span>
+      </Tooltip>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         {Object.entries(taskStatuses).map(([value, style]) => (
           <MenuItem key={value} onClick={() => changeStatus(value)} selected={value === currentTask.status}>
@@ -100,7 +111,12 @@ const TaskDetails = ({
     </>
   );
 
-  const actions = (
+  // Under the status button: the actions row in the panel, the side column in the modal
+  const statusNote = assigned ? null : (
+    <p id="status-hint" className={task.statusHint}>{lockedHint}</p>
+  );
+
+  const actionsRow = (
     <div className={task.actionsRow}>
       {view === "panel" ? statusControl : null}
       {/* Attachments aren't wired up yet */}
@@ -114,6 +130,13 @@ const TaskDetails = ({
           Create subtask
         </button>
       )}
+    </div>
+  );
+
+  const actions = (
+    <div className="flex flex-col gap-1.5">
+      {actionsRow}
+      {view === "panel" ? statusNote : null}
     </div>
   );
 
@@ -219,7 +242,10 @@ const TaskDetails = ({
               <TaskActivity />
             </div>
             <aside className={task.detailsSide}>
-              <div>{statusControl}</div>
+              <div className="flex flex-col items-start gap-1.5">
+                {statusControl}
+                {statusNote}
+              </div>
               {details}
               {progress}
             </aside>

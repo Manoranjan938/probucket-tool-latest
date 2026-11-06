@@ -68,7 +68,9 @@ export const priority = "inline-flex items-center gap-1 text-[12px] font-semibol
 export const statusPill =
   "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[12px] font-semibold whitespace-nowrap";
 export const statusButton =
-  "inline-flex items-center gap-1.5 h-9 pl-3 pr-2 border-none rounded-[10px] [font-family:inherit] text-[14px] font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
+  "inline-flex items-center gap-1.5 h-9 pl-3 pr-2 border-none rounded-[10px] [font-family:inherit] text-[14px] font-semibold cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-60";
+// Why the status button is disabled on an unassigned task
+export const statusHint = "text-[13px] text-brand-muted";
 
 /* Empty state */
 export const empty =

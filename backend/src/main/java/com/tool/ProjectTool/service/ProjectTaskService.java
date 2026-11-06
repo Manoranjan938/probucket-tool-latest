@@ -234,6 +234,14 @@ public class ProjectTaskService {
 
 		if (task != null) {
 
+			// Nobody can work on a task without an owner, so its status stays put until someone is assigned.
+			// Assigning and changing the status in the same request is fine.
+			String assignee = user != null ? user.getUserId() : task.getAssignee();
+			boolean statusChanges = !Objects.equals(task.getStatus(), updateTask.getStatus());
+			if (statusChanges && (assignee == null || assignee.isBlank())) {
+				throw new BadRequestException("Assign the task to someone before changing its status");
+			}
+
 			recordChanges(task, updateTask, user);
 
 			if(user != null) {
