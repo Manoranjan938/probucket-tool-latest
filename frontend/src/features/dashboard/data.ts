@@ -1,4 +1,4 @@
-import { FiBell, FiCheckSquare, FiFileText, FiGrid, FiSettings, FiTrash2, FiUsers } from "react-icons/fi";
+import { FiActivity, FiBell, FiCheckSquare, FiFileText, FiGrid, FiSettings, FiTrash2, FiUsers } from "react-icons/fi";
 import type { IconType } from "react-icons";
 
 /** The two dashboards – also the first part of their routes (/project/personal/*, /project/team/*) */
@@ -26,6 +26,7 @@ export const mainNav: NavItem[] = [
 
 export const manageNav: NavItem[] = [
   { path: "setting", title: "Project settings", icon: FiSettings },
+  { path: "activity", title: "Activity", icon: FiActivity },
   { path: "trash", title: "Trash", icon: FiTrash2 },
 ];
 

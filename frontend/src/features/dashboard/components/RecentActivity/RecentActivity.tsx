@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { FiEdit2, FiPlus } from "react-icons/fi";
 
 import * as activity from "features/activity/styles/activityClasses";
@@ -19,11 +20,13 @@ interface RecentActivityProps {
   name: string | null;
   /** undefined while loading */
   tasks: TaskListItem[] | undefined;
+  /** The project's Activity page */
+  activityLink: string;
 }
 
 // The project's latest changes. Nothing was recorded before this feature existed, so until there is
 // something to show, it lists the tasks that changed last: their dates are known, but not who changed them.
-const RecentActivity = ({ name, tasks }: RecentActivityProps) => {
+const RecentActivity = ({ name, tasks, activityLink }: RecentActivityProps) => {
   const { currentData, isError } = useGetProjectActivityQuery(name);
   // undefined while loading; shown as empty if it couldn't be loaded
   const activities = isError ? [] : currentData;
@@ -37,12 +40,16 @@ const RecentActivity = ({ name, tasks }: RecentActivityProps) => {
     <section className={dashboard.card} aria-labelledby="recent-activity-title">
       <div className={dashboard.cardHeader}>
         <h2 id="recent-activity-title" className={dashboard.cardTitle}>Recent activity</h2>
+        <Link to={activityLink} className={dashboard.cardLink}>View all</Link>
       </div>
 
       {activities === undefined || (activities.length === 0 && tasks === undefined) ? (
         <TimelineSkeleton />
       ) : activities.length > 0 ? (
-        <ActivityList activities={activities} />
+        // Scrolls inside the card, so the card keeps its height. Focusable, so the keyboard can scroll it too.
+        <div className={activity.cardScroll} tabIndex={0} role="region" aria-label="Recent activity entries">
+          <ActivityList activities={activities} />
+        </div>
       ) : recentTasks.length > 0 ? (
         <>
           <Timeline

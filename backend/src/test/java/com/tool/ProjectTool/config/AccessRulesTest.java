@@ -117,6 +117,8 @@ class AccessRulesTest {
 	void activityNeedsALogin() throws Exception {
 		mockMvc.perform(get("/api/v1/activity/getProjectActivity/AB")).andExpect(status().isUnauthorized());
 		mockMvc.perform(get("/api/v1/activity/getTaskActivity/AB-1")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/api/v1/activity/getProjectActivityLog/AB")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/api/v1/activity/getProjectActivityPeople/AB")).andExpect(status().isUnauthorized());
 	}
 
 	@Test

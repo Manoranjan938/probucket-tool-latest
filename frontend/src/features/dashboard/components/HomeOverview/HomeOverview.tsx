@@ -86,7 +86,7 @@ const HomeOverview = ({ type, team, children }: Props) => {
           <TaskProgress counts={counts} />
           <PriorityBreakdown tasks={tasks} />
           <ProjectDetailsCard project={project} memberCount={team?.length} />
-          <RecentActivity name={name} tasks={tasks} />
+          <RecentActivity name={name} tasks={tasks} activityLink={dashboardLink(type, "activity", projectId, name)} />
         </div>
       </div>
 

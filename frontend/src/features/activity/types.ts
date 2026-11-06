@@ -31,3 +31,26 @@ export interface Activity {
   /** ISO date */
   createdOn: string;
 }
+
+/** model/response/ActivityPageResponse.java */
+export interface ActivityPage {
+  items: Activity[];
+  /** Whether older entries match the same filters */
+  hasMore: boolean;
+}
+
+/** model/response/ActivityPersonResponse.java */
+export interface ActivityPerson {
+  actorId: string;
+  name: string | null;
+}
+
+/** The Activity page's filters, as sent to getProjectActivityLog. Every one is optional. */
+export interface ActivityLogFilters {
+  actorId?: string;
+  types?: ActivityType[];
+  /** ISO instant, inclusive */
+  from?: string;
+  /** ISO instant, exclusive */
+  to?: string;
+}

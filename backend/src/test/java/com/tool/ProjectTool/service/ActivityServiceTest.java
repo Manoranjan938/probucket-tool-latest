@@ -1,13 +1,19 @@
 package com.tool.ProjectTool.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -24,6 +31,8 @@ import com.tool.ProjectTool.entity.ActivityLog;
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.model.response.ActivityPageResponse;
+import com.tool.ProjectTool.model.response.ActivityPersonResponse;
 import com.tool.ProjectTool.model.response.ActivityResponse;
 import com.tool.ProjectTool.repo.ActivityLogRepository;
 
@@ -118,6 +127,88 @@ class ActivityServiceTest {
 		service.getTaskActivity("AB-1");
 
 		verify(activityRepo).findByTaskSequenceOrderByCreatedAtDescIdDesc("AB-1", PageRequest.of(0, 50));
+	}
+
+	private static ActivityLog entry(long id, String projectIdentifier) {
+		ActivityLog activity = new ActivityLog();
+		activity.setId(id);
+		activity.setType(ActivityType.STATUS_CHANGED);
+		activity.setProjectIdentifier(projectIdentifier);
+		return activity;
+	}
+
+	private static ActivityLogRepository.Actor actor(String actorId, String actorName) {
+		return new ActivityLogRepository.Actor() {
+			public String getActorId() {
+				return actorId;
+			}
+
+			public String getActorName() {
+				return actorName;
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
+	private void logReturns(List<ActivityLog> found) {
+		when(activityRepo.findBy(any(Specification.class), any())).thenReturn(found);
+	}
+
+	@Test
+	void logPageHasMoreWhenAnotherEntryMatches() {
+		logReturns(LongStream.rangeClosed(1, ActivityService.LOG_PAGE_SIZE + 1).mapToObj(id -> entry(id, "AB")).toList());
+
+		ActivityPageResponse page = service.getProjectActivityLog("AB", null, null, null, null, null);
+
+		assertEquals(ActivityService.LOG_PAGE_SIZE, page.items().size());
+		assertTrue(page.hasMore());
+	}
+
+	@Test
+	void lastLogPageHasNoMore() {
+		logReturns(List.of(entry(1, "AB")));
+
+		ActivityPageResponse page = service.getProjectActivityLog("AB", null, null, List.of(ActivityType.COMMENT_ADDED),
+				null, null);
+
+		assertEquals(1, page.items().size());
+		assertFalse(page.hasMore());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void logPageAfterAnotherProjectsEntryIsEmpty() {
+		when(activityRepo.findById(7L)).thenReturn(Optional.of(entry(7, "OTHER")));
+
+		ActivityPageResponse page = service.getProjectActivityLog("AB", 7L, null, null, null, null);
+
+		assertTrue(page.items().isEmpty());
+		assertFalse(page.hasMore());
+		verify(activityRepo, never()).findBy(any(Specification.class), any());
+	}
+
+	@Test
+	void logPageContinuesAfterTheGivenEntry() {
+		ActivityLog last = entry(7, "AB");
+		last.setCreatedAt(new Date());
+		when(activityRepo.findById(7L)).thenReturn(Optional.of(last));
+		logReturns(List.of(entry(6, "AB")));
+
+		ActivityPageResponse page = service.getProjectActivityLog("AB", 7L, null, null, null, null);
+
+		assertEquals(6L, page.items().get(0).id());
+	}
+
+	@Test
+	void peopleAppearOnceByTheirLatestNameSortedByName() {
+		// The repository lists the latest name first
+		when(activityRepo.findActors("AB")).thenReturn(
+				List.of(actor("u2", "ravi"), actor("u1", "Asha K"), actor("u2", "Ravi old"), actor("u1", "Asha")));
+
+		List<ActivityPersonResponse> people = service.getProjectActivityPeople("AB");
+
+		assertEquals(List.of(new ActivityPersonResponse("u1", "Asha K"), new ActivityPersonResponse("u2", "ravi")),
+				people);
 	}
 
 }

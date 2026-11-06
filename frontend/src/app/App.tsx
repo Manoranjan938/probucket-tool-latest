@@ -26,6 +26,7 @@ import NotesSkeleton from "features/notes/pages/Notes/NotesSkeleton";
 import NotificationsSkeleton from "features/notifications/pages/Notifications/NotificationsSkeleton";
 import ProjectSettingsSkeleton from "features/projects/pages/ProjectSettings/ProjectSettingsSkeleton";
 import TrashSkeleton from "features/trash/pages/Trash/TrashSkeleton";
+import ActivitySkeleton from "features/activity/pages/Activity/ActivitySkeleton";
 import NewTeamUserSkeleton from "features/team/pages/NewTeamUser/NewTeamUserSkeleton";
 import BugsSkeleton from "features/bugs/pages/Bugs/BugsSkeleton";
 import UserProfileSkeleton from "features/profile/pages/UserProfile/UserProfileSkeleton";
@@ -60,6 +61,7 @@ const Notes = lazyPage(() => import("features/notes/pages/Notes/Notes"));
 const Notifications = lazyPage(() => import("features/notifications/pages/Notifications/Notifications"));
 const ProjectSettings = lazyPage(() => import("features/projects/pages/ProjectSettings/ProjectSettings"));
 const Trash = lazyPage(() => import("features/trash/pages/Trash/Trash"));
+const Activity = lazyPage(() => import("features/activity/pages/Activity/Activity"));
 const UserProfile = lazyPage(() => import("features/profile/pages/UserProfile/UserProfile"));
 const TeamDashboard = lazyPage(() => import("features/dashboard/pages/TeamDashboard/TeamDashboard"));
 const TeamDashboardHome = lazyPage(() => import("features/dashboard/pages/TeamDashboardHome/TeamDashboardHome"));
@@ -81,6 +83,7 @@ const personalPages: DashboardPage[] = [
   { path: "/notes", element: <Notes />, skeleton: <NotesSkeleton /> },
   { path: "/notifications", element: <Notifications title="Personal Dashboard" />, skeleton: <NotificationsSkeleton /> },
   { path: "/setting", element: <ProjectSettings />, skeleton: <ProjectSettingsSkeleton /> },
+  { path: "/activity", element: <Activity type="personal" />, skeleton: <ActivitySkeleton /> },
   { path: "/trash", element: <Trash title="Personal Dashboard" />, skeleton: <TrashSkeleton /> },
 ];
 
@@ -94,6 +97,7 @@ const teamPages: DashboardPage[] = [
   { path: "/issues", element: <TeamIssue />, skeleton: null },
   { path: "/new-user", element: <NewTeamUser />, skeleton: <NewTeamUserSkeleton /> },
   { path: "/setting", element: <ProjectSettings />, skeleton: <ProjectSettingsSkeleton /> },
+  { path: "/activity", element: <Activity type="team" />, skeleton: <ActivitySkeleton team /> },
   { path: "/trash", element: <Trash title="Team Dashboard" />, skeleton: <TrashSkeleton /> },
 ];
 
