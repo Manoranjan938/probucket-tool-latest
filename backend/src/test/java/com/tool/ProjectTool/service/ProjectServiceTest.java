@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
+import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTemplateRequest;
@@ -164,6 +166,80 @@ class ProjectServiceTest {
 		verify(projectRepo, never()).save(any());
 	}
 
+	private ProjectEntity deleted() {
+		ProjectEntity project = existing();
+		project.setStatus(ProjectEntity.DELETED);
+		project.setDeletedBy("lead");
+		project.setDeletedDate(new Date());
+		return project;
+	}
+
+	@Test
+	void aDeletedProjectCantBeOpened() {
+		deleted();
+		loggedInAs("lead");
+
+		assertThrows(ProjectNotFoundException.class, () -> service.getProjectById("p1"));
+	}
+
+	@Test
+	void aDeletedProjectCantBeChanged() {
+		deleted();
+		loggedInAs("lead");
+
+		assertThrows(ProjectNotFoundException.class, () -> service.updateProject(rename("New")));
+		assertThrows(ProjectNotFoundException.class, () -> service.updateProjectTemplate(template("bug")));
+		assertThrows(ProjectNotFoundException.class, () -> service.deleteProject("p1", "lead"));
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void theLeadRestores() {
+		ProjectEntity project = deleted();
+		loggedInAs("lead");
+
+		service.restoreProject("p1");
+
+		assertEquals(ProjectEntity.ACTIVE, project.getStatus());
+		assertEquals(null, project.getDeletedDate());
+		assertEquals(null, project.getDeletedBy());
+		verify(projectRepo).save(project);
+	}
+
+	@Test
+	void someoneElseCantRestore() {
+		ProjectEntity project = deleted();
+		loggedInAs("member");
+
+		assertThrows(BadRequestException.class, () -> service.restoreProject("p1"));
+		assertEquals(ProjectEntity.DELETED, project.getStatus());
+	}
+
+	@Test
+	void aProjectThatIsntDeletedCantBeRestored() {
+		existing();
+		loggedInAs("lead");
+
+		assertThrows(ProjectNotFoundException.class, () -> service.restoreProject("p1"));
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void deletedProjectsSayWhenTheyGoForGood() {
+		ProjectEntity project = new ProjectEntity();
+		project.setStatus(ProjectEntity.DELETED);
+		project.setDeletedDate(new Date(1_000_000_000_000L));
+		Users lead = person("lead");
+		lead.setId(7L);
+		when(userRepo.findByUserId("lead")).thenReturn(lead);
+		when(projectRepo.getDeletedProjectsByUserId(7L)).thenReturn(List.of(project));
+
+		var list = service.getDeletedProjects("lead");
+
+		assertEquals(1, list.size());
+		assertEquals(1_000_000_000_000L + 30L * 24 * 60 * 60 * 1000, list.get(0).deleteForeverOn().getTime());
+	}
+
 	@Test
 	void theLeadDeletes() {
 		ProjectEntity project = existing();
@@ -172,7 +248,8 @@ class ProjectServiceTest {
 
 		service.deleteProject("p1", "lead");
 
-		assertEquals(0, project.getStatus());
+		assertEquals(ProjectEntity.DELETED, project.getStatus());
+		assertEquals("lead", project.getDeletedBy());
 		verify(projectRepo).save(project);
 	}
 

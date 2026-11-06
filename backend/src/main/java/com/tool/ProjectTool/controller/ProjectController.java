@@ -112,4 +112,19 @@ public class ProjectController {
 		return ApiResponseBuilder.ok(delete);
 	}
 
+	// Lead only; the project must be deleted
+	@PutMapping("/restoreProject/{projectId}")
+	public ResponseEntity<?> restoreProject(@PathVariable("projectId") String projectId) {
+
+		return ApiResponseBuilder.ok(projectService.restoreProject(projectId));
+	}
+
+	// The Recently deleted list on the Projects page: only the lead's own
+	@GetMapping("/getDeletedProjects/{userId}")
+	@PreAuthorize("#userId == principal.userId")
+	public ResponseEntity<?> getDeletedProjects(@PathVariable("userId") String userId) {
+
+		return ApiResponseBuilder.ok(projectService.getDeletedProjects(userId));
+	}
+
 }

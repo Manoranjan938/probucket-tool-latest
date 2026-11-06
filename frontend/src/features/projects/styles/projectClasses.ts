@@ -159,3 +159,23 @@ export const templateNote =
   "flex items-start gap-2.5 mt-4 p-3.5 rounded-xl bg-brand-surface-alt border border-brand-border text-[14px]";
 export const templateNoteIcon = "shrink-0 mt-0.5 text-[16px] text-brand-strong";
 export const detailValueWithAction = "flex items-center justify-between gap-3 min-w-0";
+
+/* Delete project dialog */
+export const deleteWarning =
+  "flex items-start gap-3 mb-5 p-3.5 rounded-xl border border-[#f2d5d5] bg-[#fdf3f3] text-[14px] text-brand-text";
+export const deleteWarningIcon = "shrink-0 mt-0.5 text-[16px] text-brand-danger";
+export const settingsButtonDanger = `${settingsButtonGhost} text-brand-danger! hover:border-brand-danger! hover:text-brand-danger!`;
+
+/* Recently deleted, at the bottom of the Projects page */
+export const deletedSection = "mt-12 pt-8 border-t border-brand-border";
+export const deletedTitle = "mb-1 text-[18px] font-bold text-brand-ink";
+export const deletedText = "mb-4 text-[14px]";
+export const deletedList = "m-0 p-0 list-none border border-brand-border rounded-brand bg-brand-surface overflow-hidden";
+export const deletedRow =
+  "flex items-center gap-4 px-5 py-4 [&+&]:border-t [&+&]:border-brand-border max-[480px]:flex-wrap max-[480px]:px-4";
+export const deletedAvatar =
+  "flex shrink-0 items-center justify-center w-10 h-10 rounded-[10px] bg-brand-surface-alt text-[16px] font-bold text-brand-muted uppercase";
+export const deletedInfo = "flex-1 min-w-0";
+export const deletedName = "flex items-center gap-2 min-w-0 text-[15px] font-semibold text-brand-ink capitalize";
+export const deletedMeta = "flex flex-wrap items-center gap-x-1.5 text-[13px] text-brand-muted";
+export const deletedDays = "font-semibold text-brand-text";

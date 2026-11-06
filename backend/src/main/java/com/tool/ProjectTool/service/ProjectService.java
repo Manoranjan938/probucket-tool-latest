@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -19,6 +20,7 @@ import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTemplateRequest;
+import com.tool.ProjectTool.model.response.DeletedProjectResponse;
 import com.tool.ProjectTool.model.response.ProjectResponse;
 import com.tool.ProjectTool.repo.ProjectRepository;
 import com.tool.ProjectTool.repo.UserRepository;
@@ -38,6 +40,9 @@ public class ProjectService {
 
 	// The templates of the Create project wizard (frontend features/projects/data.ts)
 	static final Set<String> TEMPLATES = Set.of("project", "bug", "project and bug");
+
+	/** How long a deleted project can be restored before it is removed for good */
+	public static final int RETENTION_DAYS = 30;
 
 	String randomString(int len) {
 		StringBuilder sb = new StringBuilder(len);
@@ -79,7 +84,6 @@ public class ProjectService {
 
 	public String saveProject(ProjectRequest request) {
 
-		int status = 1;
 		String ids = randomString(20);
 		String id = null;
 
@@ -124,7 +128,7 @@ public class ProjectService {
 
 			project.setProjectId(id);
 			project.setProjectDescription(request.getProjectDesc());
-			project.setStatus(status);
+			project.setStatus(ProjectEntity.ACTIVE);
 
 			projectRepo.save(project);
 
@@ -164,7 +168,8 @@ public class ProjectService {
 	public ProjectResponse getProjectById(String id) {
 
 		ProjectEntity project = projectRepo.findByProjectId(id);
-		if (project != null) {
+		// A deleted project can't be opened until it is restored
+		if (project != null && !project.isDeleted()) {
 
 			ProjectResponse response = new ProjectResponse();
 
@@ -206,12 +211,13 @@ public class ProjectService {
 		return "Project template changed";
 	}
 
+	// Hidden from everyone at once; the lead can restore it for RETENTION_DAYS days
 	public String deleteProject(String projectId, String userId) {
 
 		ProjectEntity proj = findAsLead(projectId, "delete");
 		Users user = userRepo.findByUserId(userId);
 
-		proj.setStatus(0);
+		proj.setStatus(ProjectEntity.DELETED);
 		proj.setDeletedBy(user.getName());
 		proj.setDeletedDate(new Date());
 
@@ -219,12 +225,43 @@ public class ProjectService {
 		return "Project deleted successfully";
 	}
 
+	public String restoreProject(String projectId) {
+
+		ProjectEntity proj = findAsLead(projectId, "restore", true);
+
+		proj.setStatus(ProjectEntity.ACTIVE);
+		proj.setDeletedBy(null);
+		proj.setDeletedDate(null);
+
+		projectRepo.save(proj);
+		return "Project restored";
+	}
+
+	/** The lead's deleted projects that can still be restored, the latest first */
+	public List<DeletedProjectResponse> getDeletedProjects(String userId) {
+
+		Users user = userRepo.findByUserId(userId);
+		return projectRepo.getDeletedProjectsByUserId(user.getId()).stream().map(project -> {
+			Date deletedOn = project.getDeletedDate();
+			Date deleteForeverOn = deletedOn != null
+					? new Date(deletedOn.getTime() + TimeUnit.DAYS.toMillis(RETENTION_DAYS))
+					: null;
+			return new DeletedProjectResponse(project.getProjectId(), project.getProjectName(),
+					project.getProjectIdentifier(), project.getProjectTeamType(), deletedOn, deleteForeverOn);
+		}).toList();
+	}
+
 	// The project, if the person logged in is its lead (the user who created it). Who that is comes from the
 	// login, never from the request.
 	private ProjectEntity findAsLead(String projectId, String action) {
+		return findAsLead(projectId, action, false);
+	}
+
+	// deleted: whether the project must be a deleted one (restore) or one that isn't (everything else)
+	private ProjectEntity findAsLead(String projectId, String action, boolean deleted) {
 
 		ProjectEntity proj = projectRepo.findByProjectId(projectId);
-		if (proj == null) {
+		if (proj == null || proj.isDeleted() != deleted) {
 			throw new ProjectNotFoundException("Project Not found with this project id");
 		}
 

@@ -129,6 +129,8 @@ class AccessRulesTest {
 				.andExpect(status().isUnauthorized());
 		mockMvc.perform(put("/api/v1/project/updateProjectTemplate").contentType("application/json").content(body))
 				.andExpect(status().isUnauthorized());
+		mockMvc.perform(put("/api/v1/project/restoreProject/p1")).andExpect(status().isUnauthorized());
+		mockMvc.perform(get("/api/v1/project/getDeletedProjects/me")).andExpect(status().isUnauthorized());
 	}
 
 	@Test

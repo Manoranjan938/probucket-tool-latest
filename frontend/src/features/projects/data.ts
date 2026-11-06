@@ -24,6 +24,13 @@ export const templates: ProjectOption[] = [
   },
 ];
 
+/** Days a deleted project can be restored; the same as ProjectService.RETENTION_DAYS */
+export const PROJECT_RETENTION_DAYS = 30;
+
+/** Days until a deleted project is removed for good, rounded up: 30 just after deleting, 1 on the last day, 0 once due */
+export const daysLeft = (deleteForeverOn: string, now = Date.now()) =>
+  Math.max(0, Math.ceil((new Date(deleteForeverOn).getTime() - now) / (24 * 60 * 60 * 1000)));
+
 /** The template a project uses. Projects without a known one only take tasks, like Project Management. */
 export const templateOf = (value: string | undefined) =>
   templates.find((template) => template.value === value) ?? templates[0];

@@ -30,6 +30,7 @@ import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
+import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
@@ -284,6 +285,17 @@ class ProjectTaskServiceTest {
 		backlog.setPTSequence(0);
 		backlog.setProject(project);
 		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+	}
+
+	@Test
+	void nothingIsAddedToADeletedProject() {
+		projectFrom("project");
+		backlogRepo.findByProjectIdentifier("AB").getProject().setStatus(ProjectEntity.DELETED);
+		when(projectTaskRepo.findByProjectSequence("AB-9")).thenReturn(task("AB-9", false, null));
+
+		assertThrows(ProjectNotFoundException.class, () -> service.addProjectTask(newTask("")));
+		assertThrows(ProjectNotFoundException.class, () -> service.createSubtask(subtaskOf("AB-9")));
+		verify(projectTaskRepo, never()).save(any());
 	}
 
 	private ProjectTask savedTask() {

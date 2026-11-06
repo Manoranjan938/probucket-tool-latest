@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Transient;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
@@ -19,6 +20,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "projects")
 public class ProjectEntity {
+
+	public static final int ACTIVE = 1;
+
+	public static final int DELETED = 0;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +56,7 @@ public class ProjectEntity {
 	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
 	private Backlog backlog;
 	
-	private int status;
+	private int status = ACTIVE;
 	
 	private String deletedBy;
 	
@@ -147,6 +152,12 @@ public class ProjectEntity {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	/** Deleted projects have status 0 and stay restorable until they are removed for good */
+	@Transient
+	public boolean isDeleted() {
+		return status == DELETED;
 	}
 
 	public Date getCreatedAt() {

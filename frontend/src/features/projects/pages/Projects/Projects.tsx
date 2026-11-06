@@ -6,6 +6,7 @@ import * as project from "features/projects/styles/projectClasses";
 
 import ProjectsTopBar from "features/projects/components/ProjectsTopBar/ProjectsTopBar";
 import NoProjects from "features/projects/components/NoProjects/NoProjects";
+import RecentlyDeleted from "features/projects/components/RecentlyDeleted/RecentlyDeleted";
 import { ProjectsContentSkeleton } from "features/projects/pages/Projects/ProjectsSkeleton";
 import { projectTypes } from "features/projects/data";
 import { useGetMyProjectsQuery } from "features/projects/api/projectsApi";
@@ -83,6 +84,9 @@ const Projects = () => {
         ) : (
           <NoProjects canCreate={canCreate} />
         )}
+
+        {/* Only leads delete projects, and team members can't lead one */}
+        {canCreate && currentUser.id && !isLoading ? <RecentlyDeleted userId={currentUser.id} /> : null}
       </main>
     </div>
   );

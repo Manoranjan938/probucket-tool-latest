@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import Helmet from "react-helmet";
 import { Link, useLocation } from "react-router-dom";
 
 import * as project from "features/projects/styles/projectClasses";
 
 import ProjectGeneralCard from "features/projects/components/ProjectGeneralCard/ProjectGeneralCard";
+import DeleteProjectDialog from "features/projects/components/DeleteProjectDialog/DeleteProjectDialog";
 import ProjectSettingsSkeleton from "features/projects/pages/ProjectSettings/ProjectSettingsSkeleton";
 import { dashboardLink } from "features/dashboard/data";
+import { PROJECT_RETENTION_DAYS } from "features/projects/data";
 import ComingSoonBadge from "shared/components/ComingSoonBadge/ComingSoonBadge";
 import useCurrentProject from "features/projects/hooks/useCurrentProject";
 import { useAppSelector } from "app/hooks";
@@ -18,6 +20,7 @@ const ProjectSettings = () => {
   const { currentData: currentProject } = useCurrentProject();
   const currentUser = useAppSelector((state) => state.security.user);
   const { pathname, search } = useLocation();
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const query = new URLSearchParams(search);
   const projectId = query.get("project");
   const isTeam = pathname.startsWith("/project/team/");
@@ -136,14 +139,18 @@ const ProjectSettings = () => {
                 <li className={project.settingsRow}>
                   <div className={project.settingsRowText}>
                     <p className={project.settingsRowTitle}>Delete project</p>
-                    <p className={project.settingsRowNote}>Remove the project and its tasks.</p>
+                    <p className={project.settingsRowNote}>
+                      Hide the project and its tasks from everyone. You can restore it for {PROJECT_RETENTION_DAYS} days.
+                    </p>
                   </div>
                   <div className={project.settingsRowActions}>
-                    <ComingSoonBadge />
-                    <button type="button" className={project.settingsButtonGhost} disabled>Delete</button>
+                    <button type="button" className={project.settingsButtonDanger} onClick={() => setDeleteOpen(true)}>
+                      Delete
+                    </button>
                   </div>
                 </li>
               </ul>
+              <DeleteProjectDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} currentProject={currentProject} />
             </section>
           ) : null}
         </div>

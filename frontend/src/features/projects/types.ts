@@ -31,6 +31,18 @@ export interface UpdateProjectRequest {
   projectName: string;
 }
 
+/** model/response/DeletedProjectResponse.java */
+export interface DeletedProject {
+  projectId: string;
+  projectName: string;
+  projectIdentifier: string;
+  projectType: string;
+  /** ISO date */
+  deletedOn: string;
+  /** ISO date: when it is removed for good */
+  deleteForeverOn: string;
+}
+
 /** model/request/UpdateProjectTemplateRequest.java */
 export interface UpdateProjectTemplateRequest {
   projectId: string;

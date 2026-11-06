@@ -91,7 +91,8 @@ public class ProjectTaskService {
 			}
 		}
 		Backlog back = backlogRepo.findByProjectIdentifier(request.getProjectIdentifier());
-		if (back == null) {
+		// Nothing new goes into a deleted project
+		if (back == null || (back.getProject() != null && back.getProject().isDeleted())) {
 			throw new ProjectNotFoundException("Project not found");
 		}
 		String taskType = resolveTaskType(back.getProject(), request.getTaskType());
@@ -621,8 +622,12 @@ public class ProjectTaskService {
 
 		LocalDate dueDate = parseDueDate(subtaskRequest.getDueDate());
 
+		Backlog back = backlogRepo.findByProjectIdentifier(subtaskRequest.getProjectId());
+		if (back == null || (back.getProject() != null && back.getProject().isDeleted())) {
+			throw new ProjectNotFoundException("Project not found");
+		}
+
 		try {
-			Backlog back = backlogRepo.findByProjectIdentifier(subtaskRequest.getProjectId());
 
 			ProjectTask projTask = new ProjectTask();
 			projTask.setBacklog(back);

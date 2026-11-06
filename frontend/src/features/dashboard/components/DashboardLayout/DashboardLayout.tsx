@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { FiFolder } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
@@ -8,6 +9,10 @@ import Sidebar from "features/dashboard/components/Sidebar/Sidebar";
 import DashboardHeader from "features/dashboard/components/DashboardHeader/DashboardHeader";
 import useSidebarCollapsed from "features/dashboard/hooks/useSidebarCollapsed";
 import { dashboardLink, pageTitles, type DashboardType } from "features/dashboard/data";
+import EmptyState from "shared/components/EmptyState/EmptyState";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
+import * as projectStyles from "features/projects/styles/projectClasses";
+import type { ApiRequestError } from "shared/services/api";
 
 // Frame of the personal and team dashboards; children is the current page
 const DashboardLayout = ({ type, children }: PropsWithChildren<{ type: DashboardType }>) => {
@@ -19,6 +24,9 @@ const DashboardLayout = ({ type, children }: PropsWithChildren<{ type: Dashboard
   const projectId = query.get("project");
   const name = query.get("name");
   const title = pageTitles[pathname.split("/").pop() ?? ""] ?? "";
+  // A deleted project, or a link to one that never existed: no page can show anything
+  const { error } = useCurrentProject();
+  const projectMissing = (error as ApiRequestError | undefined)?.data?.code === "PROJECT_NOT_FOUND";
 
   // The drawer closes when a link in it is followed
   useEffect(() => {
@@ -68,7 +76,16 @@ const DashboardLayout = ({ type, children }: PropsWithChildren<{ type: Dashboard
         />
         {/* Keyed by project, so the page starts fresh when the project switcher opens another project */}
         <main key={projectId} className={dashboard.main}>
-          {children}
+          {projectMissing ? (
+            <EmptyState
+              icon={FiFolder}
+              title="This project isn't available"
+              text="It may have been deleted, or the link is out of date."
+              action={<Link to="/projects" className={projectStyles.btnPrimary}>Go to your projects</Link>}
+            />
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>

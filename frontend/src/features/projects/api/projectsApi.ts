@@ -1,9 +1,17 @@
 import { api, responseData } from "shared/services/api";
 import type { AuthUser } from "features/auth/types";
-import type { Project, ProjectRequest, UpdateProjectRequest, UpdateProjectTemplateRequest } from "features/projects/types";
+import type {
+  DeletedProject,
+  Project,
+  ProjectRequest,
+  UpdateProjectRequest,
+  UpdateProjectTemplateRequest,
+} from "features/projects/types";
 import type { ApiResponse } from "shared/types";
 
 const LIST = { type: "Project", id: "LIST" } as const;
+// The lead's Recently deleted list
+const DELETED = { type: "Project", id: "DELETED" } as const;
 
 const projectsApi = api.injectEndpoints({
   endpoints: (build) => ({
@@ -57,6 +65,20 @@ const projectsApi = api.injectEndpoints({
         }
       },
     }),
+    getDeletedProjects: build.query<DeletedProject[], string>({
+      query: (userId) => ({ url: `/project/getDeletedProjects/${userId}` }),
+      transformResponse: responseData<DeletedProject[]>,
+      providesTags: [DELETED],
+    }),
+    // Lead only. The project's details are loaded again, so a page still showing it finds it gone.
+    deleteProject: build.mutation<ApiResponse, { projectId: string; userId: string }>({
+      query: ({ projectId, userId }) => ({ url: `/project/deleteProject/${projectId}/${userId}`, method: "PUT" }),
+      invalidatesTags: (_result, error, { projectId }) => (error ? [] : [LIST, DELETED, { type: "Project", id: projectId }]),
+    }),
+    restoreProject: build.mutation<ApiResponse, string>({
+      query: (projectId) => ({ url: `/project/restoreProject/${projectId}`, method: "PUT" }),
+      invalidatesTags: (_result, error, projectId) => (error ? [] : [LIST, DELETED, { type: "Project", id: projectId }]),
+    }),
   }),
 });
 
@@ -67,4 +89,7 @@ export const {
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useUpdateProjectTemplateMutation,
+  useGetDeletedProjectsQuery,
+  useDeleteProjectMutation,
+  useRestoreProjectMutation,
 } = projectsApi;

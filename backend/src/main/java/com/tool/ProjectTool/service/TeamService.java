@@ -89,6 +89,12 @@ public class TeamService {
 		if(user != null) {
 			throw new UserAlreadyExistException("User with email " + teamReq.getEmail() + " is already exists.");
 		}
+
+		// Nobody is added to a project that doesn't exist or is deleted
+		ProjectEntity project = projectRepo.findByProjectId(teamReq.getProjectId());
+		if (project == null || project.isDeleted()) {
+			throw new ProjectNotFoundException("Project not found");
+		}
 		
 		Users newUser = new Users();
 		TeamDetails team = new TeamDetails();
@@ -117,11 +123,8 @@ public class TeamService {
 		team.setUserId(newUs.getId());
 		
 		teamRepo.save(team);
-		
-		ProjectEntity project = projectRepo.findByProjectId(teamReq.getProjectId());
-		if (project != null) {
-			activityService.recordMemberAdded(project.getProjectIdentifier(), newUser.getName());
-		}
+
+		activityService.recordMemberAdded(project.getProjectIdentifier(), newUser.getName());
 		
 		sendNewTeamMemberConfirmationEmail(teamReq.getEmail(), token);
 		

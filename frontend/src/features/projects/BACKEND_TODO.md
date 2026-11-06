@@ -16,11 +16,8 @@ Search the code for `TODO(project-backend)` to find the matching spots in the fr
 - [ ] **Change project lead.** The lead is stored as `projects.user_id` and as a copied name in `projects.project_leader`, so both must change. The lead isn't in `team_details` but other members are, so decide what happens to the old and new lead there. Also decide who gets which role in `user_details.role_name`.
 - [ ] **Default assignee.** `UpdateProjectRequest.defaultAssignee` exists, but the service ignores it and `projects` has no column for it. Creating a task must then use it.
 - [ ] **Archive project.** Needs a state to store, the rules for what an archived project allows, a place to list archived projects, and a way to bring one back.
-- [ ] **Delete project, with restore.**
-  - `deleteProject` only sets `status = 0`. `getProjectsByUserId`, `getProjectsByTeamMember` and `findByProjectId` never check `status`, so a deleted project still appears and opens.
-  - Filter deleted projects out of those queries.
-  - Add an endpoint to restore a project, and decide how long deleted projects are kept (most tools keep them 30 days).
-  - Decide where deleted projects are listed. The Trash page is inside a project, so it can't show a deleted one. The Projects page is the obvious place.
+- [x] **Delete project, with restore.** Deleting sets `status = 0`: the project lists leave it out, its details answer "not found", and no tasks, subtasks or team members can be added. The lead restores it from Recently deleted on the Projects page (`PUT /project/restoreProject/{projectId}`) for 30 days.
+- [ ] **Delete forever, and the daily clean-up after 30 days.**
 
 ## Not shown on the page
 
