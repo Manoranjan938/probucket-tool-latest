@@ -3,7 +3,9 @@ import { useSnackbar } from "notistack";
 
 import * as project from "features/projects/styles/projectClasses";
 
+import ProjectTemplateDialog from "features/projects/components/ProjectTemplateDialog/ProjectTemplateDialog";
 import { useUpdateProjectMutation } from "features/projects/api/projectsApi";
+import { templateOf } from "features/projects/data";
 import { formatDate, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 import type { Project } from "features/projects/types";
@@ -15,11 +17,11 @@ type Props = {
 };
 
 // The project's name and details
-// TODO(project-backend): the API lets anyone rename a project – see features/projects/BACKEND_TODO.md
 const ProjectGeneralCard = ({ currentProject, isLead }: Props) => {
   const [name, setName] = useState(currentProject.projectName ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
   const [updateProject] = useUpdateProjectMutation();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -120,6 +122,22 @@ const ProjectGeneralCard = ({ currentProject, isLead }: Props) => {
           <dd className={project.detailValue}>{currentProject.projectType}</dd>
         </div>
         <div className={project.detailRow}>
+          <dt className={project.detailLabel}>Template</dt>
+          <dd className={`${project.detailValue} ${project.detailValueWithAction}`}>
+            <span className="truncate">{templateOf(currentProject.projectTemplate).title}</span>
+            {isLead ? (
+              <button
+                type="button"
+                className={project.settingsButtonGhost}
+                onClick={() => setTemplateOpen(true)}
+                aria-label="Change template"
+              >
+                Change
+              </button>
+            ) : null}
+          </dd>
+        </div>
+        <div className={project.detailRow}>
           <dt className={project.detailLabel}>Lead</dt>
           <dd className={project.detailValue}>{currentProject.leadBy}</dd>
         </div>
@@ -130,6 +148,15 @@ const ProjectGeneralCard = ({ currentProject, isLead }: Props) => {
           </div>
         ) : null}
       </dl>
+
+      {isLead ? (
+        <ProjectTemplateDialog
+          open={templateOpen}
+          onClose={() => setTemplateOpen(false)}
+          projectId={currentProject.projectId}
+          template={currentProject.projectTemplate}
+        />
+      ) : null}
     </section>
   );
 };

@@ -31,6 +31,13 @@ export interface UpdateProjectRequest {
   projectName: string;
 }
 
+/** model/request/UpdateProjectTemplateRequest.java */
+export interface UpdateProjectTemplateRequest {
+  projectId: string;
+  /** One of the template values in features/projects/data.ts */
+  projectTemplate: string;
+}
+
 /** Values collected by the create-project wizard */
 export interface ProjectDraft {
   /** One of the template values in features/projects/data.ts */

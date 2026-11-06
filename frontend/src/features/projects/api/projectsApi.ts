@@ -1,6 +1,6 @@
 import { api, responseData } from "shared/services/api";
 import type { AuthUser } from "features/auth/types";
-import type { Project, ProjectRequest, UpdateProjectRequest } from "features/projects/types";
+import type { Project, ProjectRequest, UpdateProjectRequest, UpdateProjectTemplateRequest } from "features/projects/types";
 import type { ApiResponse } from "shared/types";
 
 const LIST = { type: "Project", id: "LIST" } as const;
@@ -41,6 +41,22 @@ const projectsApi = api.injectEndpoints({
       },
       invalidatesTags: [LIST],
     }),
+    // Lead only. The New task dialog follows the new template at once, without loading the details again.
+    updateProjectTemplate: build.mutation<ApiResponse, UpdateProjectTemplateRequest>({
+      query: (update) => ({ url: "/project/updateProjectTemplate", method: "PUT", data: update }),
+      async onQueryStarted({ projectId, projectTemplate }, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            projectsApi.util.updateQueryData("getProjectDetails", projectId, (project) => {
+              project.projectTemplate = projectTemplate;
+            })
+          );
+        } catch {
+          // The caller shows the error
+        }
+      },
+    }),
   }),
 });
 
@@ -50,4 +66,5 @@ export const {
   useGetProjectDetailsQuery,
   useCreateProjectMutation,
   useUpdateProjectMutation,
+  useUpdateProjectTemplateMutation,
 } = projectsApi;

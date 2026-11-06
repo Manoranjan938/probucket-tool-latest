@@ -1,13 +1,18 @@
 package com.tool.ProjectTool.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +20,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.model.request.ProjectRequest;
+import com.tool.ProjectTool.model.request.UpdateProjectRequest;
+import com.tool.ProjectTool.model.request.UpdateProjectTemplateRequest;
 import com.tool.ProjectTool.repo.ProjectRepository;
 import com.tool.ProjectTool.repo.UserRepository;
 
@@ -36,7 +46,134 @@ class ProjectServiceTest {
 
 	@BeforeEach
 	void user() {
-		when(userRepo.findByUserId("me")).thenReturn(new Users());
+		lenient().when(userRepo.findByUserId("me")).thenReturn(new Users());
+	}
+
+	@AfterEach
+	void clearLogin() {
+		SecurityContextHolder.clearContext();
+	}
+
+	private static Users person(String userId) {
+		Users user = new Users();
+		user.setUserId(userId);
+		user.setName(userId);
+		return user;
+	}
+
+	private void loggedInAs(String userId) {
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(person(userId), null, List.of()));
+	}
+
+	// A project led by "lead"
+	private ProjectEntity existing() {
+		ProjectEntity project = new ProjectEntity();
+		project.setProjectId("p1");
+		project.setProjectName("Old name");
+		project.setProjectTemplateType("project");
+		project.setStatus(1);
+		project.setUser(person("lead"));
+		when(projectRepo.findByProjectId("p1")).thenReturn(project);
+		return project;
+	}
+
+	private static UpdateProjectRequest rename(String name) {
+		UpdateProjectRequest request = new UpdateProjectRequest();
+		request.setProjectId("p1");
+		request.setProjectName(name);
+		return request;
+	}
+
+	private static UpdateProjectTemplateRequest template(String template) {
+		UpdateProjectTemplateRequest request = new UpdateProjectTemplateRequest();
+		request.setProjectId("p1");
+		request.setProjectTemplate(template);
+		return request;
+	}
+
+	@Test
+	void theLeadRenamesTheProjectTrimmed() {
+		ProjectEntity project = existing();
+		loggedInAs("lead");
+
+		service.updateProject(rename("  New name "));
+
+		assertEquals("New name", project.getProjectName());
+		verify(projectRepo).save(project);
+	}
+
+	@Test
+	void someoneElseCantRename() {
+		ProjectEntity project = existing();
+		loggedInAs("member");
+
+		BadRequestException error = assertThrows(BadRequestException.class, () -> service.updateProject(rename("Mine")));
+
+		assertEquals("Only the project lead can rename this project", error.getMessage());
+		assertEquals("Old name", project.getProjectName());
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void withoutALoginNothingChanges() {
+		existing();
+
+		assertThrows(BadRequestException.class, () -> service.updateProject(rename("Mine")));
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void theLeadChangesTheTemplate() {
+		ProjectEntity project = existing();
+		loggedInAs("lead");
+
+		service.updateProjectTemplate(template("project and bug"));
+
+		assertEquals("project and bug", project.getProjectTemplateType());
+		verify(projectRepo).save(project);
+	}
+
+	@Test
+	void someoneElseCantChangeTheTemplate() {
+		ProjectEntity project = existing();
+		loggedInAs("member");
+
+		assertThrows(BadRequestException.class, () -> service.updateProjectTemplate(template("bug")));
+		assertEquals("project", project.getProjectTemplateType());
+	}
+
+	@Test
+	void anUnknownTemplateIsRejected() {
+		loggedInAs("lead");
+
+		BadRequestException error = assertThrows(BadRequestException.class,
+				() -> service.updateProjectTemplate(template("scrum")));
+
+		assertEquals("Unknown project template", error.getMessage());
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void someoneElseCantDelete() {
+		ProjectEntity project = existing();
+		loggedInAs("member");
+
+		assertThrows(BadRequestException.class, () -> service.deleteProject("p1", "member"));
+		assertEquals(1, project.getStatus());
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void theLeadDeletes() {
+		ProjectEntity project = existing();
+		loggedInAs("lead");
+		when(userRepo.findByUserId("lead")).thenReturn(person("lead"));
+
+		service.deleteProject("p1", "lead");
+
+		assertEquals(0, project.getStatus());
+		verify(projectRepo).save(project);
 	}
 
 	private ProjectEntity create(String name, String... taken) {

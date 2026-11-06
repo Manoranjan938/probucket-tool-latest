@@ -4,8 +4,11 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.tool.ProjectTool.entity.Backlog;
@@ -15,6 +18,7 @@ import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectRequest;
+import com.tool.ProjectTool.model.request.UpdateProjectTemplateRequest;
 import com.tool.ProjectTool.model.response.ProjectResponse;
 import com.tool.ProjectTool.repo.ProjectRepository;
 import com.tool.ProjectTool.repo.UserRepository;
@@ -31,6 +35,9 @@ public class ProjectService {
 	static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	static SecureRandom rnd = new SecureRandom();
 	private static final String DEFAULT_IDENTIFIER = "P";
+
+	// The templates of the Create project wizard (frontend features/projects/data.ts)
+	static final Set<String> TEMPLATES = Set.of("project", "bug", "project and bug");
 
 	String randomString(int len) {
 		StringBuilder sb = new StringBuilder(len);
@@ -179,36 +186,56 @@ public class ProjectService {
 
 	public String updateProject(UpdateProjectRequest projRequest) {
 
-		ProjectEntity proj = projectRepo.findByProjectId(projRequest.getProjectId());
+		ProjectEntity proj = findAsLead(projRequest.getProjectId(), "rename");
+		proj.setProjectName(projRequest.getProjectName().trim());
 
-		if (proj != null) {
+		projectRepo.save(proj);
+		return "Project Updated successfully";
+	}
 
-			proj.setProjectName(projRequest.getProjectName());
+	// Existing tasks and bugs keep their type; the template only decides what new items can be
+	public String updateProjectTemplate(UpdateProjectTemplateRequest request) {
 
-			projectRepo.save(proj);
-			return "Project Updated successfully";
+		if (!TEMPLATES.contains(request.getProjectTemplate())) {
+			throw new BadRequestException("Unknown project template");
 		}
+		ProjectEntity proj = findAsLead(request.getProjectId(), "change the template of");
+		proj.setProjectTemplateType(request.getProjectTemplate());
 
-		throw new ProjectNotFoundException("Project Not found with this project id");
+		projectRepo.save(proj);
+		return "Project template changed";
 	}
 
 	public String deleteProject(String projectId, String userId) {
 
-		ProjectEntity proj = projectRepo.findByProjectId(projectId);
+		ProjectEntity proj = findAsLead(projectId, "delete");
 		Users user = userRepo.findByUserId(userId);
 
-		if (proj != null) {
+		proj.setStatus(0);
+		proj.setDeletedBy(user.getName());
+		proj.setDeletedDate(new Date());
 
-			proj.setStatus(0);
-			proj.setDeletedBy(user.getName());
-			proj.setDeletedDate(new Date());
+		projectRepo.save(proj);
+		return "Project deleted successfully";
+	}
 
-			projectRepo.save(proj);
-			return "Project deleted successfully";
+	// The project, if the person logged in is its lead (the user who created it). Who that is comes from the
+	// login, never from the request.
+	private ProjectEntity findAsLead(String projectId, String action) {
+
+		ProjectEntity proj = projectRepo.findByProjectId(projectId);
+		if (proj == null) {
+			throw new ProjectNotFoundException("Project Not found with this project id");
 		}
 
-		throw new ProjectNotFoundException("Project Not found with this project id");
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String me = auth != null && auth.getPrincipal() instanceof Users user ? user.getUserId() : null;
+		String lead = proj.getUser() != null ? proj.getUser().getUserId() : null;
+		if (me == null || !me.equals(lead)) {
+			throw new BadRequestException("Only the project lead can " + action + " this project");
+		}
 
+		return proj;
 	}
 
 }

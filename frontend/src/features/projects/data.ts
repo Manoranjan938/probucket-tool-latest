@@ -24,6 +24,17 @@ export const templates: ProjectOption[] = [
   },
 ];
 
+/** The template a project uses. Projects without a known one only take tasks, like Project Management. */
+export const templateOf = (value: string | undefined) =>
+  templates.find((template) => template.value === value) ?? templates[0];
+
+/** What changes for new items when a project moves to this template; existing items always stay as they are */
+export const templateChangeNote: Record<string, string> = {
+  project: "New items will be tasks. Bugs already in the project stay as they are.",
+  bug: "New items will be bugs. Tasks already in the project stay as they are.",
+  "project and bug": "New items can be tasks or bugs. Everything already in the project stays as it is.",
+};
+
 // Step 2. `value` is sent as projectType and is also the dashboard route (/project/personal, /project/team).
 export const projectTypes: ProjectOption[] = [
   {

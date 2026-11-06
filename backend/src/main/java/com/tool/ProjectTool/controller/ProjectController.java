@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.ProjectRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectRequest;
+import com.tool.ProjectTool.model.request.UpdateProjectTemplateRequest;
 import com.tool.ProjectTool.model.response.ApiResponse;
 import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.ProjectResponse;
@@ -75,6 +76,7 @@ public class ProjectController {
 		return ApiResponseBuilder.ok(project);
 	}
 
+	// Lead only
 	@PutMapping("/updateProject")
 	public ResponseEntity<?> updateProject(@Valid @RequestBody UpdateProjectRequest projRequest, BindingResult result) {
 
@@ -85,6 +87,19 @@ public class ProjectController {
 		String update = projectService.updateProject(projRequest);
 
 		return ApiResponseBuilder.ok(update);
+	}
+
+	// Lead only
+	@PutMapping("/updateProjectTemplate")
+	public ResponseEntity<?> updateProjectTemplate(@Valid @RequestBody UpdateProjectTemplateRequest request,
+			BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+
+		return ApiResponseBuilder.ok(projectService.updateProjectTemplate(request));
 	}
 
 	@PutMapping("/deleteProject/{projectId}/{userId}")

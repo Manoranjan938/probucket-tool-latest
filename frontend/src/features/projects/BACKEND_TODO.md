@@ -5,9 +5,9 @@ Search the code for `TODO(project-backend)` to find the matching spots in the fr
 
 ## Do first
 
-- [ ] **Only the project lead can rename a project.** `PUT /project/updateProject` has no owner check, so any logged-in user can rename any project. The frontend only hides the form from everyone else.
-- [ ] **Reject a blank project name on the server.** `UpdateProjectRequest` has no validation, so only the browser checks it today.
-- [ ] **Only the project lead can delete a project.** `PUT /project/deleteProject/{projectId}/{userId}` only checks that `userId` is the caller, not that the caller owns the project.
+- [x] **Only the project lead can rename a project.** `PUT /project/updateProject` has no owner check, so any logged-in user can rename any project. The frontend only hides the form from everyone else.
+- [x] **Reject a blank project name on the server.** `UpdateProjectRequest` has no validation, so only the browser checks it today.
+- [x] **Only the project lead can delete a project.** `PUT /project/deleteProject/{projectId}/{userId}` only checks that `userId` is the caller, not that the caller owns the project.
 
 ## Coming soon on the page
 
@@ -24,7 +24,7 @@ Search the code for `TODO(project-backend)` to find the matching spots in the fr
 
 ## Not shown on the page
 
-- [ ] **Project template.** `projects.project_template_type` is saved but not returned. Return it and add it to the details in `ProjectGeneralCard`.
+- [x] **Project template.** Shown in `ProjectGeneralCard`; the lead can change it with `PUT /project/updateProjectTemplate`.
 
 ## Later, deliberately left off the page
 

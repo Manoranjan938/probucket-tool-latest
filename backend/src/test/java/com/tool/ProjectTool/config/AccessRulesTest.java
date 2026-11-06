@@ -13,6 +13,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -119,6 +120,15 @@ class AccessRulesTest {
 		mockMvc.perform(get("/api/v1/activity/getTaskActivity/AB-1")).andExpect(status().isUnauthorized());
 		mockMvc.perform(get("/api/v1/activity/getProjectActivityLog/AB")).andExpect(status().isUnauthorized());
 		mockMvc.perform(get("/api/v1/activity/getProjectActivityPeople/AB")).andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	void projectChangesNeedALogin() throws Exception {
+		String body = "{\"projectId\":\"p1\",\"projectName\":\"x\",\"projectTemplate\":\"bug\"}";
+		mockMvc.perform(put("/api/v1/project/updateProject").contentType("application/json").content(body))
+				.andExpect(status().isUnauthorized());
+		mockMvc.perform(put("/api/v1/project/updateProjectTemplate").contentType("application/json").content(body))
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test

@@ -1,9 +1,13 @@
 package com.tool.ProjectTool.model.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class UpdateProjectRequest {
-	
+
+	@NotBlank(message = "Project id is required.")
 	private String projectId;
-	
+
+	@NotBlank(message = "Enter a project name.")
 	private String projectName;
 	
 	private Long defaultAssignee;

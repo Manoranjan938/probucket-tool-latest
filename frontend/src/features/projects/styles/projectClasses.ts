@@ -151,3 +151,11 @@ export const detailRow =
 export const detailLabel = "text-brand-muted";
 export const detailValue = "m-0 font-semibold text-brand-ink capitalize truncate";
 export const detailKey = "inline-flex px-2 py-0.5 rounded-md bg-brand-surface-alt border border-brand-border font-mono text-[13px] uppercase";
+
+/* Change template dialog: the wizard's cards, three across, one column on phones */
+export const templateDialogPaper =
+  "w-full max-w-[760px]! m-4! rounded-2xl! bg-brand-surface! text-brand-text leading-[1.5] [&_*]:box-border";
+export const templateNote =
+  "flex items-start gap-2.5 mt-4 p-3.5 rounded-xl bg-brand-surface-alt border border-brand-border text-[14px]";
+export const templateNoteIcon = "shrink-0 mt-0.5 text-[16px] text-brand-strong";
+export const detailValueWithAction = "flex items-center justify-between gap-3 min-w-0";
