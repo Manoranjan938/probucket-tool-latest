@@ -1,12 +1,17 @@
 import React from "react";
+import { skipToken } from "@reduxjs/toolkit/query/react";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import { formatDate } from "features/tasks/data";
 import { useAppSelector } from "app/hooks";
+import { useGetCommentsQuery } from "features/comments/api/commentsApi";
 
 const CommentList = () => {
-  const comments = useAppSelector((state) => state.comment.commentList);
+  const taskSequence = useAppSelector((state) => state.tasks.selectedTaskSequence);
+  // Empty while another task's comments load
+  const { currentData: comments = [] } = useGetCommentsQuery(taskSequence ?? skipToken);
+
   if (comments.length === 0) {
     return <p className="text-[14px] text-brand-muted">No comments yet.</p>;
   }

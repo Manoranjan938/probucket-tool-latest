@@ -7,29 +7,27 @@ import * as task from "features/tasks/styles/taskClasses";
 
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
-import useCreateNewSubtask from "features/tasks/hooks/useCreateNewSubtask";
+import { useCreateSubtaskMutation } from "features/tasks/api/tasksApi";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
 import { toastOptions } from "features/tasks/data";
-import type { ApiError } from "shared/types";
 import { useAppSelector } from "app/hooks";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Called after the subtask is created, to reload the subtasks */
-  onCreated: () => void;
 };
 
 // Dialog that adds a subtask to the open task
-const NewSubTask = ({ open, onClose, onCreated }: Props) => {
-  const currentProject = useAppSelector((state) => state.project.project);
-  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
+const NewSubTask = ({ open, onClose }: Props) => {
+  const { currentData: currentProject } = useCurrentProject();
+  const parentTaskId = useAppSelector((state) => state.tasks.selectedTaskSequence);
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
   const [dueDate, setDueDate] = useState("");
   const [dueDateError, setDueDateError] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [createNewSubtask] = useCreateNewSubtask();
+  const [createNewSubtask] = useCreateSubtaskMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleClose = () => {
@@ -56,18 +54,17 @@ const NewSubTask = ({ open, onClose, onCreated }: Props) => {
     setSaving(true);
     try {
       const resp = await createNewSubtask({
-        projectId: currentProject.projectIdentifier!,
-        parentTaskId: currentTask.taskSequence!,
+        projectId: currentProject!.projectIdentifier,
+        parentTaskId: parentTaskId!,
         taskName: name,
         priority,
         status: "",
         dueDate,
-      });
-      enqueueSnackbar(resp.data.message || "Subtask created", { ...toastOptions, variant: "success" });
-      onCreated();
+      }).unwrap();
+      enqueueSnackbar(resp.message || "Subtask created", { ...toastOptions, variant: "success" });
       handleClose();
     } catch (err) {
-      console.log((err as ApiError).response);
+      console.log(err);
       enqueueSnackbar("Couldn't create the subtask. Please try again.", { ...toastOptions, variant: "error" });
     } finally {
       setSaving(false);
@@ -81,7 +78,7 @@ const NewSubTask = ({ open, onClose, onCreated }: Props) => {
           <div>
             <h2 id="new-subtask-title" className={task.dialogTitle}>New subtask</h2>
             <p className="text-[13px] text-brand-muted">
-              in <span className="font-semibold uppercase">{currentTask.taskSequence}</span>
+              in <span className="font-semibold uppercase">{parentTaskId}</span>
             </p>
           </div>
           <button type="button" className={task.iconButton} onClick={handleClose} aria-label="Close">

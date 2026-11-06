@@ -5,15 +5,13 @@ import { FiAlertTriangle, FiCheck, FiCopy, FiX } from "react-icons/fi";
 
 import * as team from "features/team/styles/teamClasses";
 
-import useAddTeamMember from "features/team/hooks/useAddTeamMember";
+import { useAddTeamMemberMutation } from "features/team/api/teamApi";
 import { toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 
 interface AddMemberProps {
   open: boolean;
   onClose: () => void;
-  /** Called after the member is added, to reload the list */
-  onAdded: () => void;
   /** The "project" query parameter */
   projectId: string | null;
 }
@@ -21,14 +19,14 @@ interface AddMemberProps {
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Dialog that adds a team member; afterwards it shows the one-time temporary password
-const AddMember = ({ open, onClose, onAdded, projectId }: AddMemberProps) => {
+const AddMember = ({ open, onClose, projectId }: AddMemberProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({ name: "", email: "" });
   const [saving, setSaving] = useState(false);
   // Set once the member is added: who was added and their one-time password
   const [added, setAdded] = useState<{ name: string; password: string } | null>(null);
-  const [addTeamMember] = useAddTeamMember();
+  const [addTeamMember] = useAddTeamMemberMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleClose = () => {
@@ -58,9 +56,8 @@ const AddMember = ({ open, onClose, onAdded, projectId }: AddMemberProps) => {
 
     setSaving(true);
     try {
-      const resp = await addTeamMember({ name: memberName, email: memberEmail, projectId: projectId! });
-      setAdded({ name: memberName, password: resp.data.data.temporaryPassword });
-      onAdded();
+      const resp = await addTeamMember({ name: memberName, email: memberEmail, projectId: projectId! }).unwrap();
+      setAdded({ name: memberName, password: resp.data.temporaryPassword });
     } catch (err) {
       enqueueSnackbar(getApiErrorMessage(err, "Couldn't add the member. Please try again."), { ...toastOptions, variant: "error" });
     } finally {

@@ -4,11 +4,11 @@ import { FiMoreHorizontal } from "react-icons/fi";
 import * as note from "features/notes/styles/noteClasses";
 
 import type { NoteListItem } from "features/notes/types";
-import { useAppSelector } from "app/hooks";
+import useProjectNotes from "features/notes/hooks/useProjectNotes";
 
 // The user's notes as cards; clicking a card opens the whole note
 const NotesList = ({ onOpen }: { onOpen: (item: NoteListItem) => void }) => {
-  const notes = useAppSelector((state) => state.note.allNotes);
+  const { data: notes = [] } = useProjectNotes();
 
   return (
     <ul className={note.grid}>

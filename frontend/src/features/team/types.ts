@@ -31,7 +31,3 @@ export interface UpdateTeamRequest {
   /** "active" or "inactive" – anything else leaves the status unchanged */
   status: string;
 }
-
-export interface TeamState {
-  allTeamMember: TeamMember[];
-}

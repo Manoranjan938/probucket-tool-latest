@@ -1,43 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 
 import * as task from "features/tasks/styles/taskClasses";
 
-import useAddComment from "features/comments/hooks/useAddComment";
+import { useAddCommentMutation } from "features/comments/api/commentsApi";
 import CommentList from "features/comments/components/CommentList/CommentList";
-import useGetComments from "features/comments/hooks/useGetComments";
 import { toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
-import { useAppDispatch, useAppSelector } from "app/hooks";
-import { setAllComments } from "features/comments/store/commentSlice";
+import { useAppSelector } from "app/hooks";
 
 // Comment box and the comments of the open task
 const Comments = () => {
-  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
+  const taskSequence = useAppSelector((state) => state.tasks.selectedTaskSequence);
   const currentUser = useAppSelector((state) => state.security.user);
-  const dispatch = useAppDispatch();
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [addNewComment] = useAddComment();
-  const [comments, getComments] = useGetComments();
+  // Adding a comment reloads the list
+  const [addNewComment] = useAddCommentMutation();
   const { enqueueSnackbar } = useSnackbar();
-
-  const loadComments = () => {
-    getComments(currentTask.taskSequence).catch((err) => console.log(err));
-  };
-
-  useEffect(() => {
-    dispatch(setAllComments([]));
-  }, []);
-
-  useEffect(() => {
-    loadComments();
-  }, [currentTask.taskSequence]);
-
-  useEffect(() => {
-    dispatch(setAllComments(comments));
-  }, [comments]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,13 +31,12 @@ const Comments = () => {
     setSaving(true);
     try {
       const resp = await addNewComment({
-        taskId: currentTask.taskSequence!,
+        taskId: taskSequence!,
         userId: currentUser.id!,
         comment: text,
-      });
+      }).unwrap();
       setComment("");
-      enqueueSnackbar(resp.data.message || "Comment added", { ...toastOptions, variant: "success" });
-      loadComments();
+      enqueueSnackbar(resp.message || "Comment added", { ...toastOptions, variant: "success" });
     } catch (err) {
       enqueueSnackbar(getApiErrorMessage(err, "Couldn't add the comment. Please try again."), { ...toastOptions, variant: "error" });
     } finally {

@@ -1,30 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Tooltip } from "@mui/material";
 import { FiSearch } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
-import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
-import { useAppDispatch } from "app/hooks";
-import { setAllTeamMembers } from "features/team/store/teamsSlice";
+import { useGetTeamMembersQuery } from "features/team/api/teamApi";
 
 const MAX_AVATARS = 5;
 
 type Props = { projectId: string | null };
 
-// Team board toolbar: search and the team members. Also loads the members into the store,
-// where the task details read them for the assignee picker.
+// Team board toolbar: search and the team members
 const TeamWorkHeader = ({ projectId }: Props) => {
-  const dispatch = useAppDispatch();
-  const [teamList, getTeamLists] = useGetTeamMembersList();
-
-  useEffect(() => {
-    getTeamLists(projectId).catch((err) => console.log(err));
-  }, [projectId]);
-
-  useEffect(() => {
-    dispatch(setAllTeamMembers(teamList));
-  }, [teamList]);
+  const { data: teamList = [] } = useGetTeamMembersQuery(projectId);
 
   return (
     <>

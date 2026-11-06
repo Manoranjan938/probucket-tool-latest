@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import type { PropsWithChildren } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -14,10 +14,11 @@ import RecentActivity from "features/dashboard/components/RecentActivity/RecentA
 import TeamWorkload from "features/dashboard/components/TeamWorkload/TeamWorkload";
 import PriorityBreakdown from "features/dashboard/components/PriorityBreakdown/PriorityBreakdown";
 import ProjectDetailsCard from "features/dashboard/components/ProjectDetailsCard/ProjectDetailsCard";
-import useGetHomeCountDatas from "features/dashboard/hooks/useGetHomeCountDatas";
-import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
+import { useGetHomeTaskCountsQuery } from "features/dashboard/api/dashboardApi";
+import { useGetTasksQuery } from "features/tasks/api/tasksApi";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
 import { dashboardLink, type DashboardType } from "features/dashboard/data";
-import type { TaskListItem } from "features/tasks/types";
+import type { HomeTaskCounts } from "features/dashboard/types";
 import type { TeamMember } from "features/team/types";
 import { useAppSelector } from "app/hooks";
 
@@ -30,49 +31,22 @@ type Props = PropsWithChildren<{
 // Content of the personal and team dashboard home pages. children is shown below the task counts.
 const HomeOverview = ({ type, team, children }: Props) => {
   const currentUser = useAppSelector((state) => state.security.user);
-  const currentProject = useAppSelector((state) => state.project.project);
   const { search } = useLocation();
-  const [counts, getHomeCountData] = useGetHomeCountDatas();
-  const [countsFailed, setCountsFailed] = useState(false);
-  const [, getTaskLists] = useGetTaskLists();
-  const [tasks, setTasks] = useState<TaskListItem[]>();
-
   const query = new URLSearchParams(search);
   const projectId = query.get("project");
   const name = query.get("name");
 
-  useEffect(() => {
-    getHomeCountData(projectId).catch((err) => {
-      console.log(err);
-      setCountsFailed(true);
-    });
-  }, [projectId]);
-
+  // The previous project's counts stay until the new ones arrive
+  const { data: countsData, isError: countsFailed } = useGetHomeTaskCountsQuery(projectId);
+  const counts: Partial<HomeTaskCounts> = countsData ?? {};
   // Cleared on every project change, so a project with no tasks doesn't keep showing the previous project's
-  useEffect(() => {
-    let current = true;
-    setTasks(undefined);
-    getTaskLists(name)
-      .then((resp) => {
-        if (current) {
-          setTasks(resp.data.data);
-        }
-      })
-      // The backend answers 400 "Task not found" when the project has no tasks
-      .catch(() => {
-        if (current) {
-          setTasks([]);
-        }
-      });
-    return () => {
-      current = false;
-    };
-  }, [name]);
+  const { currentData: loadedTasks, isError: tasksFailed } = useGetTasksQuery(name);
+  const tasks = tasksFailed ? [] : loadedTasks;
+  // Undefined while this project's details are loading, so no name is shown
+  const { currentData: project } = useCurrentProject();
 
   const countsLoaded = counts.total !== undefined || countsFailed;
   const firstName = currentUser.fullName?.split(" ")[0];
-  // The sidebar loads the project; until then (or while it still holds the previous project) no name is shown
-  const project = currentProject.projectId === projectId ? currentProject : undefined;
   const worksLink = dashboardLink(type, "works", projectId, name);
 
   return (

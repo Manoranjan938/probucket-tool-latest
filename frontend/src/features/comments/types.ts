@@ -12,7 +12,3 @@ export interface CommentRequest {
   userId: string;
   comment: string;
 }
-
-export interface CommentState {
-  commentList: Comment[];
-}

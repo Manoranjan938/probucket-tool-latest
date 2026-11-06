@@ -5,12 +5,10 @@ import { FiCheck, FiChevronDown, FiFolder } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
-import useGetAllProjects from "features/projects/hooks/useGetAllProjects";
-import useGetProjectsByTeamMembers from "features/projects/hooks/useGetProjectsByTeamMembers";
+import { useLazyGetMyProjectsQuery } from "features/projects/api/projectsApi";
 import { dashboardLink, type DashboardType } from "features/dashboard/data";
 import type { Project } from "features/projects/types";
-import { useAppDispatch, useAppSelector } from "app/hooks";
-import { setAllProjects } from "features/projects/store/projectSlice";
+import { useAppSelector } from "app/hooks";
 
 type Props = {
   project: Partial<Project>;
@@ -21,35 +19,15 @@ type Props = {
 // The current project at the top of the sidebar; opens a menu to switch to another project
 const ProjectSwitcher = ({ project, collapsed }: Props) => {
   const currentUser = useAppSelector((state) => state.security.user);
-  const myProjects = useAppSelector((state) => state.project.allProjects);
-  const dispatch = useAppDispatch();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [, getAllProjectDetails] = useGetAllProjects();
-  const [, getProjectsByTeam] = useGetProjectsByTeamMembers();
+  // Loaded when the menu first opens; the list stays while the menu closes
+  const [loadProjects, { data: myProjects = [], isFetching }] = useLazyGetMyProjectsQuery();
   const open = Boolean(anchorEl);
-
-  // Same role check as the Projects page
-  const loadProjects = async () => {
-    setLoading(true);
-    try {
-      if (currentUser.rolename === "ROLE_TEAM-USER") {
-        const res = await getProjectsByTeam(currentUser.id);
-        dispatch(setAllProjects(res.data.data));
-      } else {
-        const res = await getAllProjectDetails(currentUser.id);
-        dispatch(setAllProjects(res.data.data));
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-    loadProjects();
+    // The cached list if there is one, e.g. from the Projects page
+    loadProjects({ id: currentUser.id, rolename: currentUser.rolename }, true);
   };
 
   const handleClose = () => {
@@ -104,7 +82,7 @@ const ProjectSwitcher = ({ project, collapsed }: Props) => {
         }}
       >
         <li className={dashboard.menuHeading} role="presentation">Switch project</li>
-        {myProjects.length === 0 && loading ? (
+        {myProjects.length === 0 && isFetching ? (
           <li className={dashboard.menuItemMuted} role="presentation">Loading projects…</li>
         ) : null}
         {myProjects.map((item) => {

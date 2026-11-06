@@ -1,31 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Subtask, TaskDetails, TaskListItem, TaskState } from "features/tasks/types";
+import type { TaskState } from "features/tasks/types";
 
 const initialState: TaskState = {
-  allTask: [],
-  selectedTask: {},
-  allSubtasks: [],
+  selectedTaskSequence: null,
 };
 
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    setAllTasks: (state, action: PayloadAction<TaskListItem[] | undefined>) => {
-      state.allTask = action.payload;
-    },
-    setSelectedTask: (state, action: PayloadAction<Partial<TaskDetails>>) => {
-      state.selectedTask = action.payload;
+    selectTask: (state, action: PayloadAction<string>) => {
+      state.selectedTaskSequence = action.payload;
     },
     clearSelectedTask: (state) => {
-      state.selectedTask = {};
-    },
-    setAllSubtasks: (state, action: PayloadAction<Subtask[]>) => {
-      state.allSubtasks = action.payload;
+      state.selectedTaskSequence = null;
     },
   },
 });
 
-export const { setAllTasks, setSelectedTask, clearSelectedTask, setAllSubtasks } = tasksSlice.actions;
+export const { selectTask, clearSelectedTask } = tasksSlice.actions;
 
 export default tasksSlice.reducer;

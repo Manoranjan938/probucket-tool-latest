@@ -5,10 +5,8 @@ import { useSnackbar } from "notistack";
 import * as task from "features/tasks/styles/taskClasses";
 
 import TaskDetails, { type DetailsView } from "features/tasks/components/TaskDetails/TaskDetails";
-import useGetTaskDetails from "features/tasks/hooks/useGetTaskDetails";
+import useSelectedTask from "features/tasks/hooks/useSelectedTask";
 import { toastOptions } from "features/tasks/data";
-import { useAppDispatch } from "app/hooks";
-import { clearSelectedTask, setSelectedTask } from "features/tasks/store/tasksSlice";
 
 // Side panel or modal – the last choice is remembered in this browser
 const VIEW_KEY = "probucket.taskDetailsView";
@@ -27,37 +25,19 @@ type Props = {
   onClose: () => void;
   /** Shows another task instead, e.g. the parent of a subtask */
   onOpenTask: (sequence: string) => void;
-  /** Called after the task changed, to reload the board */
-  onTaskChanged: () => void;
 };
 
-// Loads the open task into the store and shows it in a side panel, or a centered modal when expanded
-const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged }: Props) => {
-  const dispatch = useAppDispatch();
+// Shows the open task in a side panel, or a centered modal when expanded
+const TaskDetailsView = ({ sequence, onClose, onOpenTask }: Props) => {
   const [view, setView] = useState<DetailsView>(readView);
-  const [, getTaskDetails] = useGetTaskDetails();
+  const { isError } = useSelectedTask();
   const { enqueueSnackbar } = useSnackbar();
 
-  const loadTask = async (taskSequence: string) => {
-    try {
-      const resp = await getTaskDetails(taskSequence);
-      dispatch(setSelectedTask(resp.data.data));
-    } catch (err) {
-      console.log(err);
+  useEffect(() => {
+    if (isError) {
       enqueueSnackbar("Couldn't load the task. Please try again.", { ...toastOptions, variant: "error" });
     }
-  };
-
-  useEffect(() => {
-    if (sequence) {
-      loadTask(sequence);
-    }
-  }, [sequence]);
-
-  const handleClose = () => {
-    onClose();
-    dispatch(clearSelectedTask());
-  };
+  }, [isError, enqueueSnackbar]);
 
   const handleToggleView = () => {
     const next = view === "panel" ? "modal" : "panel";
@@ -69,21 +49,13 @@ const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged }: Props
     }
   };
 
-  const handleChanged = () => {
-    if (sequence) {
-      loadTask(sequence);
-    }
-    onTaskChanged();
-  };
-
   const content = sequence ? (
     <TaskDetails
       sequence={sequence}
       view={view}
       onToggleView={handleToggleView}
-      onClose={handleClose}
+      onClose={onClose}
       onOpenTask={onOpenTask}
-      onChanged={handleChanged}
     />
   ) : null;
 
@@ -91,7 +63,7 @@ const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged }: Props
     <Drawer
       anchor="right"
       open={Boolean(sequence)}
-      onClose={handleClose}
+      onClose={onClose}
       PaperProps={{ className: task.panelPaper, "aria-label": "Task details" } as object}
       BackdropProps={{ sx: { bgcolor: "rgba(31, 29, 58, 0.25)" } }}
     >
@@ -100,7 +72,7 @@ const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged }: Props
   ) : (
     <Dialog
       open={Boolean(sequence)}
-      onClose={handleClose}
+      onClose={onClose}
       maxWidth={false}
       PaperProps={{ className: task.modalPaper, "aria-label": "Task details" } as object}
     >

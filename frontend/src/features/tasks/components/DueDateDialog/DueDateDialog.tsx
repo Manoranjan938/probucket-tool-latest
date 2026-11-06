@@ -6,26 +6,24 @@ import { FiX } from "react-icons/fi";
 import * as task from "features/tasks/styles/taskClasses";
 
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
-import useUpdateDueDate from "features/tasks/hooks/useUpdateDueDate";
+import { useUpdateDueDateMutation } from "features/tasks/api/tasksApi";
 import { toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 
 interface DueDateDialogProps {
   open: boolean;
   onClose: () => void;
-  /** Called after the date is saved or removed, to reload the task */
-  onChanged: () => void;
   taskId: string | undefined;
   /** The current due date, yyyy-mm-dd */
   dueDate: string | null | undefined;
 }
 
 // Dialog that sets, changes or removes a task's due date
-const DueDateDialog = ({ open, onClose, onChanged, taskId, dueDate }: DueDateDialogProps) => {
+const DueDateDialog = ({ open, onClose, taskId, dueDate }: DueDateDialogProps) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [updateDueDate] = useUpdateDueDate();
+  const [updateDueDate] = useUpdateDueDateMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
@@ -38,9 +36,8 @@ const DueDateDialog = ({ open, onClose, onChanged, taskId, dueDate }: DueDateDia
   const save = async (newDate: string) => {
     setSaving(true);
     try {
-      await updateDueDate({ taskId: taskId!, dueDate: newDate });
+      await updateDueDate({ taskId: taskId!, dueDate: newDate }).unwrap();
       enqueueSnackbar(newDate ? "Due date updated" : "Due date removed", { ...toastOptions, variant: "success" });
-      onChanged();
       onClose();
     } catch (err) {
       setError(getApiErrorMessage(err, "Couldn't save the due date. Please try again."));

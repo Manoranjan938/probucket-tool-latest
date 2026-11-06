@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Tooltip } from "@mui/material";
 import { FiX } from "react-icons/fi";
@@ -9,9 +9,8 @@ import logo from "shared/assets/images/logo.png";
 import ProjectSwitcher from "features/dashboard/components/ProjectSwitcher/ProjectSwitcher";
 import AccountMenu from "features/dashboard/components/AccountMenu/AccountMenu";
 import { dashboardLink, mainNav, manageNav, visibleNav, type DashboardType, type NavItem } from "features/dashboard/data";
-import useGetProjectDetails from "features/projects/hooks/useGetProjectDetails";
-import { useAppDispatch, useAppSelector } from "app/hooks";
-import { setCurrentProject } from "features/projects/store/projectSlice";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
+import { useAppSelector } from "app/hooks";
 
 type Props = {
   type: DashboardType;
@@ -34,18 +33,8 @@ const Sidebar = ({
   onClose,
 }: Props) => {
   const currentUser = useAppSelector((state) => state.security.user);
-  const currentProject = useAppSelector((state) => state.project.project);
-  const dispatch = useAppDispatch();
-  const [project, getProjectDetails] = useGetProjectDetails();
-
-  // Again when the project switcher opens another project of the same type
-  useEffect(() => {
-    getProjectDetails(id).catch(() => {});
-  }, [id]);
-
-  useEffect(() => {
-    dispatch(setCurrentProject(project));
-  }, [project]);
+  // Keeps showing the previous project while the project switcher's choice loads
+  const { data: currentProject = {} } = useCurrentProject();
 
   const renderLinks = (items: NavItem[]) => (
     <ul className={dashboard.navList}>
@@ -84,7 +73,7 @@ const Sidebar = ({
       </div>
 
       <div className={dashboard.sidebarSection}>
-        {/* From the store, so renaming the project in its settings shows here straight away */}
+        {/* From the cache, so renaming the project in its settings shows here straight away */}
         <ProjectSwitcher project={currentProject} collapsed={collapsed} />
       </div>
 

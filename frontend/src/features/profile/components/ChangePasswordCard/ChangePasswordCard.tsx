@@ -4,7 +4,7 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 
 import * as profile from "features/profile/styles/profileClasses";
 
-import useUpdatePassword from "features/profile/hooks/useUpdatePassword";
+import { useUpdatePasswordMutation } from "features/profile/api/profileApi";
 import { MIN_PASSWORD_LENGTH } from "features/profile/data";
 import { toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
@@ -18,7 +18,7 @@ const ChangePasswordCard = ({ userId }: { userId: string | undefined }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState(noErrors);
   const [saving, setSaving] = useState(false);
-  const [updatePassword] = useUpdatePassword();
+  const [updatePassword] = useUpdatePasswordMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const validate = () => {
@@ -43,7 +43,7 @@ const ChangePasswordCard = ({ userId }: { userId: string | undefined }) => {
     }
     setSaving(true);
     try {
-      await updatePassword({ userId: userId!, password });
+      await updatePassword({ userId: userId!, password }).unwrap();
       setPassword("");
       setConfirm("");
       setShowPassword(false);

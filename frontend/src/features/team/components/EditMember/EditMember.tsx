@@ -5,7 +5,7 @@ import { FiX } from "react-icons/fi";
 
 import * as team from "features/team/styles/teamClasses";
 
-import useUpdateTeamMember from "features/team/hooks/useUpdateTeamMember";
+import { useUpdateTeamMemberMutation } from "features/team/api/teamApi";
 import { isActive, memberRole, roleSuggestions } from "features/team/data";
 import { toastOptions } from "features/tasks/data";
 import type { TeamMember } from "features/team/types";
@@ -15,16 +15,14 @@ interface EditMemberProps {
   /** The member to edit; null when closed */
   member: TeamMember | null;
   onClose: () => void;
-  /** Called after the member is saved, to reload the list */
-  onSaved: () => void;
 }
 
 // Dialog that changes a member's role and whether they are active
-const EditMember = ({ member, onClose, onSaved }: EditMemberProps) => {
+const EditMember = ({ member, onClose }: EditMemberProps) => {
   const [role, setRole] = useState("");
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [updateTeamMember] = useUpdateTeamMember();
+  const [updateTeamMember] = useUpdateTeamMemberMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   // Start from the member's current role and status
@@ -44,9 +42,8 @@ const EditMember = ({ member, onClose, onSaved }: EditMemberProps) => {
         userid: member!.userid,
         role: role.trim(),
         status: active ? "active" : "inactive",
-      });
-      enqueueSnackbar(resp.data.message || "Member updated", { ...toastOptions, variant: "success" });
-      onSaved();
+      }).unwrap();
+      enqueueSnackbar(resp.message || "Member updated", { ...toastOptions, variant: "success" });
       onClose();
     } catch (err) {
       console.log(err);

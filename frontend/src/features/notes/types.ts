@@ -12,7 +12,3 @@ export interface NotesRequest {
   userId: string;
   projectId: string;
 }
-
-export interface NoteState {
-  allNotes: NoteListItem[];
-}

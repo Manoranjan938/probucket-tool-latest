@@ -7,27 +7,25 @@ import * as task from "features/tasks/styles/taskClasses";
 
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
-import useCreateTask from "features/tasks/hooks/useCreateTask";
+import { useCreateTaskMutation } from "features/tasks/api/tasksApi";
 import { toastOptions } from "features/tasks/data";
 
 interface NewTaskProps {
   open: boolean;
   onClose: () => void;
-  /** Called after the task is created, to reload the board */
-  onCreated: () => void;
   /** projectIdentifier – the "name" query parameter */
   projectIdentifier: string | null;
 }
 
 // Dialog that creates a task in the To do column
-const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) => {
+const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
   const [dueDate, setDueDate] = useState("");
   const [dueDateError, setDueDateError] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [createProjectTask] = useCreateTask();
+  const [createProjectTask] = useCreateTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleClose = () => {
@@ -60,9 +58,8 @@ const NewTask = ({ open, onClose, onCreated, projectIdentifier }: NewTaskProps) 
         sprintId: "",
         status: "",
         dueDate,
-      });
+      }).unwrap();
       enqueueSnackbar("Task created", { ...toastOptions, variant: "success" });
-      onCreated();
       handleClose();
     } catch (err) {
       console.log(err);

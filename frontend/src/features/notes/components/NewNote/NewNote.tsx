@@ -5,27 +5,25 @@ import { FiX } from "react-icons/fi";
 
 import * as note from "features/notes/styles/noteClasses";
 
-import useAddNote from "features/notes/hooks/useAddNote";
+import { useAddNoteMutation } from "features/notes/api/notesApi";
 import { toastOptions } from "features/tasks/data";
 import { useAppSelector } from "app/hooks";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Called after the note is saved, to reload the list */
-  onCreated: () => void;
   /** The "project" query parameter */
   projectId: string | null;
 };
 
 // Dialog that adds a note to the project; notes are private to the user who writes them
-const NewNote = ({ open, onClose, onCreated, projectId }: Props) => {
+const NewNote = ({ open, onClose, projectId }: Props) => {
   const currentUser = useAppSelector((state) => state.security.user);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [createNote] = useAddNote();
+  const [createNote] = useAddNoteMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const handleClose = () => {
@@ -50,9 +48,8 @@ const NewNote = ({ open, onClose, onCreated, projectId }: Props) => {
         noteDescription: description.trim(),
         userId: currentUser.id!,
         projectId: projectId!,
-      });
-      enqueueSnackbar(res.data.message || "Note added", { ...toastOptions, variant: "success" });
-      onCreated();
+      }).unwrap();
+      enqueueSnackbar(res.message || "Note added", { ...toastOptions, variant: "success" });
       handleClose();
     } catch (err) {
       console.log(err);

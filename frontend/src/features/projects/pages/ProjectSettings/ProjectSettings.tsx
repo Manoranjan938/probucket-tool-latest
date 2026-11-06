@@ -8,21 +8,21 @@ import ProjectGeneralCard from "features/projects/components/ProjectGeneralCard/
 import ProjectSettingsSkeleton from "features/projects/pages/ProjectSettings/ProjectSettingsSkeleton";
 import { dashboardLink } from "features/dashboard/data";
 import ComingSoonBadge from "shared/components/ComingSoonBadge/ComingSoonBadge";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
 import { useAppSelector } from "app/hooks";
 
 // Everyone on the project sees its details; only the lead gets the rest
 // TODO(project-backend): every "Coming soon" here is listed in features/projects/BACKEND_TODO.md
 const ProjectSettings = () => {
-  const currentProject = useAppSelector((state) => state.project.project);
+  // Undefined until this project's details are loaded, which shows the skeleton
+  const { currentData: currentProject } = useCurrentProject();
   const currentUser = useAppSelector((state) => state.security.user);
   const { pathname, search } = useLocation();
   const query = new URLSearchParams(search);
   const projectId = query.get("project");
   const isTeam = pathname.startsWith("/project/team/");
   const title = isTeam ? "Team Dashboard" : "Personal Dashboard";
-  // The sidebar loads the project into the store; until then (or while it still holds another project) show the skeleton
-  const loaded = currentProject.projectId === projectId;
-  const isLead = Boolean(currentProject.leadEmail) && currentProject.leadEmail === currentUser.username;
+  const isLead = Boolean(currentProject?.leadEmail) && currentProject?.leadEmail === currentUser.username;
   // Same rule as the Team members link in the sidebar
   const canManageTeam = isTeam && currentUser.rolename !== "ROLE_TEAM-USER";
 
@@ -31,7 +31,7 @@ const ProjectSettings = () => {
       <Helmet>
         <title>{title} | Settings</title>
       </Helmet>
-      {loaded ? (
+      {currentProject ? (
         <div className={project.settings}>
           <ProjectGeneralCard currentProject={currentProject} isLead={isLead} />
 

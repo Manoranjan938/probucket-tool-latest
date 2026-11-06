@@ -5,7 +5,7 @@ import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
-import useResetPassword from "features/auth/hooks/useResetPassword";
+import { useResetPasswordMutation } from "features/auth/api/authApi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
@@ -29,7 +29,7 @@ const ResetPassword = () => {
     type: "",
     message: "",
   });
-  const [resetMyPassword] = useResetPassword();
+  const [resetMyPassword] = useResetPasswordMutation();
 
   let { search } = useLocation();
   const query = new URLSearchParams(search);
@@ -61,14 +61,14 @@ const ResetPassword = () => {
   const callResetPassword = async () => {
     setLoading(true);
     try {
-      const resp = await resetMyPassword(param, password);
+      const resp = await resetMyPassword({ token: param, pass: password }).unwrap();
 
       if (resp.status === 200) {
         setPassword("");
         setStatusBar({
           open: true,
           type: "success",
-          message: resp.data.message,
+          message: resp.message,
         });
       }
     } catch (err) {

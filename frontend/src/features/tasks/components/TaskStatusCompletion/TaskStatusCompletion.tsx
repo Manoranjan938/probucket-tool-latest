@@ -1,19 +1,17 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { skipToken } from "@reduxjs/toolkit/query/react";
 
 import * as task from "features/tasks/styles/taskClasses";
 
-import useGetTaskStatistics from "features/tasks/hooks/useGetTaskStatistics";
+import { useGetTaskStatisticsQuery } from "features/tasks/api/tasksApi";
 import { taskStatuses } from "features/tasks/data";
-import type { TaskDetails } from "features/tasks/types";
+import type { TaskDetails, TaskStatistics } from "features/tasks/types";
 
 // Share of the task's subtasks per status. The backend sends percentages (0 when there are no subtasks).
 const TaskStatusCompletion = ({ task: currentTask }: { task: Partial<TaskDetails> }) => {
-  const [stats, getTaskStats] = useGetTaskStatistics();
-
-  // Again after the task is reloaded, e.g. when a subtask was added
-  useEffect(() => {
-    getTaskStats(currentTask.taskSequence).catch((err) => console.log(err));
-  }, [currentTask]);
+  // Reloads after every task change, e.g. when a subtask was added
+  const { currentData } = useGetTaskStatisticsQuery(currentTask.taskSequence ?? skipToken);
+  const stats: Partial<TaskStatistics> = currentData ?? {};
 
   const rows = [
     { status: taskStatuses.COMPLETED, value: stats.completed ?? 0 },

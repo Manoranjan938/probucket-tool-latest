@@ -9,7 +9,7 @@ import googleImage from "shared/assets/images/google-logo.png";
 import { Snackbar } from "@mui/material";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
-import useSignUpRequest from "features/auth/hooks/useSignUpRequest";
+import { useSignUpMutation } from "features/auth/api/authApi";
 import type { UserRequest } from "features/auth/types";
 import { steps } from "features/landing/data";
 import { getApiErrorMessage } from "shared/services/apiError";
@@ -48,7 +48,7 @@ const Signup = () => {
     password: "",
     name: "",
   });
-  const [register] = useSignUpRequest();
+  const [register] = useSignUpMutation();
 
   const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") {
@@ -104,7 +104,7 @@ const Signup = () => {
   const callAddUser = async () => {
     setLoading(true);
     try {
-      const res = await register(registerRequest);
+      const res = await register(registerRequest).unwrap();
       if (res.status === 201) {
         setEmail("");
         setName("");

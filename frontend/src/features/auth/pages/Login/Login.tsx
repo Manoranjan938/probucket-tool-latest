@@ -8,7 +8,7 @@ import { GOOGLE_AUTH_URL } from "shared/constants/constant";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
 import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
-import useLoginRequest from "features/auth/hooks/useLoginRequest";
+import { useLoginMutation } from "features/auth/api/authApi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
@@ -43,7 +43,7 @@ const Login = () => {
     username: "",
     password: "",
   });
-  const [loginRequest] = useLoginRequest();
+  const [loginRequest] = useLoginMutation();
 
   const navigate = useNavigate();
 
@@ -93,10 +93,10 @@ const Login = () => {
   const callLoginUser = async () => {
     setLoading(true);
     try{
-      const res = await loginRequest(loginRequests);
+      const res = await loginRequest(loginRequests).unwrap();
       if(res.status === 200){
         // The next page reads the user from the store as soon as it mounts
-        dispatch(setUser(res.data.data));
+        dispatch(setUser(res.data));
         navigate("/projects");
       }
     }catch(err){

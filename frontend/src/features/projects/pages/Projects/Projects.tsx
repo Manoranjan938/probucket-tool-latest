@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight, FaPlus } from "react-icons/fa";
 
@@ -8,11 +8,9 @@ import ProjectsTopBar from "features/projects/components/ProjectsTopBar/Projects
 import NoProjects from "features/projects/components/NoProjects/NoProjects";
 import { ProjectsContentSkeleton } from "features/projects/pages/Projects/ProjectsSkeleton";
 import { projectTypes } from "features/projects/data";
-import useGetAllProjects from "features/projects/hooks/useGetAllProjects";
-import useGetProjectsByTeamMembers from "features/projects/hooks/useGetProjectsByTeamMembers";
+import { useGetMyProjectsQuery } from "features/projects/api/projectsApi";
 import type { Project } from "features/projects/types";
-import { useAppDispatch, useAppSelector } from "app/hooks";
-import { setAllProjects } from "features/projects/store/projectSlice";
+import { useAppSelector } from "app/hooks";
 
 const ProjectCard = ({ item }: { item: Project }) => {
   const TypeIcon = projectTypes.find((type) => type.value === item.projectType)?.icon;
@@ -46,46 +44,18 @@ const ProjectCard = ({ item }: { item: Project }) => {
 
 const Projects = () => {
   const currentUser = useAppSelector((state) => state.security.user);
-  const myProjects = useAppSelector((state) => state.project.allProjects);
-  const dispatch = useAppDispatch();
-  const [, getAllProjectDetails] = useGetAllProjects();
-  const [, getProjectsByTeam] = useGetProjectsByTeamMembers();
-  const [loading, setLoading] = useState(true);
+  // Shown as empty if they couldn't be loaded
+  const { data: myProjects = [], isLoading } = useGetMyProjectsQuery({ id: currentUser.id, rolename: currentUser.rolename });
 
   // Team members are added to projects, everyone else creates their own
   const canCreate = currentUser.rolename !== "ROLE_TEAM-USER";
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        if (
-          currentUser.rolename === "ROLE_PERSONAL" ||
-          currentUser.rolename === "ROLE_TEAM-ADMIN" ||
-          currentUser.rolename === "ROLE_USER"
-        ) {
-          const res = await getAllProjectDetails(currentUser.id);
-          dispatch(setAllProjects(res.data.data));
-        } else if (currentUser.rolename === "ROLE_TEAM-USER") {
-          const res = await getProjectsByTeam(currentUser.id);
-          dispatch(setAllProjects(res.data.data));
-        }
-      } catch (err) {
-        console.log(err);
-        dispatch(setAllProjects([]));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProjects();
-  }, []);
 
   return (
     <div className={project.page}>
       <ProjectsTopBar />
 
       <main className={project.container}>
-        {loading ? (
+        {isLoading ? (
           <ProjectsContentSkeleton />
         ) : myProjects.length > 0 ? (
           <>

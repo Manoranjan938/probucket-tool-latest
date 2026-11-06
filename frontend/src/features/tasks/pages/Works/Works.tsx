@@ -10,17 +10,14 @@ import TeamWorkHeader from "features/tasks/components/TeamWorkHeader/TeamWorkHea
 import ProjectWorks from "features/tasks/components/ProjectWorks/ProjectWorks";
 import TaskDetailsView from "features/tasks/components/TaskDetailsView/TaskDetailsView";
 import { BoardSkeleton } from "features/tasks/pages/Works/WorksSkeleton";
-import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
+import { useGetTasksQuery } from "features/tasks/api/tasksApi";
 import { useAppDispatch, useAppSelector } from "app/hooks";
-import { setAllTasks } from "features/tasks/store/tasksSlice";
+import { clearSelectedTask, selectTask } from "features/tasks/store/tasksSlice";
 
 const Works = ({ title }: { title: string }) => {
-  const myTasks = useAppSelector((state) => state.tasks.allTask);
+  const openTask = useAppSelector((state) => state.tasks.selectedTaskSequence);
   const dispatch = useAppDispatch();
-  const [, getTaskLists] = useGetTaskLists();
-  const [loading, setLoading] = useState(true);
   const [showNewTask, setShowNewTask] = useState(false);
-  const [openTask, setOpenTask] = useState<string | null>(null);
 
   const { pathname, search } = useLocation();
   const query = new URLSearchParams(search);
@@ -28,23 +25,17 @@ const Works = ({ title }: { title: string }) => {
   const name = query.get("name");
   const isTeam = pathname.startsWith("/project/team/");
 
-  const loadTasks = async () => {
-    try {
-      const resp = await getTaskLists(name);
-      dispatch(setAllTasks(resp.data.data));
-    } catch {
-      // The backend answers 400 "Task not found" when the project has no tasks
-      dispatch(setAllTasks([]));
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Shown as empty if they couldn't be loaded
+  const { data: tasks = [], isLoading } = useGetTasksQuery(name);
 
+  const openTaskDetails = (sequence: string) => dispatch(selectTask(sequence));
+
+  // Leaving the board closes the panel, so it isn't open again on the next visit
   useEffect(() => {
-    loadTasks();
-  }, []);
-
-  const tasks = myTasks ?? [];
+    return () => {
+      dispatch(clearSelectedTask());
+    };
+  }, [dispatch]);
 
   return (
     <div className={task.page}>
@@ -68,13 +59,13 @@ const Works = ({ title }: { title: string }) => {
         </button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <BoardSkeleton />
       ) : tasks.length > 0 ? (
         <ProjectWorks
           tasks={tasks}
           selectedTask={openTask}
-          onOpenTask={setOpenTask}
+          onOpenTask={openTaskDetails}
           onNewTask={() => setShowNewTask(true)}
         />
       ) : (
@@ -94,14 +85,12 @@ const Works = ({ title }: { title: string }) => {
       <NewTask
         open={showNewTask}
         onClose={() => setShowNewTask(false)}
-        onCreated={loadTasks}
         projectIdentifier={name}
       />
       <TaskDetailsView
         sequence={openTask}
-        onClose={() => setOpenTask(null)}
-        onOpenTask={setOpenTask}
-        onTaskChanged={loadTasks}
+        onClose={() => dispatch(clearSelectedTask())}
+        onOpenTask={openTaskDetails}
       />
     </div>
   );

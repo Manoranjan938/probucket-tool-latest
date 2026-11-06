@@ -4,7 +4,7 @@ import * as auth from "features/auth/styles/authClasses";
 import image from "shared/assets/images/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { FaCheck, FaExclamation } from "react-icons/fa";
-import useVerifyAccount from "features/auth/hooks/useVerifyAccount";
+import { useVerifyAccountMutation } from "features/auth/api/authApi";
 import EmailVerifySkeleton from "features/auth/pages/EmailVerify/EmailVerifySkeleton";
 import { getApiErrorMessage } from "shared/services/apiError";
 
@@ -12,7 +12,7 @@ import { getApiErrorMessage } from "shared/services/apiError";
 const VerifyAccount = () => {
   const { search } = useLocation();
   const token = new URLSearchParams(search).get("token");
-  const [verifyAccount] = useVerifyAccount();
+  const [verifyAccount] = useVerifyAccountMutation();
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(token ? "" : "This verification link is not valid.");
   // A token only works once, and StrictMode runs effects twice
@@ -25,6 +25,7 @@ const VerifyAccount = () => {
     requested.current = true;
 
     verifyAccount(token)
+      .unwrap()
       .then(() => setVerified(true))
       .catch((err) => setError(getApiErrorMessage(err, "We couldn't verify your email. Please try again.")));
   }, [token, verifyAccount]);

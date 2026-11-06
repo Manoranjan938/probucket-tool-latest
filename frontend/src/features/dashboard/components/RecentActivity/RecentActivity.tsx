@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { FiEdit2, FiPlus } from "react-icons/fi";
 
 import * as activity from "features/activity/styles/activityClasses";
@@ -7,8 +7,7 @@ import * as dashboard from "features/dashboard/styles/dashboardClasses";
 import ActivityList from "features/activity/components/ActivityList/ActivityList";
 import Timeline from "features/activity/components/Timeline/Timeline";
 import TimelineSkeleton from "features/activity/components/Timeline/TimelineSkeleton";
-import useGetActivity from "features/activity/hooks/useGetActivity";
-import type { Activity } from "features/activity/types";
+import { useGetProjectActivityQuery } from "features/activity/api/activityApi";
 import type { TaskListItem } from "features/tasks/types";
 
 const MAX_RECENT_TASKS = 5;
@@ -25,28 +24,9 @@ interface RecentActivityProps {
 // The project's latest changes. Nothing was recorded before this feature existed, so until there is
 // something to show, it lists the tasks that changed last: their dates are known, but not who changed them.
 const RecentActivity = ({ name, tasks }: RecentActivityProps) => {
-  const { getProjectActivity } = useGetActivity();
-  const [activities, setActivities] = useState<Activity[]>();
-
-  useEffect(() => {
-    let current = true;
-    setActivities(undefined);
-    getProjectActivity(name)
-      .then((resp) => {
-        if (current) {
-          setActivities(resp.data.data);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        if (current) {
-          setActivities([]);
-        }
-      });
-    return () => {
-      current = false;
-    };
-  }, [name]);
+  const { currentData, isError } = useGetProjectActivityQuery(name);
+  // undefined while loading; shown as empty if it couldn't be loaded
+  const activities = isError ? [] : currentData;
 
   const recentTasks = [...(tasks ?? [])]
     .filter(lastChange)

@@ -3,15 +3,13 @@ import { useSnackbar } from "notistack";
 
 import * as project from "features/projects/styles/projectClasses";
 
-import useUpdateProject from "features/projects/hooks/useUpdateProject";
+import { useUpdateProjectMutation } from "features/projects/api/projectsApi";
 import { formatDate, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 import type { Project } from "features/projects/types";
-import { useAppDispatch } from "app/hooks";
-import { setCurrentProject } from "features/projects/store/projectSlice";
 
 type Props = {
-  currentProject: Partial<Project>;
+  currentProject: Project;
   /** Only the lead can rename the project; everyone else sees the name */
   isLead: boolean;
 };
@@ -19,11 +17,10 @@ type Props = {
 // The project's name and details
 // TODO(project-backend): the API lets anyone rename a project – see features/projects/BACKEND_TODO.md
 const ProjectGeneralCard = ({ currentProject, isLead }: Props) => {
-  const dispatch = useAppDispatch();
   const [name, setName] = useState(currentProject.projectName ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [updateProject] = useUpdateProject();
+  const [updateProject] = useUpdateProjectMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const trimmedName = name.trim();
@@ -42,9 +39,8 @@ const ProjectGeneralCard = ({ currentProject, isLead }: Props) => {
     setError("");
     setSaving(true);
     try {
-      await updateProject({ projectId: currentProject.projectId!, projectName: trimmedName });
-      // The sidebar shows the project from the store, so it picks up the new name too
-      dispatch(setCurrentProject({ ...currentProject, projectName: trimmedName }));
+      // Updates the cached project, so the sidebar and the other pages show the new name too
+      await updateProject({ projectId: currentProject.projectId, projectName: trimmedName }).unwrap();
       enqueueSnackbar("Project renamed", { ...toastOptions, variant: "success" });
     } catch (err) {
       enqueueSnackbar(getApiErrorMessage(err, "Couldn't rename the project. Please try again."), {

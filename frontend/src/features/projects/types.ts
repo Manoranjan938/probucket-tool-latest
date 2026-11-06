@@ -29,12 +29,6 @@ export interface UpdateProjectRequest {
   projectName: string;
 }
 
-export interface ProjectState {
-  allProjects: Project[];
-  /** Empty object until the project details are loaded */
-  project: Partial<Project>;
-}
-
 /** Values collected by the create-project wizard */
 export interface ProjectDraft {
   /** One of the template values in features/projects/data.ts */

@@ -10,24 +10,20 @@ import ExtraDetails from "features/tasks/components/ExtraDetails/ExtraDetails";
 import TaskActivity from "features/tasks/components/TaskActivity/TaskActivity";
 import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion/TaskStatusCompletion";
 import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
-import useUpdateTask from "features/tasks/hooks/useUpdateTask";
-import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
+import { useGetSubtasksQuery, useGetTaskDetailsQuery, useUpdateTaskMutation } from "features/tasks/api/tasksApi";
 import { taskStatuses, toastOptions } from "features/tasks/data";
-import { useAppDispatch, useAppSelector } from "app/hooks";
-import { setAllSubtasks } from "features/tasks/store/tasksSlice";
+import type { TaskDetails as TaskDetailsData } from "features/tasks/types";
 
 export type DetailsView = "panel" | "modal";
 
 type Props = {
-  /** The task to show; the store may still hold the previously opened task while this one loads */
+  /** The task to show */
   sequence: string;
   view: DetailsView;
   onToggleView: () => void;
   onClose: () => void;
   /** Shows the given task instead of this one */
   onOpenTask: (sequence: string) => void;
-  /** Called after the task changed, to reload it and the board */
-  onChanged: () => void;
 };
 
 // Content of the task details side panel / modal
@@ -37,37 +33,21 @@ const TaskDetails = ({
   onToggleView,
   onClose,
   onOpenTask,
-  onChanged,
 }: Props) => {
-  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
-  const allSubtask = useAppSelector((state) => state.tasks.allSubtasks);
-  const dispatch = useAppDispatch();
+  // Both are undefined while this task loads, so the previous task's never show; every change reloads them
+  const { currentData: loadedTask } = useGetTaskDetailsQuery(sequence);
+  const { currentData: allSubtask = [] } = useGetSubtasksQuery(sequence);
+  const currentTask: Partial<TaskDetailsData> = loadedTask ?? {};
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [description, setDescription] = useState("");
   const [savingStatus, setSavingStatus] = useState(false);
   const [openSubtask, setOpenSubtask] = useState(false);
-  const [updateTask] = useUpdateTask();
-  const [, getSubtaskList] = useGetSubTasks();
+  const [updateTask] = useUpdateTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
 
-  const loaded = currentTask.taskSequence === sequence;
+  const loaded = Boolean(loadedTask);
   const isSubtask = Boolean(currentTask.subtask);
   const status = taskStatuses[currentTask.status ?? ""] ?? taskStatuses.TODO;
-
-  const loadSubtasks = async () => {
-    try {
-      const resp = await getSubtaskList(sequence);
-      dispatch(setAllSubtasks(resp.data.data));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // The previous task's subtasks are cleared first, so they never show under this task
-  useEffect(() => {
-    dispatch(setAllSubtasks([]));
-    loadSubtasks();
-  }, [sequence]);
 
   useEffect(() => {
     setDescription(currentTask.taskDesc ?? "");
@@ -86,19 +66,13 @@ const TaskDetails = ({
         assignee: currentTask.assignee!,
         priority: currentTask.priority!,
         description: currentTask.taskDesc!,
-      });
-      onChanged();
+      }).unwrap();
     } catch (err) {
       console.log(err);
       enqueueSnackbar("Couldn't change the status. Please try again.", { ...toastOptions, variant: "error" });
     } finally {
       setSavingStatus(false);
     }
-  };
-
-  const handleSubtaskCreated = () => {
-    loadSubtasks();
-    onChanged();
   };
 
   const statusControl = (
@@ -161,7 +135,7 @@ const TaskDetails = ({
     </section>
   );
 
-  const details = <ExtraDetails onChanged={onChanged} />;
+  const details = <ExtraDetails />;
   // Subtasks can't have their own, so these only show on a subtask for data from before that rule
   const showSubtasks = !isSubtask || allSubtask.length > 0;
   const progress = showSubtasks ? <TaskStatusCompletion task={currentTask} /> : null;
@@ -254,7 +228,7 @@ const TaskDetails = ({
       </div>
 
       {openSubtask && (
-        <NewSubTask open={openSubtask} onClose={() => setOpenSubtask(false)} onCreated={handleSubtaskCreated} />
+        <NewSubTask open={openSubtask} onClose={() => setOpenSubtask(false)} />
       )}
     </div>
   );

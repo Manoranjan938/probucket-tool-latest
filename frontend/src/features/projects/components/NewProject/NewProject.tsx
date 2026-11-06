@@ -10,7 +10,7 @@ import WizardStepper from "features/projects/components/WizardStepper/WizardStep
 import ChooseTemplate from "features/projects/components/ChooseTemplate/ChooseTemplate";
 import ChooseType from "features/projects/components/ChooseType/ChooseType";
 import ProjectDetails from "features/projects/components/ProjectDetails/ProjectDetails";
-import useCreateNewProject from "features/projects/hooks/useCreateNewProject";
+import { useCreateProjectMutation } from "features/projects/api/projectsApi";
 import type { ProjectDraft } from "features/projects/types";
 import { getApiErrorMessage } from "shared/services/apiError";
 import { useAppSelector } from "app/hooks";
@@ -32,7 +32,7 @@ const NewProject = () => {
   });
   const [nameError, setNameError] = useState("");
   const [creating, setCreating] = useState(false);
-  const [createNewProject] = useCreateNewProject();
+  const [createNewProject] = useCreateProjectMutation();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
@@ -71,7 +71,7 @@ const NewProject = () => {
         projectTemplate: details.projectTemplate,
         projectType: details.projectType,
         userId: currentUser.id!,
-      });
+      }).unwrap();
       enqueueSnackbar("Project created successfully", { ...toastOptions, variant: "success" });
       navigate("/projects");
     } catch (err) {

@@ -7,9 +7,13 @@ import * as task from "features/tasks/styles/taskClasses";
 
 import DueBadge from "features/tasks/components/DueBadge/DueBadge";
 import DueDateDialog from "features/tasks/components/DueDateDialog/DueDateDialog";
-import useUpdateTask from "features/tasks/hooks/useUpdateTask";
+import { useUpdateTaskMutation } from "features/tasks/api/tasksApi";
+import { useGetTeamMembersQuery } from "features/team/api/teamApi";
+import useSelectedTask from "features/tasks/hooks/useSelectedTask";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
 import { formatDate, formatEnum, priorityColors, toastOptions } from "features/tasks/data";
-import { useAppSelector } from "app/hooks";
+import type { Project } from "features/projects/types";
+import type { TaskDetails } from "features/tasks/types";
 
 interface AssigneeOption {
   name: string;
@@ -17,22 +21,23 @@ interface AssigneeOption {
 }
 
 // The task's assignee, priority and dates, with dialogs to change the assignee and the due date
-const ExtraDetails = ({ onChanged }: { onChanged: () => void }) => {
-  const myTeams = useAppSelector((state) => state.teams.allTeamMember);
-  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
-  const currentProject = useAppSelector((state) => state.project.project);
+const ExtraDetails = () => {
+  const currentTask: Partial<TaskDetails> = useSelectedTask().currentData ?? {};
+  const currentProject: Partial<Project> = useCurrentProject().currentData ?? {};
+  const isTeam = currentProject.projectType?.toLowerCase() === "team";
+  // Shared with the team board's toolbar; a personal project has no members
+  const { data: myTeams = [] } = useGetTeamMembersQuery(currentProject.projectId, { skip: !isTeam });
   const [showAssigneeDialog, setShowAssigneeDialog] = useState(false);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
   const [assignee, setAssignee] = useState<AssigneeOption | null>(null);
   const [saving, setSaving] = useState(false);
-  const [updateTask] = useUpdateTask();
+  const [updateTask] = useUpdateTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
 
   const assigneeName = currentTask.assignee && currentTask.assignee !== "NA" ? currentTask.assignee : null;
 
-  // The team board fills the team list, so on a personal project it can still hold another project's members.
-  // The project lead isn't a team member, but can be assigned too.
-  const team = currentProject.projectType?.toLowerCase() === "team" ? myTeams : [];
+  // The project lead isn't a team member, but can be assigned too
+  const team = isTeam ? myTeams : [];
   const { leadEmail, leadBy } = currentProject;
   const assigneeOptions: AssigneeOption[] = [
     ...(leadEmail && !team.some((member) => member.email === leadEmail)
@@ -59,9 +64,8 @@ const ExtraDetails = ({ onChanged }: { onChanged: () => void }) => {
         assignee: assignee.email,
         priority: currentTask.priority!,
         description: currentTask.taskDesc!,
-      });
+      }).unwrap();
       enqueueSnackbar("Assignee updated", { ...toastOptions, variant: "success" });
-      onChanged();
       handleClose();
     } catch (err) {
       console.log(err);
@@ -132,7 +136,6 @@ const ExtraDetails = ({ onChanged }: { onChanged: () => void }) => {
       <DueDateDialog
         open={showDueDateDialog}
         onClose={() => setShowDueDateDialog(false)}
-        onChanged={onChanged}
         taskId={currentTask.taskSequence}
         dueDate={currentTask.dueDate}
       />

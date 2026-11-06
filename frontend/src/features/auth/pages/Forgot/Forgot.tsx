@@ -9,7 +9,7 @@ import image from "shared/assets/images/logo.png";
 import { Snackbar } from "@mui/material";
 import { ImSpinner2 } from "react-icons/im";
 
-import useResetPassRequest from 'features/auth/hooks/useResetPassRequest';
+import { useRequestPasswordChangeMutation } from 'features/auth/api/authApi';
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
 import { getApiErrorMessage } from "shared/services/apiError";
 
@@ -32,7 +32,7 @@ const Forgot = () => {
     type: '',
     message: ''
   });
-  const [resetPassword] = useResetPassRequest();
+  const [resetPassword] = useRequestPasswordChangeMutation();
 
   const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if(reason === 'clickaway'){
@@ -61,7 +61,7 @@ const Forgot = () => {
   const callResetPass = async () => {
     setLoading(true);
     try {
-      const res = await resetPassword(email);
+      const res = await resetPassword(email).unwrap();
       if (res.status === 200) {
         setEmail('');
         setStatusBar({

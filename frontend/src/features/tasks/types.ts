@@ -83,9 +83,6 @@ export interface UpdateTaskRequest {
 }
 
 export interface TaskState {
-  /** undefined until the task list is loaded */
-  allTask: TaskListItem[] | undefined;
-  /** Empty object until a task is selected */
-  selectedTask: Partial<TaskDetails>;
-  allSubtasks: Subtask[];
+  /** The task open in the details panel; null when it's closed */
+  selectedTaskSequence: string | null;
 }
