@@ -53,6 +53,9 @@ export const formatDate = (value: number | string | undefined) => {
 export const DUE_SOON_DAYS = 7;
 
 /** The range the backend accepts (ProjectTaskService.parseDueDate) */
+// Same limit as ProjectTaskRequest.MAX_DESCRIPTION in the backend
+export const MAX_DESCRIPTION = 10000;
+
 export const MIN_DUE_DATE = "2000-01-01";
 export const MAX_DUE_DATE = "2100-12-31";
 

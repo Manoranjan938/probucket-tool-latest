@@ -31,6 +31,8 @@ public class ProjectTask {
 	
 	private String taskName;
 	
+	// Longer than the default varchar(255); schema.sql widens existing databases
+	@Column(columnDefinition = "text")
 	private String taskDesc;
 	
 	private String priority;

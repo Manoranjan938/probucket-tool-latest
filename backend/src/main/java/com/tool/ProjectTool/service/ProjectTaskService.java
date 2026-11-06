@@ -63,6 +63,14 @@ public class ProjectTaskService {
 	public String addProjectTask(ProjectTaskRequest request) {
 
 		LocalDate dueDate = parseDueDate(request.getDueDate());
+		// Looked up before the try below, which reports every failure as a missing project
+		Users assignee = null;
+		if (request.getAssignee() != null && !request.getAssignee().isBlank()) {
+			assignee = userRepo.findByEmail(request.getAssignee());
+			if (assignee == null) {
+				throw new BadRequestException("The person to assign was not found");
+			}
+		}
 
 		try {
 			Backlog back = backlogRepo.findByProjectIdentifier(request.getProjectIdentifier());
@@ -90,9 +98,16 @@ public class ProjectTaskService {
 			projTask.setSprintId(request.getSprintId());
 			projTask.setDueDate(dueDate);
 			projTask.setSubtask(false);
+			projTask.setTaskDesc(emptyToNull(request.getDescription() == null ? null : request.getDescription().trim()));
+			if (assignee != null) {
+				projTask.setAssignee(assignee.getUserId());
+			}
 
 			projectTaskRepo.save(projTask);
 			activityService.recordTaskActivity(ActivityType.TASK_CREATED, projTask, null, null);
+			if (assignee != null) {
+				activityService.recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, projTask, null, assignee.getName());
+			}
 
 			return "Task created successfully";
 		} catch (Exception e) {

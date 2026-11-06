@@ -11,7 +11,7 @@ import TaskActivity from "features/tasks/components/TaskActivity/TaskActivity";
 import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion/TaskStatusCompletion";
 import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
 import { useGetSubtasksQuery, useGetTaskDetailsQuery, useUpdateTaskMutation } from "features/tasks/api/tasksApi";
-import { taskStatuses, toastOptions } from "features/tasks/data";
+import { MAX_DESCRIPTION, taskStatuses, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 import type { TaskDetails as TaskDetailsData } from "features/tasks/types";
 
@@ -42,6 +42,7 @@ const TaskDetails = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [description, setDescription] = useState("");
   const [savingStatus, setSavingStatus] = useState(false);
+  const [savingDescription, setSavingDescription] = useState(false);
   const [openSubtask, setOpenSubtask] = useState(false);
   const [updateTask] = useUpdateTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
@@ -77,6 +78,28 @@ const TaskDetails = ({
       enqueueSnackbar(getApiErrorMessage(err, "Couldn't change the status. Please try again."), { ...toastOptions, variant: "error" });
     } finally {
       setSavingStatus(false);
+    }
+  };
+
+  const savedDescription = currentTask.taskDesc ?? "";
+  const descriptionChanged = description.trim() !== savedDescription;
+
+  const saveDescription = async () => {
+    setSavingDescription(true);
+    try {
+      await updateTask({
+        taskId: currentTask.taskSequence!,
+        status: currentTask.status!,
+        assignee: currentTask.assignee!,
+        priority: currentTask.priority!,
+        description: description.trim(),
+      }).unwrap();
+      enqueueSnackbar("Description saved", { ...toastOptions, variant: "success" });
+    } catch (err) {
+      console.log(err);
+      enqueueSnackbar(getApiErrorMessage(err, "Couldn't save the description. Please try again."), { ...toastOptions, variant: "error" });
+    } finally {
+      setSavingDescription(false);
     }
   };
 
@@ -149,11 +172,26 @@ const TaskDetails = ({
         placeholder="Add a description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        maxLength={MAX_DESCRIPTION}
       />
-      {/* Saving the description isn't wired up yet */}
+      {/* Only while there's something to save */}
       <div className={task.formActions}>
-        <button type="button" className={`${task.btnPrimary} ${task.btnSmall}`}>Save</button>
-        <button type="button" className={`${task.btnGhost} ${task.btnSmall}`}>Cancel</button>
+        <button
+          type="button"
+          className={`${task.btnPrimary} ${task.btnSmall}`}
+          onClick={saveDescription}
+          disabled={!descriptionChanged || savingDescription}
+        >
+          {savingDescription ? "Saving…" : "Save"}
+        </button>
+        <button
+          type="button"
+          className={`${task.btnGhost} ${task.btnSmall}`}
+          onClick={() => setDescription(savedDescription)}
+          disabled={description === savedDescription || savingDescription}
+        >
+          Cancel
+        </button>
       </div>
     </section>
   );

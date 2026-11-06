@@ -53,6 +53,10 @@ export interface ProjectTaskRequest {
   status: string;
   /** yyyy-mm-dd, optional */
   dueDate?: string;
+  /** Optional, up to MAX_DESCRIPTION characters */
+  description?: string;
+  /** Email of the person to assign, optional */
+  assignee?: string;
 }
 
 /** model/request/RequestCreateSubtask.java */

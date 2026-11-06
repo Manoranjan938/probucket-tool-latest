@@ -68,7 +68,13 @@ public class TaskController {
 	}
 
 	@PostMapping("/updateTask")
-	public ResponseEntity<?> updateProjectTask(@RequestBody UpdateProjectTaskRequest updateTask) {
+	public ResponseEntity<?> updateProjectTask(@Valid @RequestBody UpdateProjectTaskRequest updateTask,
+			BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
 
 		return ApiResponseBuilder.ok(taskService.updateTask(updateTask));
 	}

@@ -152,6 +152,17 @@ export const dialogTitle = "text-[18px] font-bold text-brand-ink";
 export const dialogBody = "px-6 pt-3 pb-2";
 export const dialogFooter = "flex items-center justify-end gap-2 px-6 pt-4 pb-5";
 
+/* New task dialog: the content on the left, the settings on the right; one column on phones */
+export const newTaskPaper = `${base} w-full max-w-[820px]! m-4! rounded-2xl! bg-brand-surface!`;
+export const newTaskGrid = "grid grid-cols-[minmax(0,1fr)_260px] gap-6 max-[720px]:grid-cols-[minmax(0,1fr)]";
+export const newTaskSide = "flex flex-col p-4 rounded-xl bg-brand-surface-alt max-[720px]:p-0 max-[720px]:bg-transparent";
+export const newTaskFooter = "flex items-center gap-3 px-6 pt-4 pb-5 flex-wrap";
+// Wraps as one group below the checkbox on narrow screens, still on the right
+export const newTaskButtons = "flex items-center gap-2 ml-auto";
+export const checkboxLabel = "inline-flex items-center gap-2 mr-auto text-[14px] text-brand-ink cursor-pointer";
+export const checkbox = "w-4 h-4 accent-brand-strong cursor-pointer";
+export const fieldHint = "text-[12px] text-brand-muted";
+
 /* Activity tabs and comments */
 export const tabs = "flex items-center gap-1 p-1 w-fit rounded-[10px] bg-brand-surface-alt";
 export const tab =

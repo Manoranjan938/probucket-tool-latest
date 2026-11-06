@@ -8,25 +8,15 @@ import * as task from "features/tasks/styles/taskClasses";
 import DueBadge from "features/tasks/components/DueBadge/DueBadge";
 import DueDateDialog from "features/tasks/components/DueDateDialog/DueDateDialog";
 import { useUpdateTaskMutation } from "features/tasks/api/tasksApi";
-import { useGetTeamMembersQuery } from "features/team/api/teamApi";
 import useSelectedTask from "features/tasks/hooks/useSelectedTask";
-import useCurrentProject from "features/projects/hooks/useCurrentProject";
+import useAssigneeOptions, { type AssigneeOption } from "features/tasks/hooks/useAssigneeOptions";
 import { formatDate, formatEnum, priorityColors, toastOptions } from "features/tasks/data";
-import type { Project } from "features/projects/types";
 import type { TaskDetails } from "features/tasks/types";
-
-interface AssigneeOption {
-  name: string;
-  email: string;
-}
 
 // The task's assignee, priority and dates, with dialogs to change the assignee and the due date
 const ExtraDetails = () => {
   const currentTask: Partial<TaskDetails> = useSelectedTask().currentData ?? {};
-  const currentProject: Partial<Project> = useCurrentProject().currentData ?? {};
-  const isTeam = currentProject.projectType?.toLowerCase() === "team";
-  // Shared with the team board's toolbar; a personal project has no members
-  const { data: myTeams = [] } = useGetTeamMembersQuery(currentProject.projectId, { skip: !isTeam });
+  const { options: assigneeOptions } = useAssigneeOptions();
   const [showAssigneeDialog, setShowAssigneeDialog] = useState(false);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
   const [assignee, setAssignee] = useState<AssigneeOption | null>(null);
@@ -35,16 +25,6 @@ const ExtraDetails = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const assigneeName = currentTask.assignee && currentTask.assignee !== "NA" ? currentTask.assignee : null;
-
-  // The project lead isn't a team member, but can be assigned too
-  const team = isTeam ? myTeams : [];
-  const { leadEmail, leadBy } = currentProject;
-  const assigneeOptions: AssigneeOption[] = [
-    ...(leadEmail && !team.some((member) => member.email === leadEmail)
-      ? [{ name: `${leadBy} (Lead)`, email: leadEmail }]
-      : []),
-    ...team.map(({ name, email }) => ({ name, email })),
-  ];
 
   const handleClose = () => {
     setShowAssigneeDialog(false);

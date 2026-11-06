@@ -284,6 +284,55 @@ class ProjectTaskServiceTest {
 	}
 
 	@Test
+	void newTaskKeepsItsDescriptionAndAssignee() {
+		Backlog backlog = new Backlog();
+		backlog.setPTSequence(0);
+		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+		Users ravi = new Users();
+		ravi.setUserId("user-2");
+		ravi.setName("Ravi");
+		when(userRepo.findByEmail("ravi@example.com")).thenReturn(ravi);
+		ProjectTaskRequest request = newTask("");
+		request.setDescription("  Steps and notes  ");
+		request.setAssignee("ravi@example.com");
+
+		service.addProjectTask(request);
+
+		ArgumentCaptor<ProjectTask> saved = ArgumentCaptor.forClass(ProjectTask.class);
+		verify(projectTaskRepo).save(saved.capture());
+		assertEquals("Steps and notes", saved.getValue().getTaskDesc());
+		assertEquals("user-2", saved.getValue().getAssignee());
+		verify(activityService).recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, saved.getValue(), null, "Ravi");
+	}
+
+	@Test
+	void newTaskWithoutDescriptionOrAssigneeHasNeither() {
+		Backlog backlog = new Backlog();
+		backlog.setPTSequence(0);
+		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
+		ProjectTaskRequest request = newTask("");
+		request.setDescription("   ");
+		request.setAssignee("");
+
+		service.addProjectTask(request);
+
+		ArgumentCaptor<ProjectTask> saved = ArgumentCaptor.forClass(ProjectTask.class);
+		verify(projectTaskRepo).save(saved.capture());
+		assertNull(saved.getValue().getTaskDesc());
+		assertNull(saved.getValue().getAssignee());
+		verify(activityService, never()).recordTaskActivity(eq(ActivityType.ASSIGNEE_CHANGED), any(), any(), any());
+	}
+
+	@Test
+	void newTaskWithAnUnknownAssigneeIsRefused() {
+		ProjectTaskRequest request = newTask("");
+		request.setAssignee("nobody@example.com");
+
+		assertThrows(BadRequestException.class, () -> service.addProjectTask(request));
+		verify(projectTaskRepo, never()).save(any());
+	}
+
+	@Test
 	void newTaskWithoutADueDateHasNone() {
 		Backlog backlog = new Backlog();
 		backlog.setPTSequence(0);

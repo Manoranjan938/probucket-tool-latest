@@ -1,5 +1,7 @@
 package com.tool.ProjectTool.model.request;
 
+import jakarta.validation.constraints.Size;
+
 public class UpdateProjectTaskRequest {
 	
 	private String taskId;
@@ -10,6 +12,7 @@ public class UpdateProjectTaskRequest {
 	
 	private String priority;
 	
+	@Size(max = ProjectTaskRequest.MAX_DESCRIPTION, message = "Description is too long")
 	private String description;
 
 	public String getTaskId() {
