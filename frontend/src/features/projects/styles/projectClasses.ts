@@ -172,10 +172,12 @@ export const deletedTitle = "mb-1 text-[18px] font-bold text-brand-ink";
 export const deletedText = "mb-4 text-[14px]";
 export const deletedList = "m-0 p-0 list-none border border-brand-border rounded-brand bg-brand-surface overflow-hidden";
 export const deletedRow =
-  "flex items-center gap-4 px-5 py-4 [&+&]:border-t [&+&]:border-brand-border max-[480px]:flex-wrap max-[480px]:px-4";
+  "flex items-center gap-4 px-5 py-4 [&+&]:border-t [&+&]:border-brand-border max-[560px]:flex-wrap max-[480px]:px-4";
 export const deletedAvatar =
   "flex shrink-0 items-center justify-center w-10 h-10 rounded-[10px] bg-brand-surface-alt text-[16px] font-bold text-brand-muted uppercase";
 export const deletedInfo = "flex-1 min-w-0";
 export const deletedName = "flex items-center gap-2 min-w-0 text-[15px] font-semibold text-brand-ink capitalize";
 export const deletedMeta = "flex flex-wrap items-center gap-x-1.5 text-[13px] text-brand-muted";
 export const deletedDays = "font-semibold text-brand-text";
+// Below the name on phones, both buttons on one line
+export const deletedActions = "flex shrink-0 items-center gap-2 max-[560px]:w-full max-[560px]:justify-end";

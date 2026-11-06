@@ -4,6 +4,7 @@ import { FiRotateCcw } from "react-icons/fi";
 
 import * as project from "features/projects/styles/projectClasses";
 
+import DeleteForeverDialog from "features/projects/components/DeleteForeverDialog/DeleteForeverDialog";
 import { useGetDeletedProjectsQuery, useRestoreProjectMutation } from "features/projects/api/projectsApi";
 import { daysLeft, PROJECT_RETENTION_DAYS } from "features/projects/data";
 import { formatDate, toastOptions } from "features/tasks/data";
@@ -21,9 +22,11 @@ const RecentlyDeleted = ({ userId }: { userId: string }) => {
   const { data: deleted = [] } = useGetDeletedProjectsQuery(userId);
   const [restoreProject] = useRestoreProjectMutation();
   const [restoring, setRestoring] = useState<string | null>(null);
+  const [deleteForever, setDeleteForever] = useState<DeletedProject | null>(null);
   const { enqueueSnackbar } = useSnackbar();
 
-  if (deleted.length === 0) {
+  // The dialog stays mounted while the last project goes, so it can close properly
+  if (deleted.length === 0 && deleteForever === null) {
     return null;
   }
 
@@ -65,19 +68,31 @@ const RecentlyDeleted = ({ userId }: { userId: string }) => {
                 <span className={project.deletedDays}>{remaining(item)}</span>
               </p>
             </div>
-            <button
-              type="button"
-              className={project.settingsButtonGhost}
-              onClick={() => handleRestore(item)}
-              disabled={restoring !== null}
-              aria-label={`Restore ${item.projectName}`}
-            >
-              <FiRotateCcw aria-hidden="true" className="mr-1.5" />
-              {restoring === item.projectId ? "Restoring…" : "Restore"}
-            </button>
+            <div className={project.deletedActions}>
+              <button
+                type="button"
+                className={project.settingsButtonDanger}
+                onClick={() => setDeleteForever(item)}
+                disabled={restoring !== null}
+                aria-label={`Delete ${item.projectName} forever`}
+              >
+                Delete forever
+              </button>
+              <button
+                type="button"
+                className={project.settingsButtonGhost}
+                onClick={() => handleRestore(item)}
+                disabled={restoring !== null}
+                aria-label={`Restore ${item.projectName}`}
+              >
+                <FiRotateCcw aria-hidden="true" className="mr-1.5" />
+                {restoring === item.projectId ? "Restoring…" : "Restore"}
+              </button>
+            </div>
           </li>
         ))}
       </ul>
+      <DeleteForeverDialog item={deleteForever} onClose={() => setDeleteForever(null)} />
     </section>
   );
 };

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -131,6 +132,7 @@ class AccessRulesTest {
 				.andExpect(status().isUnauthorized());
 		mockMvc.perform(put("/api/v1/project/restoreProject/p1")).andExpect(status().isUnauthorized());
 		mockMvc.perform(get("/api/v1/project/getDeletedProjects/me")).andExpect(status().isUnauthorized());
+		mockMvc.perform(delete("/api/v1/project/deleteProjectForever/p1")).andExpect(status().isUnauthorized());
 	}
 
 	@Test

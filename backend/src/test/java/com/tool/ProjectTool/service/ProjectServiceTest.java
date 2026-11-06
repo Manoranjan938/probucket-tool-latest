@@ -43,6 +43,9 @@ class ProjectServiceTest {
 	@Mock
 	private UserRepository userRepo;
 
+	@Mock
+	private ProjectPurgeService purgeService;
+
 	@InjectMocks
 	private ProjectService service;
 
@@ -238,6 +241,34 @@ class ProjectServiceTest {
 
 		assertEquals(1, list.size());
 		assertEquals(1_000_000_000_000L + 30L * 24 * 60 * 60 * 1000, list.get(0).deleteForeverOn().getTime());
+	}
+
+	@Test
+	void theLeadDeletesADeletedProjectForever() {
+		ProjectEntity project = deleted();
+		loggedInAs("lead");
+
+		service.deleteProjectForever("p1");
+
+		verify(purgeService).purge(project);
+	}
+
+	@Test
+	void onlyADeletedProjectCanBeDeletedForever() {
+		existing();
+		loggedInAs("lead");
+
+		assertThrows(ProjectNotFoundException.class, () -> service.deleteProjectForever("p1"));
+		verify(purgeService, never()).purge(any());
+	}
+
+	@Test
+	void someoneElseCantDeleteForever() {
+		deleted();
+		loggedInAs("member");
+
+		assertThrows(BadRequestException.class, () -> service.deleteProjectForever("p1"));
+		verify(purgeService, never()).purge(any());
 	}
 
 	@Test

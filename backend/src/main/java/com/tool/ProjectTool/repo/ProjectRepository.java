@@ -1,9 +1,11 @@
 package com.tool.ProjectTool.repo;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.tool.ProjectTool.entity.ProjectEntity;
@@ -22,5 +24,9 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 	// The lead's deleted projects, the latest first
 	@Query(value = "select * from projects p where user_id =:userId and status = 0 order by deleted_date desc", nativeQuery = true)
 	public List<ProjectEntity> getDeletedProjectsByUserId(long userId);
+
+	// Deleted projects whose time to be restored is over
+	@Query("select p from ProjectEntity p where p.status = 0 and p.deletedDate < :cutoff")
+	public List<ProjectEntity> findDeletedBefore(@Param("cutoff") Date cutoff);
 
 }

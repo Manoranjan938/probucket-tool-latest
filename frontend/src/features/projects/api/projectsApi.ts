@@ -79,6 +79,11 @@ const projectsApi = api.injectEndpoints({
       query: (projectId) => ({ url: `/project/restoreProject/${projectId}`, method: "PUT" }),
       invalidatesTags: (_result, error, projectId) => (error ? [] : [LIST, DELETED, { type: "Project", id: projectId }]),
     }),
+    // Lead only, from Recently deleted. Can't be undone.
+    deleteProjectForever: build.mutation<ApiResponse, string>({
+      query: (projectId) => ({ url: `/project/deleteProjectForever/${projectId}`, method: "DELETE" }),
+      invalidatesTags: (_result, error) => (error ? [] : [DELETED]),
+    }),
   }),
 });
 
@@ -92,4 +97,5 @@ export const {
   useGetDeletedProjectsQuery,
   useDeleteProjectMutation,
   useRestoreProjectMutation,
+  useDeleteProjectForeverMutation,
 } = projectsApi;

@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -117,6 +118,13 @@ public class ProjectController {
 	public ResponseEntity<?> restoreProject(@PathVariable("projectId") String projectId) {
 
 		return ApiResponseBuilder.ok(projectService.restoreProject(projectId));
+	}
+
+	// Lead only; the project must be deleted already. Removes everything in it for good.
+	@DeleteMapping("/deleteProjectForever/{projectId}")
+	public ResponseEntity<?> deleteProjectForever(@PathVariable("projectId") String projectId) {
+
+		return ApiResponseBuilder.ok(projectService.deleteProjectForever(projectId));
 	}
 
 	// The Recently deleted list on the Projects page: only the lead's own

@@ -34,6 +34,9 @@ public class ProjectService {
 	@Autowired
 	private UserRepository userRepo;
 
+	@Autowired
+	private ProjectPurgeService purgeService;
+
 	static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	static SecureRandom rnd = new SecureRandom();
 	private static final String DEFAULT_IDENTIFIER = "P";
@@ -235,6 +238,14 @@ public class ProjectService {
 
 		projectRepo.save(proj);
 		return "Project restored";
+	}
+
+	// Lead only, from Recently deleted: the project must be deleted already. Can't be undone.
+	public String deleteProjectForever(String projectId) {
+
+		ProjectEntity proj = findAsLead(projectId, "delete", true);
+		purgeService.purge(proj);
+		return "Project deleted for good";
 	}
 
 	/** The lead's deleted projects that can still be restored, the latest first */
