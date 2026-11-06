@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { useSnackbar, type OptionsObject } from "notistack";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
@@ -13,9 +11,9 @@ import ChooseTemplate from "features/projects/components/ChooseTemplate/ChooseTe
 import ChooseType from "features/projects/components/ChooseType/ChooseType";
 import ProjectDetails from "features/projects/components/ProjectDetails/ProjectDetails";
 import useCreateNewProject from "features/projects/hooks/useCreateNewProject";
-import type { RootState } from "app/store";
 import type { ProjectDraft } from "features/projects/types";
 import { getApiErrorMessage } from "shared/services/apiError";
+import { useAppSelector } from "app/hooks";
 
 const steps = ["Template", "Managed by", "Details"];
 const lastStep = steps.length - 1;
@@ -23,7 +21,8 @@ const lastStep = steps.length - 1;
 // Same corner as the Snackbars on the other pages
 const toastOptions: OptionsObject = { anchorOrigin: { vertical: "bottom", horizontal: "right" } };
 
-const NewProject = ({ currentUser }: Props) => {
+const NewProject = () => {
+  const currentUser = useAppSelector((state) => state.security.user);
   const [page, setPage] = useState(0);
   const [details, setDetails] = useState<ProjectDraft>({
     projectTemplate: "",
@@ -133,12 +132,4 @@ const NewProject = ({ currentUser }: Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(NewProject);
+export default NewProject;

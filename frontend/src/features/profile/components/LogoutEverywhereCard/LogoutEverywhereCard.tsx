@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import { Dialog } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { connect, type ConnectedProps } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { compose } from "redux";
 
 import * as profile from "features/profile/styles/profileClasses";
 
-import { logoutEverywhere } from "features/auth/store/securityActions";
 import { toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
-import type { AppDispatch } from "app/store";
+import { useAppDispatch } from "app/hooks";
+import { logoutEverywhere } from "features/auth/store/securitySlice";
 
 // Ends every session, including this one, so it asks first
-const LogoutEverywhereCard = ({ logoutEverywhere }: Props) => {
+const LogoutEverywhereCard = () => {
+  const dispatch = useAppDispatch();
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +21,7 @@ const LogoutEverywhereCard = ({ logoutEverywhere }: Props) => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await logoutEverywhere();
+      await dispatch(logoutEverywhere());
       navigate("/login");
     } catch (err) {
       setLoading(false);
@@ -71,14 +70,4 @@ const LogoutEverywhereCard = ({ logoutEverywhere }: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    logoutEverywhere: () => dispatch(logoutEverywhere()),
-  };
-}
-
-const withConnect = connect(null, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(LogoutEverywhereCard);
+export default LogoutEverywhereCard;

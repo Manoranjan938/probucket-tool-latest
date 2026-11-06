@@ -4,14 +4,9 @@ import type { ApiResponse } from "shared/types";
 
 const useCreateTask = () => {
   const createProjectTask = async (taskRequest: ProjectTaskRequest) => {
-    //const token = localStorage.getItem("jwtToken");
-    try {
-      const resp = await axios.post<ApiResponse>("/task/createTask", taskRequest);
+    const resp = await axios.post<ApiResponse>("/task/createTask", taskRequest);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [createProjectTask] as const;

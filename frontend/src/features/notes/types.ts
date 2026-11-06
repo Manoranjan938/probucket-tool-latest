@@ -5,12 +5,6 @@ export interface NoteListItem {
   description: string;
 }
 
-/** model/response/NoteDetails.java */
-export interface NoteDetails {
-  title: string;
-  description: string;
-}
-
 /** model/request/NotesRequest.java */
 export interface NotesRequest {
   title: string;
@@ -21,5 +15,4 @@ export interface NotesRequest {
 
 export interface NoteState {
   allNotes: NoteListItem[];
-  note: Partial<NoteDetails>;
 }

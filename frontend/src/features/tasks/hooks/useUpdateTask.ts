@@ -4,13 +4,9 @@ import type { ApiResponse } from "shared/types";
 
 const useUpdateTask = () => {
   const updateTask = async (updateRequest: UpdateTaskRequest) => {
-    try {
-      const resp = await axios.post<ApiResponse>("/task/updateTask", updateRequest);
+    const resp = await axios.post<ApiResponse>("/task/updateTask", updateRequest);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [updateTask] as const;

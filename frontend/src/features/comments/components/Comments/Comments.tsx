@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import useAddComment from "features/comments/hooks/useAddComment";
 import CommentList from "features/comments/components/CommentList/CommentList";
 import useGetComments from "features/comments/hooks/useGetComments";
-import { setAllComments } from "features/comments/store/commentAction";
 import { toastOptions } from "features/tasks/data";
-import type { AppDispatch, RootState } from "app/store";
-import type { Comment } from "features/comments/types";
 import { getApiErrorMessage } from "shared/services/apiError";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setAllComments } from "features/comments/store/commentSlice";
 
 // Comment box and the comments of the open task
-const Comments = ({ currentTask, currentUser, setComments }: Props) => {
+const Comments = () => {
+  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
+  const currentUser = useAppSelector((state) => state.security.user);
+  const dispatch = useAppDispatch();
   const [comment, setComment] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -28,7 +28,7 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
   };
 
   useEffect(() => {
-    setComments([]);
+    dispatch(setAllComments([]));
   }, []);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
   }, [currentTask.taskSequence]);
 
   useEffect(() => {
-    setComments(comments);
+    dispatch(setAllComments(comments));
   }, [comments]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -99,19 +99,4 @@ const Comments = ({ currentTask, currentUser, setComments }: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setComments: (data: Comment[]) => dispatch(setAllComments(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  currentTask: state.tasks.selectedTask,
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Comments);
+export default Comments;

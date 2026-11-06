@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Helmet from "react-helmet";
 import { useLocation } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import HomeOverview from "features/dashboard/components/HomeOverview/HomeOverview";
 import TeamMemberNotification from "features/dashboard/components/TeamMemberNotification/TeamMemberNotification";
 import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
 import { dashboardLink } from "features/dashboard/data";
 import type { TeamMember } from "features/team/types";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
-const TeamDashboardHome = ({ currentUser }: Props) => {
+const TeamDashboardHome = () => {
+  const currentUser = useAppSelector((state) => state.security.user);
   const [, getTeamLists] = useGetTeamMembersList();
   // undefined while loading, null if it couldn't be loaded
   const [team, setTeam] = useState<TeamMember[] | null>();
@@ -58,12 +57,4 @@ const TeamDashboardHome = ({ currentUser }: Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(TeamDashboardHome);
+export default TeamDashboardHome;

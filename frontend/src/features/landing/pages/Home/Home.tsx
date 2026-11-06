@@ -1,8 +1,5 @@
 import React from "react";
 import Helmet from "react-helmet";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
-import type { RootState } from "app/store";
 
 import * as landing from "features/landing/styles/landingClasses";
 
@@ -15,8 +12,12 @@ import ComingSoon from "features/landing/components/ComingSoon/ComingSoon";
 import Pricing from "features/landing/components/Pricing/Pricing";
 import CallToAction from "features/landing/components/CallToAction/CallToAction";
 import Footer from "features/landing/components/Footer/Footer";
+import { useAppSelector } from "app/hooks";
+import { selectIsLoggedIn } from "features/auth/store/securitySlice";
 
-const Home = ({ isLoggedIn }: Props) => {
+const Home = () => {
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+
   return (
     <div className={landing.page}>
       <Helmet>
@@ -37,13 +38,4 @@ const Home = ({ isLoggedIn }: Props) => {
   );
 };
 
-// validToken stays true after logout (payload is {}), so check the user id instead
-const mapStateToProps = (state: RootState) => ({
-  isLoggedIn: Boolean(state.security.user && state.security.user.id),
-});
-
-const withConnect = connect(mapStateToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Home);
+export default Home;

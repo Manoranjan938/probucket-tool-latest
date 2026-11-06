@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Helmet from "react-helmet";
 import { useLocation } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { FiUserPlus, FiUsers } from "react-icons/fi";
 
 import * as team from "features/team/styles/teamClasses";
@@ -12,12 +10,13 @@ import AddMember from "features/team/components/AddMember/AddMember";
 import EditMember from "features/team/components/EditMember/EditMember";
 import { MembersTableSkeleton } from "features/team/pages/NewTeamUser/NewTeamUserSkeleton";
 import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
-import { getAllTeamMembers } from "features/team/store/teamActions";
-import type { AppDispatch } from "app/store";
 import type { TeamMember } from "features/team/types";
+import { useAppDispatch } from "app/hooks";
+import { setAllTeamMembers } from "features/team/store/teamsSlice";
 
 // Team members page of the team dashboard (admins only – the sidebar hides it from team members)
-const NewTeamUser = ({ getTeamList }: Props) => {
+const NewTeamUser = () => {
+  const dispatch = useAppDispatch();
   const [teamList, getTeamLists] = useGetTeamMembersList();
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -42,7 +41,7 @@ const NewTeamUser = ({ getTeamList }: Props) => {
 
   // The task details read the members from the store for the assignee picker
   useEffect(() => {
-    getTeamList(teamList);
+    dispatch(setAllTeamMembers(teamList));
   }, [teamList]);
 
   return (
@@ -87,14 +86,4 @@ const NewTeamUser = ({ getTeamList }: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getTeamList: (data: TeamMember[]) => dispatch(getAllTeamMembers(data)),
-  };
-}
-
-const withConnect = connect(null, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(NewTeamUser);
+export default NewTeamUser;

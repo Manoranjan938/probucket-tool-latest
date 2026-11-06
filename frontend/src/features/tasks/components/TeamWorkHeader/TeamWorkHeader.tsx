@@ -1,23 +1,21 @@
 import React, { useEffect } from "react";
 import { Tooltip } from "@mui/material";
 import { FiSearch } from "react-icons/fi";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import useGetTeamMembersList from "features/team/hooks/useGetTeamMembersList";
-import { getAllTeamMembers } from "features/team/store/teamActions";
-import type { AppDispatch } from "app/store";
-import type { TeamMember } from "features/team/types";
+import { useAppDispatch } from "app/hooks";
+import { setAllTeamMembers } from "features/team/store/teamsSlice";
 
 const MAX_AVATARS = 5;
 
-type OwnProps = { projectId: string | null };
+type Props = { projectId: string | null };
 
 // Team board toolbar: search and the team members. Also loads the members into the store,
 // where the task details read them for the assignee picker.
-const TeamWorkHeader = ({ projectId, getTeamList }: OwnProps & Props) => {
+const TeamWorkHeader = ({ projectId }: Props) => {
+  const dispatch = useAppDispatch();
   const [teamList, getTeamLists] = useGetTeamMembersList();
 
   useEffect(() => {
@@ -25,7 +23,7 @@ const TeamWorkHeader = ({ projectId, getTeamList }: OwnProps & Props) => {
   }, [projectId]);
 
   useEffect(() => {
-    getTeamList(teamList);
+    dispatch(setAllTeamMembers(teamList));
   }, [teamList]);
 
   return (
@@ -56,14 +54,4 @@ const TeamWorkHeader = ({ projectId, getTeamList }: OwnProps & Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getTeamList: (data: TeamMember[]) => dispatch(getAllTeamMembers(data)),
-  };
-}
-
-const withConnect = connect(null, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(TeamWorkHeader);
+export default TeamWorkHeader;

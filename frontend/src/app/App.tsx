@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Navigate, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import store from "./store";
-import { restoreSession } from "features/auth/store/securityActions";
+import { restoreSession } from "features/auth/store/securitySlice";
 import RouteErrorBoundary from "shared/components/RouteErrorBoundary/RouteErrorBoundary";
 
 // Skeletons are shown while a page's code is loading, so they are imported normally

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Dialog } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { FiX } from "react-icons/fi";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
@@ -12,9 +10,9 @@ import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPic
 import useCreateNewSubtask from "features/tasks/hooks/useCreateNewSubtask";
 import { toastOptions } from "features/tasks/data";
 import type { ApiError } from "shared/types";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
-type OwnProps = {
+type Props = {
   open: boolean;
   onClose: () => void;
   /** Called after the subtask is created, to reload the subtasks */
@@ -22,7 +20,9 @@ type OwnProps = {
 };
 
 // Dialog that adds a subtask to the open task
-const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: OwnProps & Props) => {
+const NewSubTask = ({ open, onClose, onCreated }: Props) => {
+  const currentProject = useAppSelector((state) => state.project.project);
+  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
   const [taskName, setTaskName] = useState("");
   const [priority, setPriority] = useState("LOW");
   const [dueDate, setDueDate] = useState("");
@@ -135,13 +135,4 @@ const NewSubTask = ({ open, onClose, onCreated, currentProject, currentTask }: O
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentProject: state.project.project,
-  currentTask: state.tasks.selectedTask,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(NewSubTask);
+export default NewSubTask;

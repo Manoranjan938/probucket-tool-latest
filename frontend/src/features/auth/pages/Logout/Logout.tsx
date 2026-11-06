@@ -5,13 +5,13 @@ import * as auth from "features/auth/styles/authClasses";
 
 import image from "shared/assets/images/logo.png";
 import { FaSignOutAlt } from "react-icons/fa";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
-import { logout, logoutEverywhere } from "features/auth/store/securityActions";
-import type { AppDispatch, RootState } from "app/store";
 import { getApiErrorMessage } from "shared/services/apiError";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { logout, logoutEverywhere } from "features/auth/store/securitySlice";
 
-const Logout = ({ logout, logoutEverywhere, currentUser }: Props) => {
+const Logout = () => {
+  const currentUser = useAppSelector((state) => state.security.user);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
@@ -47,12 +47,12 @@ const Logout = ({ logout, logoutEverywhere, currentUser }: Props) => {
               </div>
             </div>
 
-            <button type="button" className={auth.btnPrimary} onClick={() => handleClickLogout(logout)}>
+            <button type="button" className={auth.btnPrimary} onClick={() => handleClickLogout(() => dispatch(logout()))}>
               <FaSignOutAlt />
               Log out
             </button>
             {error && <p className={auth.error}>{error}</p>}
-            <button type="button" className={auth.btnGhost} onClick={() => handleClickLogout(logoutEverywhere)}>
+            <button type="button" className={auth.btnGhost} onClick={() => handleClickLogout(() => dispatch(logoutEverywhere()))}>
               Log out on all devices
             </button>
             <Link to="/projects" className={auth.btnGhost}>
@@ -69,19 +69,4 @@ const Logout = ({ logout, logoutEverywhere, currentUser }: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    logout: () => dispatch(logout()),
-    logoutEverywhere: () => dispatch(logoutEverywhere()),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Logout);
+export default Logout;

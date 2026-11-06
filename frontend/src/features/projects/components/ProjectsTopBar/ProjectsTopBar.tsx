@@ -1,16 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { FaSignOutAlt } from "react-icons/fa";
 
 import * as project from "features/projects/styles/projectClasses";
 
 import logo from "shared/assets/images/logo.png";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
 // Top bar of the Projects list, the Create project wizard and the Profile page (logo, link to the profile, Log out)
-const ProjectsTopBar = ({ currentUser }: Props) => {
+const ProjectsTopBar = () => {
+  const currentUser = useAppSelector((state) => state.security.user);
+
   return (
     <header className={project.topBar}>
       <div className={project.topBarInner}>
@@ -38,12 +38,4 @@ const ProjectsTopBar = ({ currentUser }: Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(ProjectsTopBar);
+export default ProjectsTopBar;

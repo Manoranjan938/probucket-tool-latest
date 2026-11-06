@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import { Dialog } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { FiX } from "react-icons/fi";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as note from "features/notes/styles/noteClasses";
 
 import useAddNote from "features/notes/hooks/useAddNote";
 import { toastOptions } from "features/tasks/data";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
-type OwnProps = {
+type Props = {
   open: boolean;
   onClose: () => void;
   /** Called after the note is saved, to reload the list */
@@ -21,7 +19,8 @@ type OwnProps = {
 };
 
 // Dialog that adds a note to the project; notes are private to the user who writes them
-const NewNote = ({ open, onClose, onCreated, projectId, currentUser }: OwnProps & Props) => {
+const NewNote = ({ open, onClose, onCreated, projectId }: Props) => {
+  const currentUser = useAppSelector((state) => state.security.user);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
@@ -121,12 +120,4 @@ const NewNote = ({ open, onClose, onCreated, projectId, currentUser }: OwnProps 
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(NewNote);
+export default NewNote;

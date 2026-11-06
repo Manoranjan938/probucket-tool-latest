@@ -4,13 +4,9 @@ import type { ApiResponse } from "shared/types";
 
 const useCreateNewSubtask = () => {
   const createNewSubtask = async (subtask: CreateSubtaskRequest) => {
-    try {
-      const resp = await axios.post<ApiResponse>("/task/createSubTask", subtask);
+    const resp = await axios.post<ApiResponse>("/task/createSubTask", subtask);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [createNewSubtask] as const;

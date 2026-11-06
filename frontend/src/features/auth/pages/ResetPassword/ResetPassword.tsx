@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import * as auth from "features/auth/styles/authClasses";
 import image from "shared/assets/images/logo.png";
 import MuiAlert, { type AlertProps } from "@mui/material/Alert";

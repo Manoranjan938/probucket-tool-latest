@@ -1,8 +1,6 @@
 import React from "react";
 import Helmet from "react-helmet";
-import { connect, type ConnectedProps } from "react-redux";
 import { Link, useSearchParams } from "react-router-dom";
-import { compose } from "redux";
 import { FiArrowLeft } from "react-icons/fi";
 
 import * as profile from "features/profile/styles/profileClasses";
@@ -11,7 +9,7 @@ import ProfileHeader from "features/profile/components/ProfileHeader/ProfileHead
 import ProfileTab from "features/profile/components/ProfileTab/ProfileTab";
 import SecurityTab from "features/profile/components/SecurityTab/SecurityTab";
 import ProjectsTopBar from "features/projects/components/ProjectsTopBar/ProjectsTopBar";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
 const tabs = [
   { id: "profile", title: "Profile" },
@@ -19,7 +17,8 @@ const tabs = [
 ];
 
 // The signed-in user's own account. The open tab is in the URL, so a reload stays on it.
-const UserProfile = ({ user }: Props) => {
+const UserProfile = () => {
+  const user = useAppSelector((state) => state.security.user);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = tabs.find((item) => item.id === searchParams.get("tab"))?.id ?? "profile";
 
@@ -85,12 +84,4 @@ const UserProfile = ({ user }: Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  user: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(UserProfile);
+export default UserProfile;

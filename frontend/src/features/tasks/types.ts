@@ -88,5 +88,4 @@ export interface TaskState {
   /** Empty object until a task is selected */
   selectedTask: Partial<TaskDetails>;
   allSubtasks: Subtask[];
-  selectedSubtask: Partial<Subtask>;
 }

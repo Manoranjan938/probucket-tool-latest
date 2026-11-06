@@ -1,21 +1,20 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { Divider, Menu, MenuItem, Tooltip } from "@mui/material";
 import { FiChevronUp, FiFolder, FiLogOut, FiUser } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
+import { useAppSelector } from "app/hooks";
 
-import type { RootState } from "app/store";
 
-type OwnProps = {
+type Props = {
   /** Only the avatar shows, with the user's name as a tooltip */
   collapsed: boolean;
 };
 
 // Signed-in user at the bottom of the sidebar, with Profile, Projects and Log out
-const AccountMenu = ({ collapsed, currentUser }: OwnProps & Props) => {
+const AccountMenu = ({ collapsed }: Props) => {
+  const currentUser = useAppSelector((state) => state.security.user);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
 
@@ -80,12 +79,4 @@ const AccountMenu = ({ collapsed, currentUser }: OwnProps & Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(AccountMenu);
+export default AccountMenu;

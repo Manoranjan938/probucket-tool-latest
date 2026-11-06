@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Dialog, Drawer } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import TaskDetails, { type DetailsView } from "features/tasks/components/TaskDetails/TaskDetails";
 import useGetTaskDetails from "features/tasks/hooks/useGetTaskDetails";
-import { getSingleTask, removeSelectedTask } from "features/tasks/store/taskAction";
 import { toastOptions } from "features/tasks/data";
-import type { AppDispatch } from "app/store";
-import type { TaskDetails as TaskDetailsData } from "features/tasks/types";
+import { useAppDispatch } from "app/hooks";
+import { clearSelectedTask, setSelectedTask } from "features/tasks/store/tasksSlice";
 
 // Side panel or modal – the last choice is remembered in this browser
 const VIEW_KEY = "probucket.taskDetailsView";
@@ -24,7 +21,7 @@ const readView = (): DetailsView => {
   }
 };
 
-type OwnProps = {
+type Props = {
   /** Sequence of the task to show; null when closed */
   sequence: string | null;
   onClose: () => void;
@@ -35,7 +32,8 @@ type OwnProps = {
 };
 
 // Loads the open task into the store and shows it in a side panel, or a centered modal when expanded
-const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged, setTask, removeTask }: OwnProps & Props) => {
+const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged }: Props) => {
+  const dispatch = useAppDispatch();
   const [view, setView] = useState<DetailsView>(readView);
   const [, getTaskDetails] = useGetTaskDetails();
   const { enqueueSnackbar } = useSnackbar();
@@ -43,7 +41,7 @@ const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged, setTask
   const loadTask = async (taskSequence: string) => {
     try {
       const resp = await getTaskDetails(taskSequence);
-      setTask(resp.data.data);
+      dispatch(setSelectedTask(resp.data.data));
     } catch (err) {
       console.log(err);
       enqueueSnackbar("Couldn't load the task. Please try again.", { ...toastOptions, variant: "error" });
@@ -58,7 +56,7 @@ const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged, setTask
 
   const handleClose = () => {
     onClose();
-    removeTask();
+    dispatch(clearSelectedTask());
   };
 
   const handleToggleView = () => {
@@ -111,15 +109,4 @@ const TaskDetailsView = ({ sequence, onClose, onOpenTask, onTaskChanged, setTask
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setTask: (data: Partial<TaskDetailsData>) => dispatch(getSingleTask(data)),
-    removeTask: () => dispatch(removeSelectedTask()),
-  };
-}
-
-const withConnect = connect(null, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(TaskDetailsView);
+export default TaskDetailsView;

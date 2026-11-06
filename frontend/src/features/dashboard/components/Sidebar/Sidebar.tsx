@@ -1,7 +1,5 @@
 import React, { useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { Tooltip } from "@mui/material";
 import { FiX } from "react-icons/fi";
 
@@ -11,12 +9,11 @@ import logo from "shared/assets/images/logo.png";
 import ProjectSwitcher from "features/dashboard/components/ProjectSwitcher/ProjectSwitcher";
 import AccountMenu from "features/dashboard/components/AccountMenu/AccountMenu";
 import { dashboardLink, mainNav, manageNav, visibleNav, type DashboardType, type NavItem } from "features/dashboard/data";
-import { getProjectDetails } from "features/projects/store/projectsAction";
 import useGetProjectDetails from "features/projects/hooks/useGetProjectDetails";
-import type { AppDispatch, RootState } from "app/store";
-import type { Project } from "features/projects/types";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setCurrentProject } from "features/projects/store/projectSlice";
 
-type OwnProps = {
+type Props = {
   type: DashboardType;
   id: string | null;
   name: string | null;
@@ -35,10 +32,10 @@ const Sidebar = ({
   open,
   collapsed,
   onClose,
-  getSingleProject,
-  currentUser,
-  currentProject,
-}: OwnProps & Props) => {
+}: Props) => {
+  const currentUser = useAppSelector((state) => state.security.user);
+  const currentProject = useAppSelector((state) => state.project.project);
+  const dispatch = useAppDispatch();
   const [project, getProjectDetails] = useGetProjectDetails();
 
   // Again when the project switcher opens another project of the same type
@@ -47,7 +44,7 @@ const Sidebar = ({
   }, [id]);
 
   useEffect(() => {
-    getSingleProject(project);
+    dispatch(setCurrentProject(project));
   }, [project]);
 
   const renderLinks = (items: NavItem[]) => (
@@ -104,19 +101,4 @@ const Sidebar = ({
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getSingleProject: (data: Partial<Project>) => dispatch(getProjectDetails(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-  currentProject: state.project.project,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Sidebar);
+export default Sidebar;

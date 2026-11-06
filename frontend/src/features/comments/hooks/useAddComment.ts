@@ -4,13 +4,9 @@ import type { ApiResponse } from "shared/types";
 
 const useAddComment = () => {
   const addNewComment = async (commentRequest: CommentRequest) => {
-    try {
-      const resp = await axios.post<ApiResponse>("/comment/addComment", commentRequest);
+    const resp = await axios.post<ApiResponse>("/comment/addComment", commentRequest);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [addNewComment] as const;

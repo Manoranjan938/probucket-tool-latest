@@ -1,27 +1,28 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { Divider, Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
 import { FiCheck, FiChevronDown, FiFolder } from "react-icons/fi";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
-import { getAllProjects } from "features/projects/store/projectsAction";
 import useGetAllProjects from "features/projects/hooks/useGetAllProjects";
 import useGetProjectsByTeamMembers from "features/projects/hooks/useGetProjectsByTeamMembers";
 import { dashboardLink, type DashboardType } from "features/dashboard/data";
-import type { AppDispatch, RootState } from "app/store";
 import type { Project } from "features/projects/types";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setAllProjects } from "features/projects/store/projectSlice";
 
-type OwnProps = {
+type Props = {
   project: Partial<Project>;
   /** Only the avatar shows, with the project name as a tooltip */
   collapsed: boolean;
 };
 
 // The current project at the top of the sidebar; opens a menu to switch to another project
-const ProjectSwitcher = ({ project, collapsed, currentUser, myProjects, getProjects }: OwnProps & Props) => {
+const ProjectSwitcher = ({ project, collapsed }: Props) => {
+  const currentUser = useAppSelector((state) => state.security.user);
+  const myProjects = useAppSelector((state) => state.project.allProjects);
+  const dispatch = useAppDispatch();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [, getAllProjectDetails] = useGetAllProjects();
@@ -34,10 +35,10 @@ const ProjectSwitcher = ({ project, collapsed, currentUser, myProjects, getProje
     try {
       if (currentUser.rolename === "ROLE_TEAM-USER") {
         const res = await getProjectsByTeam(currentUser.id);
-        getProjects(res.data.data);
+        dispatch(setAllProjects(res.data.data));
       } else {
         const res = await getAllProjectDetails(currentUser.id);
-        getProjects(res.data.data);
+        dispatch(setAllProjects(res.data.data));
       }
     } catch (err) {
       console.log(err);
@@ -135,19 +136,4 @@ const ProjectSwitcher = ({ project, collapsed, currentUser, myProjects, getProje
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getProjects: (data: Project[]) => dispatch(getAllProjects(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-  myProjects: state.project.allProjects,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(ProjectSwitcher);
+export default ProjectSwitcher;

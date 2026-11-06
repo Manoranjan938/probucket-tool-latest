@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Autocomplete, Dialog, TextField } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { FiFlag, FiX } from "react-icons/fi";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
@@ -11,7 +9,7 @@ import DueBadge from "features/tasks/components/DueBadge/DueBadge";
 import DueDateDialog from "features/tasks/components/DueDateDialog/DueDateDialog";
 import useUpdateTask from "features/tasks/hooks/useUpdateTask";
 import { formatDate, formatEnum, priorityColors, toastOptions } from "features/tasks/data";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
 interface AssigneeOption {
   name: string;
@@ -19,7 +17,10 @@ interface AssigneeOption {
 }
 
 // The task's assignee, priority and dates, with dialogs to change the assignee and the due date
-const ExtraDetails = ({ onChanged, myTeams, currentTask, currentProject }: { onChanged: () => void } & Props) => {
+const ExtraDetails = ({ onChanged }: { onChanged: () => void }) => {
+  const myTeams = useAppSelector((state) => state.teams.allTeamMember);
+  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
+  const currentProject = useAppSelector((state) => state.project.project);
   const [showAssigneeDialog, setShowAssigneeDialog] = useState(false);
   const [showDueDateDialog, setShowDueDateDialog] = useState(false);
   const [assignee, setAssignee] = useState<AssigneeOption | null>(null);
@@ -183,14 +184,4 @@ const ExtraDetails = ({ onChanged, myTeams, currentTask, currentProject }: { onC
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  myTeams: state.teams.allTeamMember,
-  currentTask: state.tasks.selectedTask,
-  currentProject: state.project.project,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(ExtraDetails);
+export default ExtraDetails;

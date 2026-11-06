@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { FaArrowRight, FaPlus } from "react-icons/fa";
 
 import * as project from "features/projects/styles/projectClasses";
@@ -10,11 +8,11 @@ import ProjectsTopBar from "features/projects/components/ProjectsTopBar/Projects
 import NoProjects from "features/projects/components/NoProjects/NoProjects";
 import { ProjectsContentSkeleton } from "features/projects/pages/Projects/ProjectsSkeleton";
 import { projectTypes } from "features/projects/data";
-import { getAllProjects } from "features/projects/store/projectsAction";
 import useGetAllProjects from "features/projects/hooks/useGetAllProjects";
 import useGetProjectsByTeamMembers from "features/projects/hooks/useGetProjectsByTeamMembers";
-import type { AppDispatch, RootState } from "app/store";
 import type { Project } from "features/projects/types";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setAllProjects } from "features/projects/store/projectSlice";
 
 const ProjectCard = ({ item }: { item: Project }) => {
   const TypeIcon = projectTypes.find((type) => type.value === item.projectType)?.icon;
@@ -46,7 +44,10 @@ const ProjectCard = ({ item }: { item: Project }) => {
   );
 };
 
-const Projects = ({ getProjects, currentUser, myProjects }: Props) => {
+const Projects = () => {
+  const currentUser = useAppSelector((state) => state.security.user);
+  const myProjects = useAppSelector((state) => state.project.allProjects);
+  const dispatch = useAppDispatch();
   const [, getAllProjectDetails] = useGetAllProjects();
   const [, getProjectsByTeam] = useGetProjectsByTeamMembers();
   const [loading, setLoading] = useState(true);
@@ -63,14 +64,14 @@ const Projects = ({ getProjects, currentUser, myProjects }: Props) => {
           currentUser.rolename === "ROLE_USER"
         ) {
           const res = await getAllProjectDetails(currentUser.id);
-          getProjects(res.data.data);
+          dispatch(setAllProjects(res.data.data));
         } else if (currentUser.rolename === "ROLE_TEAM-USER") {
           const res = await getProjectsByTeam(currentUser.id);
-          getProjects(res.data.data);
+          dispatch(setAllProjects(res.data.data));
         }
       } catch (err) {
         console.log(err);
-        getProjects([]);
+        dispatch(setAllProjects([]));
       } finally {
         setLoading(false);
       }
@@ -117,19 +118,4 @@ const Projects = ({ getProjects, currentUser, myProjects }: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getProjects: (data: Project[]) => dispatch(getAllProjects(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-  myProjects: state.project.allProjects,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Projects);
+export default Projects;

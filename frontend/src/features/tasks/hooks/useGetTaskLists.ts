@@ -7,15 +7,10 @@ const useGetTaskLists = () => {
   const [tasks, setTasks] = useState<TaskListItem[]>();
 
   const getTaskLists = async (projectIdentifier: string | null) => {
-    try {
-      const resp = await axios.get<ApiResponse<TaskListItem[]>>(`/task/getTasks/${projectIdentifier}`);
+    const resp = await axios.get<ApiResponse<TaskListItem[]>>(`/task/getTasks/${projectIdentifier}`);
 
-      setTasks(resp.data.data);
-      return resp;
-    } catch (err) {
-      //console.log(err);
-      throw err;
-    }
+    setTasks(resp.data.data);
+    return resp;
   };
 
   return [tasks, getTaskLists] as const;

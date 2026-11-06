@@ -1,8 +1,6 @@
 import React from "react";
 import Helmet from "react-helmet";
 import { Link, useLocation } from "react-router-dom";
-import { compose } from "redux";
-import { connect, type ConnectedProps } from "react-redux";
 
 import * as project from "features/projects/styles/projectClasses";
 
@@ -10,11 +8,13 @@ import ProjectGeneralCard from "features/projects/components/ProjectGeneralCard/
 import ProjectSettingsSkeleton from "features/projects/pages/ProjectSettings/ProjectSettingsSkeleton";
 import { dashboardLink } from "features/dashboard/data";
 import ComingSoonBadge from "shared/components/ComingSoonBadge/ComingSoonBadge";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
 // Everyone on the project sees its details; only the lead gets the rest
 // TODO(project-backend): every "Coming soon" here is listed in features/projects/BACKEND_TODO.md
-const ProjectSettings = ({ currentProject, currentUser }: Props) => {
+const ProjectSettings = () => {
+  const currentProject = useAppSelector((state) => state.project.project);
+  const currentUser = useAppSelector((state) => state.security.user);
   const { pathname, search } = useLocation();
   const query = new URLSearchParams(search);
   const projectId = query.get("project");
@@ -154,13 +154,4 @@ const ProjectSettings = ({ currentProject, currentUser }: Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentProject: state.project.project,
-  currentUser: state.security.user,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(ProjectSettings);
+export default ProjectSettings;

@@ -3,13 +3,9 @@ import type { ApiResponse } from "shared/types";
 
 const useVerifyAccount = () => {
   const verifyAccount = async (token: string) => {
-    try {
-      const resp = await axios.get<ApiResponse>("/auth/verify", { params: { token } });
+    const resp = await axios.get<ApiResponse>("/auth/verify", { params: { token } });
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [verifyAccount] as const;

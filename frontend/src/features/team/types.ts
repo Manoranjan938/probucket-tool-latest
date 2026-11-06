@@ -34,5 +34,4 @@ export interface UpdateTeamRequest {
 
 export interface TeamState {
   allTeamMember: TeamMember[];
-  selectedMember: Partial<TeamMember>;
 }

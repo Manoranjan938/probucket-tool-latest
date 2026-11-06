@@ -3,13 +3,9 @@ import type { ApiResponse } from "shared/types";
 
 const useResetPassRequest = () => {
   const resetPassword = async (email: string) => {
-    try {
-      const resp = await axios.get<ApiResponse>(`/auth/requestPasswordChange/${email}`);
+    const resp = await axios.get<ApiResponse>(`/auth/requestPasswordChange/${email}`);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
   return [resetPassword] as const;
 };

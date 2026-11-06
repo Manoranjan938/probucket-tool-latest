@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from "react";
 import Helmet from "react-helmet";
-import { connect, type ConnectedProps } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { compose } from "redux";
 import { FiInbox, FiPlus } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
-import { getAllTask } from "features/tasks/store/taskAction";
 import NewTask from "features/tasks/components/NewTask/NewTask";
 import TeamWorkHeader from "features/tasks/components/TeamWorkHeader/TeamWorkHeader";
 import ProjectWorks from "features/tasks/components/ProjectWorks/ProjectWorks";
 import TaskDetailsView from "features/tasks/components/TaskDetailsView/TaskDetailsView";
 import { BoardSkeleton } from "features/tasks/pages/Works/WorksSkeleton";
 import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
-import type { AppDispatch, RootState } from "app/store";
-import type { TaskListItem } from "features/tasks/types";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setAllTasks } from "features/tasks/store/tasksSlice";
 
-const Works = ({ title, getTaskList, myTasks }: { title: string } & Props) => {
+const Works = ({ title }: { title: string }) => {
+  const myTasks = useAppSelector((state) => state.tasks.allTask);
+  const dispatch = useAppDispatch();
   const [, getTaskLists] = useGetTaskLists();
   const [loading, setLoading] = useState(true);
   const [showNewTask, setShowNewTask] = useState(false);
@@ -32,10 +31,10 @@ const Works = ({ title, getTaskList, myTasks }: { title: string } & Props) => {
   const loadTasks = async () => {
     try {
       const resp = await getTaskLists(name);
-      getTaskList(resp.data.data);
+      dispatch(setAllTasks(resp.data.data));
     } catch {
       // The backend answers 400 "Task not found" when the project has no tasks
-      getTaskList([]);
+      dispatch(setAllTasks([]));
     } finally {
       setLoading(false);
     }
@@ -108,18 +107,4 @@ const Works = ({ title, getTaskList, myTasks }: { title: string } & Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getTaskList: (data: TaskListItem[] | undefined) => dispatch(getAllTask(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  myTasks: state.tasks.allTask,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Works);
+export default Works;

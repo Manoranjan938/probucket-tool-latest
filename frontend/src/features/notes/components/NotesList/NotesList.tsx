@@ -1,15 +1,15 @@
 import React from "react";
 import { FiMoreHorizontal } from "react-icons/fi";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as note from "features/notes/styles/noteClasses";
 
-import type { RootState } from "app/store";
 import type { NoteListItem } from "features/notes/types";
+import { useAppSelector } from "app/hooks";
 
 // The user's notes as cards; clicking a card opens the whole note
-const NotesList = ({ notes, onOpen }: { onOpen: (item: NoteListItem) => void } & Props) => {
+const NotesList = ({ onOpen }: { onOpen: (item: NoteListItem) => void }) => {
+  const notes = useAppSelector((state) => state.note.allNotes);
+
   return (
     <ul className={note.grid}>
       {notes.map((item) => (
@@ -34,12 +34,4 @@ const NotesList = ({ notes, onOpen }: { onOpen: (item: NoteListItem) => void } &
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  notes: state.note.allNotes,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(NotesList);
+export default NotesList;

@@ -22,5 +22,4 @@ export interface UserRequest {
 export interface SecurityState {
   /** Empty object while nobody is logged in */
   user: Partial<AuthUser>;
-  validToken: boolean;
 }

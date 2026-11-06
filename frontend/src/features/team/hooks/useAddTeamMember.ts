@@ -4,13 +4,9 @@ import type { ApiResponse } from "shared/types";
 
 const useAddTeamMember = () => {
   const addTeamMember = async (teamRequest: AddTeamMemberRequest) => {
-    try {
-      const resp = await axios.post<ApiResponse<NewTeamMember>>("/team/newTeamMember", teamRequest);
+    const resp = await axios.post<ApiResponse<NewTeamMember>>("/team/newTeamMember", teamRequest);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [addTeamMember] as const;

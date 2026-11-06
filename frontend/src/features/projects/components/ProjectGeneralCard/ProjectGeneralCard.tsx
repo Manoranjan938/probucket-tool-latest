@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as project from "features/projects/styles/projectClasses";
 
 import useUpdateProject from "features/projects/hooks/useUpdateProject";
-import { getProjectDetails } from "features/projects/store/projectsAction";
 import { formatDate, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
-import type { AppDispatch } from "app/store";
 import type { Project } from "features/projects/types";
+import { useAppDispatch } from "app/hooks";
+import { setCurrentProject } from "features/projects/store/projectSlice";
 
-type OwnProps = {
+type Props = {
   currentProject: Partial<Project>;
   /** Only the lead can rename the project; everyone else sees the name */
   isLead: boolean;
@@ -20,7 +18,8 @@ type OwnProps = {
 
 // The project's name and details
 // TODO(project-backend): the API lets anyone rename a project – see features/projects/BACKEND_TODO.md
-const ProjectGeneralCard = ({ currentProject, isLead, setProject }: OwnProps & Props) => {
+const ProjectGeneralCard = ({ currentProject, isLead }: Props) => {
+  const dispatch = useAppDispatch();
   const [name, setName] = useState(currentProject.projectName ?? "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -45,7 +44,7 @@ const ProjectGeneralCard = ({ currentProject, isLead, setProject }: OwnProps & P
     try {
       await updateProject({ projectId: currentProject.projectId!, projectName: trimmedName });
       // The sidebar shows the project from the store, so it picks up the new name too
-      setProject({ ...currentProject, projectName: trimmedName });
+      dispatch(setCurrentProject({ ...currentProject, projectName: trimmedName }));
       enqueueSnackbar("Project renamed", { ...toastOptions, variant: "success" });
     } catch (err) {
       enqueueSnackbar(getApiErrorMessage(err, "Couldn't rename the project. Please try again."), {
@@ -139,14 +138,4 @@ const ProjectGeneralCard = ({ currentProject, isLead, setProject }: OwnProps & P
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setProject: (data: Partial<Project>) => dispatch(getProjectDetails(data)),
-  };
-}
-
-const withConnect = connect(null, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(ProjectGeneralCard);
+export default ProjectGeneralCard;

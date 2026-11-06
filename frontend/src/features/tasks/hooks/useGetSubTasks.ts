@@ -7,14 +7,10 @@ const useGetSubTasks = () => {
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
 
   const getSubtaskList = async (taskId: string | undefined) => {
-    try {
-      const resp = await axios.get<ApiResponse<Subtask[]>>(`/task/getSubtaskList/${taskId}`);
+    const resp = await axios.get<ApiResponse<Subtask[]>>(`/task/getSubtaskList/${taskId}`);
 
-      setSubtasks(resp.data.data);
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    setSubtasks(resp.data.data);
+    return resp;
   };
 
   return [subtasks, getSubtaskList] as const;

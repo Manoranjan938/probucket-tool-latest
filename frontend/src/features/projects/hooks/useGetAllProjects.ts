@@ -7,14 +7,10 @@ const useGetAllProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   const getAllProjectDetails = async (userId: string | undefined) => {
-    try {
-      const res = await axios.get<ApiResponse<Project[]>>(`/project/getProjects/${userId}`);
+    const res = await axios.get<ApiResponse<Project[]>>(`/project/getProjects/${userId}`);
 
-      setProjects(res.data.data);
-      return res;
-    } catch (err) {
-      throw err;
-    }
+    setProjects(res.data.data);
+    return res;
   };
 
   return [projects, getAllProjectDetails] as const;

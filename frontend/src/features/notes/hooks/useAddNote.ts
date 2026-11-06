@@ -4,13 +4,9 @@ import type { ApiResponse } from "shared/types";
 
 const useAddNote = () => {
   const createNote = async (noteRequest: NotesRequest) => {
-    try {
-      const resp = await axios.post<ApiResponse>("/note/newNote", noteRequest);
+    const resp = await axios.post<ApiResponse>("/note/newNote", noteRequest);
 
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    return resp;
   };
 
   return [createNote] as const;

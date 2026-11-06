@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Helmet from "react-helmet";
 import { useLocation } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import { FiFileText, FiPlus } from "react-icons/fi";
 
 import * as note from "features/notes/styles/noteClasses";
@@ -13,11 +11,14 @@ import NewNote from "features/notes/components/NewNote/NewNote";
 import NoteDetails from "features/notes/components/NoteDetails/NoteDetails";
 import { NoteCardsSkeleton } from "features/notes/pages/Notes/NotesSkeleton";
 import useGetNotesList from "features/notes/hooks/useGetNotesList";
-import { getAllNotes } from "features/notes/store/notesAction";
-import type { AppDispatch, RootState } from "app/store";
 import type { NoteListItem } from "features/notes/types";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setAllNotes } from "features/notes/store/noteSlice";
 
-const Notes = ({ currentUser, myNotes, setNote }: Props) => {
+const Notes = () => {
+  const currentUser = useAppSelector((state) => state.security.user);
+  const myNotes = useAppSelector((state) => state.note.allNotes);
+  const dispatch = useAppDispatch();
   const [, getNotesList] = useGetNotesList();
   const [loading, setLoading] = useState(true);
   const [showNewNote, setShowNewNote] = useState(false);
@@ -30,10 +31,10 @@ const Notes = ({ currentUser, myNotes, setNote }: Props) => {
   const loadNotes = async () => {
     try {
       const resp = await getNotesList(projectId, currentUser.id);
-      setNote(resp.data.data);
+      dispatch(setAllNotes(resp.data.data));
     } catch (err) {
       console.log(err);
-      setNote([]);
+      dispatch(setAllNotes([]));
     } finally {
       setLoading(false);
     }
@@ -82,19 +83,4 @@ const Notes = ({ currentUser, myNotes, setNote }: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setNote: (data: NoteListItem[]) => dispatch(getAllNotes(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-  myNotes: state.note.allNotes,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Notes);
+export default Notes;

@@ -1,13 +1,12 @@
 import React from "react";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
 import { formatDate } from "features/tasks/data";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
-const CommentList = ({ comments }: Props) => {
+const CommentList = () => {
+  const comments = useAppSelector((state) => state.comment.commentList);
   if (comments.length === 0) {
     return <p className="text-[14px] text-brand-muted">No comments yet.</p>;
   }
@@ -32,12 +31,4 @@ const CommentList = ({ comments }: Props) => {
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  comments: state.comment.commentList,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(CommentList);
+export default CommentList;

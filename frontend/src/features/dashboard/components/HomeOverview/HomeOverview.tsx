@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
 import { useLocation } from "react-router-dom";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as dashboard from "features/dashboard/styles/dashboardClasses";
 
@@ -21,16 +19,18 @@ import useGetTaskLists from "features/tasks/hooks/useGetTaskLists";
 import { dashboardLink, type DashboardType } from "features/dashboard/data";
 import type { TaskListItem } from "features/tasks/types";
 import type { TeamMember } from "features/team/types";
-import type { RootState } from "app/store";
+import { useAppSelector } from "app/hooks";
 
-type OwnProps = PropsWithChildren<{
+type Props = PropsWithChildren<{
   type: DashboardType;
   /** Team dashboard only: undefined while loading, null if it couldn't be loaded */
   team?: TeamMember[] | null;
 }>;
 
 // Content of the personal and team dashboard home pages. children is shown below the task counts.
-const HomeOverview = ({ type, team, children, currentUser, currentProject }: OwnProps & Props) => {
+const HomeOverview = ({ type, team, children }: Props) => {
+  const currentUser = useAppSelector((state) => state.security.user);
+  const currentProject = useAppSelector((state) => state.project.project);
   const { search } = useLocation();
   const [counts, getHomeCountData] = useGetHomeCountDatas();
   const [countsFailed, setCountsFailed] = useState(false);
@@ -108,13 +108,4 @@ const HomeOverview = ({ type, team, children, currentUser, currentProject }: Own
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  currentUser: state.security.user,
-  currentProject: state.project.project,
-});
-
-const withConnect = connect(mapStateToProps, null);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(HomeOverview);
+export default HomeOverview;

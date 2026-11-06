@@ -1,47 +1,24 @@
-import {
-  applyMiddleware,
-  compose,
-  createStore,
-  type Store,
-  type StoreEnhancer,
-} from "redux";
-import { thunk, type ThunkDispatch } from "redux-thunk";
-import rootReducer from "./rootReducer";
+import { configureStore, type ThunkAction, type UnknownAction } from "@reduxjs/toolkit";
+import securityReducer from "features/auth/store/securitySlice";
+import projectReducer from "features/projects/store/projectSlice";
+import tasksReducer from "features/tasks/store/tasksSlice";
+import teamsReducer from "features/team/store/teamsSlice";
+import commentReducer from "features/comments/store/commentSlice";
+import noteReducer from "features/notes/store/noteSlice";
 
-declare global {
-  interface Window {
-    __REDUX_DEVTOOLS_EXTENSION__?: () => StoreEnhancer;
-  }
-}
+const store = configureStore({
+  reducer: {
+    security: securityReducer,
+    project: projectReducer,
+    tasks: tasksReducer,
+    teams: teamsReducer,
+    comment: commentReducer,
+    note: noteReducer,
+  },
+});
 
-export type RootState = ReturnType<typeof rootReducer>;
-export type AppAction = Parameters<typeof rootReducer>[1];
-export type AppDispatch = ThunkDispatch<RootState, unknown, AppAction>;
-
-const initialState = {};
-const middleware = [thunk];
-
-let store: Store<RootState, AppAction> & { dispatch: AppDispatch };
-
-let ReactReduxDevTools =
-  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__();
-
-if (window.navigator.userAgent.includes("Chrome") && ReactReduxDevTools) {
-  store = createStore(
-    rootReducer,
-    initialState,
-    // compose() can't infer the combined type of two enhancers
-    compose(
-      applyMiddleware(...middleware),
-      ReactReduxDevTools
-    ) as StoreEnhancer<{ dispatch: AppDispatch }>
-  );
-} else {
-  store = createStore(
-    rootReducer,
-    initialState,
-    compose(applyMiddleware(...middleware))
-  );
-}
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, UnknownAction>;
 
 export default store;

@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { FiCheck, FiChevronDown, FiCornerLeftUp, FiEye, FiGitMerge, FiMaximize2, FiMinimize2, FiMoreHorizontal, FiPaperclip, FiShare2, FiX } from "react-icons/fi";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 
 import * as task from "features/tasks/styles/taskClasses";
 
@@ -14,14 +12,13 @@ import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion
 import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
 import useUpdateTask from "features/tasks/hooks/useUpdateTask";
 import useGetSubTasks from "features/tasks/hooks/useGetSubTasks";
-import { setSubtaskList } from "features/tasks/store/taskAction";
 import { taskStatuses, toastOptions } from "features/tasks/data";
-import type { AppDispatch, RootState } from "app/store";
-import type { Subtask } from "features/tasks/types";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { setAllSubtasks } from "features/tasks/store/tasksSlice";
 
 export type DetailsView = "panel" | "modal";
 
-type OwnProps = {
+type Props = {
   /** The task to show; the store may still hold the previously opened task while this one loads */
   sequence: string;
   view: DetailsView;
@@ -41,10 +38,10 @@ const TaskDetails = ({
   onClose,
   onOpenTask,
   onChanged,
-  task: currentTask,
-  setSubtasks,
-  allSubtask,
-}: OwnProps & Props) => {
+}: Props) => {
+  const currentTask = useAppSelector((state) => state.tasks.selectedTask);
+  const allSubtask = useAppSelector((state) => state.tasks.allSubtasks);
+  const dispatch = useAppDispatch();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [description, setDescription] = useState("");
   const [savingStatus, setSavingStatus] = useState(false);
@@ -60,7 +57,7 @@ const TaskDetails = ({
   const loadSubtasks = async () => {
     try {
       const resp = await getSubtaskList(sequence);
-      setSubtasks(resp.data.data);
+      dispatch(setAllSubtasks(resp.data.data));
     } catch (err) {
       console.log(err);
     }
@@ -68,7 +65,7 @@ const TaskDetails = ({
 
   // The previous task's subtasks are cleared first, so they never show under this task
   useEffect(() => {
-    setSubtasks([]);
+    dispatch(setAllSubtasks([]));
     loadSubtasks();
   }, [sequence]);
 
@@ -263,19 +260,4 @@ const TaskDetails = ({
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    setSubtasks: (data: Subtask[]) => dispatch(setSubtaskList(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  task: state.tasks.selectedTask,
-  allSubtask: state.tasks.allSubtasks,
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(TaskDetails);
+export default TaskDetails;

@@ -8,22 +8,21 @@ import { GOOGLE_AUTH_URL } from "shared/constants/constant";
 import MuiAlert, { type AlertProps } from '@mui/material/Alert';
 import type { SnackbarState } from "shared/types";
 import { Snackbar } from "@mui/material";
-import { login } from "features/auth/store/securityActions";
-import type { AuthUser } from "features/auth/types";
-import { connect, type ConnectedProps } from "react-redux";
-import { compose } from "redux";
 import useLoginRequest from "features/auth/hooks/useLoginRequest";
-import type { AppDispatch, RootState } from "app/store";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ImSpinner2 } from "react-icons/im";
 import AuthPanel from "features/auth/components/AuthPanel/AuthPanel";
 import { getApiErrorMessage } from "shared/services/apiError";
+import { useAppDispatch, useAppSelector } from "app/hooks";
+import { selectIsLoggedIn, setUser } from "features/auth/store/securitySlice";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />
 })
 
-const Login = ({getUsers, isLoggedIn}: Props) => {
+const Login = () => {
+  const isLoggedIn = useAppSelector(selectIsLoggedIn);
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -97,7 +96,7 @@ const Login = ({getUsers, isLoggedIn}: Props) => {
       const res = await loginRequest(loginRequests);
       if(res.status === 200){
         // The next page reads the user from the store as soon as it mounts
-        getUsers(res.data.data);
+        dispatch(setUser(res.data.data));
         navigate("/projects");
       }
     }catch(err){
@@ -250,18 +249,4 @@ const Login = ({getUsers, isLoggedIn}: Props) => {
   );
 };
 
-function mapDispatchToProps(dispatch: AppDispatch) {
-  return {
-    getUsers: (data: AuthUser) => dispatch(login(data)),
-  };
-}
-
-const mapStateToProps = (state: RootState) => ({
-  isLoggedIn: Boolean(state.security.user && state.security.user.id),
-});
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-type Props = ConnectedProps<typeof withConnect>;
-
-export default compose(withConnect)(Login);
+export default Login;

@@ -7,14 +7,10 @@ const useGetProjectsByTeamMembers = () => {
   const [teamProjects, setTeamProjects] = useState<Project[]>([]);
 
   const getProjectsByTeam = async (userId: string | undefined) => {
-    try {
-      const resp = await axios.get<ApiResponse<Project[]>>(`/team/getProjectsByTeam/${userId}`);
+    const resp = await axios.get<ApiResponse<Project[]>>(`/team/getProjectsByTeam/${userId}`);
 
-      setTeamProjects(resp.data.data);
-      return resp;
-    } catch (err) {
-      throw err;
-    }
+    setTeamProjects(resp.data.data);
+    return resp;
   };
 
   return [teamProjects, getProjectsByTeam] as const;
