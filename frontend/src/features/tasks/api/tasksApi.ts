@@ -1,5 +1,7 @@
 import { api, responseData } from "shared/services/api";
 import type {
+  Attachment,
+  CreatedTask,
   CreateSubtaskRequest,
   ProjectTaskRequest,
   Subtask,
@@ -48,7 +50,25 @@ const tasksApi = api.injectEndpoints({
       transformResponse: responseData<string[]>,
       providesTags: ["Task"],
     }),
-    createTask: build.mutation<ApiResponse, ProjectTaskRequest>({
+    getAttachments: build.query<Attachment[], string>({
+      query: (sequence) => ({ url: `/task/getAttachments/${sequence}` }),
+      transformResponse: responseData<Attachment[]>,
+      providesTags: ["Attachment"],
+    }),
+    // The images go as multipart form data; the browser sets its content type
+    uploadAttachments: build.mutation<ApiResponse, { taskId: string; files: File[] }>({
+      query: ({ taskId, files }) => {
+        const form = new FormData();
+        files.forEach((file) => form.append("files", file, file.name));
+        return { url: `/task/uploadAttachments/${taskId}`, method: "POST", data: form, timeout: 120000 };
+      },
+      invalidatesTags: ["Attachment", "Activity"],
+    }),
+    deleteAttachment: build.mutation<ApiResponse, string>({
+      query: (attachmentId) => ({ url: `/task/deleteAttachment/${attachmentId}`, method: "POST" }),
+      invalidatesTags: ["Attachment", "Activity"],
+    }),
+    createTask: build.mutation<ApiResponse<CreatedTask>, ProjectTaskRequest>({
       query: (taskRequest) => ({ url: "/task/createTask", method: "POST", data: taskRequest }),
       invalidatesTags: taskChanges,
     }),
@@ -93,6 +113,9 @@ export const {
   useGetSubtasksQuery,
   useGetTaskStatisticsQuery,
   useGetProjectLabelsQuery,
+  useGetAttachmentsQuery,
+  useUploadAttachmentsMutation,
+  useDeleteAttachmentMutation,
   useCreateTaskMutation,
   useCreateSubtaskMutation,
   useUpdateTaskMutation,

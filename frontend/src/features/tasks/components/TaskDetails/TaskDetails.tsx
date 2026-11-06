@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Menu, MenuItem, Skeleton, Tooltip } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { FaBug } from "react-icons/fa";
@@ -12,8 +12,10 @@ import TaskActivity from "features/tasks/components/TaskActivity/TaskActivity";
 import TaskStatusCompletion from "features/tasks/components/TaskStatusCompletion/TaskStatusCompletion";
 import NewSubTask from "features/tasks/components/NewSubTask/NewSubTask";
 import BugDetails from "features/tasks/components/BugDetails/BugDetails";
+import TaskAttachments from "features/tasks/components/Attachments/TaskAttachments";
+import useTaskAttachments from "features/tasks/hooks/useTaskAttachments";
 import { useGetSubtasksQuery, useGetTaskDetailsQuery, useUpdateTaskMutation } from "features/tasks/api/tasksApi";
-import { isBug, MAX_DESCRIPTION, taskStatuses, toastOptions } from "features/tasks/data";
+import { isBug, MAX_DESCRIPTION, pastedImages, taskStatuses, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 import type { TaskDetails as TaskDetailsData } from "features/tasks/types";
 
@@ -48,6 +50,9 @@ const TaskDetails = ({
   const [openSubtask, setOpenSubtask] = useState(false);
   const [updateTask] = useUpdateTaskMutation();
   const { enqueueSnackbar } = useSnackbar();
+  const attachmentState = useTaskAttachments(sequence);
+  // The attachments' file input; the Attach button opens it too
+  const attachInputRef = useRef<HTMLInputElement>(null);
 
   const loaded = Boolean(loadedTask);
   const isSubtask = Boolean(currentTask.subtask);
@@ -144,8 +149,7 @@ const TaskDetails = ({
   const actionsRow = (
     <div className={task.actionsRow}>
       {view === "panel" ? statusControl : null}
-      {/* Attachments aren't wired up yet */}
-      <button type="button" className={`${task.btnGhost} ${task.btnSmall}`}>
+      <button type="button" className={`${task.btnGhost} ${task.btnSmall}`} onClick={() => attachInputRef.current?.click()}>
         <FiPaperclip aria-hidden="true" />
         Attach
       </button>
@@ -174,6 +178,14 @@ const TaskDetails = ({
         placeholder="Add a description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        // A pasted screenshot is attached rather than pasted as text
+        onPaste={(e) => {
+          const images = pastedImages(e.clipboardData);
+          if (images.length) {
+            e.preventDefault();
+            attachmentState.add(images);
+          }
+        }}
         maxLength={MAX_DESCRIPTION}
       />
       {/* Only while there's something to save */}
@@ -199,6 +211,7 @@ const TaskDetails = ({
   );
 
   const bugDetails = isBug(currentTask.taskType) ? <BugDetails bug={currentTask} /> : null;
+  const attachments = <TaskAttachments state={attachmentState} inputRef={attachInputRef} />;
   const details = <ExtraDetails />;
   // Subtasks can't have their own, so these only show on a subtask for data from before that rule
   const showSubtasks = !isSubtask || allSubtask.length > 0;
@@ -273,6 +286,7 @@ const TaskDetails = ({
             {details}
             {descriptionSection}
             {bugDetails}
+            {attachments}
             {subtasks}
             {progress}
             <TaskActivity />
@@ -285,6 +299,7 @@ const TaskDetails = ({
               {actions}
               {descriptionSection}
               {bugDetails}
+              {attachments}
               {subtasks}
               <TaskActivity />
             </div>

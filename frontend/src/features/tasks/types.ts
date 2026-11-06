@@ -121,6 +121,25 @@ export interface UpdateDueDateRequest {
   dueDate: string;
 }
 
+/** model/response/AttachmentResponse.java */
+export interface Attachment {
+  attachmentId: string;
+  fileName: string;
+  contentType: string;
+  /** Bytes */
+  size: number;
+  uploadedByName: string | null;
+  /** ISO date */
+  createdOn: string;
+  /** The uploader and the project lead may delete it */
+  canDelete: boolean;
+}
+
+/** The data of a createTask response */
+export interface CreatedTask {
+  taskSequence: string;
+}
+
 /** model/request/UpdateAssigneeRequest.java */
 export interface UpdateAssigneeRequest {
   taskId: string;

@@ -38,7 +38,10 @@ const goToLogin = (url?: string) => {
 instance.interceptors.response.use(undefined, async (err: ApiError) => {
   const config = err.config as AxiosRequestConfig & { retried?: boolean };
 
-  if (err.response?.data?.code !== "UNAUTHORIZED" || config.url === REFRESH_URL) {
+  // A blob request (e.g. an attachment image) gets its error body as a Blob, so only its status can tell
+  const unauthorized =
+    err.response?.data?.code === "UNAUTHORIZED" || (config.responseType === "blob" && err.response?.status === 401);
+  if (!unauthorized || config.url === REFRESH_URL) {
     return Promise.reject(err);
   }
 

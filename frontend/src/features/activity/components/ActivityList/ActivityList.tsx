@@ -11,6 +11,7 @@ import {
   FiEdit2,
   FiFlag,
   FiGitMerge,
+  FiImage,
   FiMessageSquare,
   FiPlayCircle,
   FiPlus,
@@ -115,6 +116,10 @@ const describe = (activity: Activity, target: ReactNode): ReactNode => {
       return <>added the label <LabelChip label={newValue ?? ""} /> to {target}</>;
     case "LABEL_REMOVED":
       return <>removed the label <LabelChip label={oldValue ?? ""} /> from {target}</>;
+    case "ATTACHMENT_ADDED":
+      return <>attached <Strong>{newValue}</Strong> to {target}</>;
+    case "ATTACHMENT_REMOVED":
+      return <>removed <Strong>{oldValue}</Strong> from {target}</>;
     case "MEMBER_ADDED":
       return <>added <Strong>{newValue}</Strong> to the team</>;
     default:
@@ -170,6 +175,10 @@ const appearance = ({ type, newValue }: Activity): { icon: IconType; tone: strin
     case "LABEL_ADDED":
     case "LABEL_REMOVED":
       return { icon: FiTag, tone: styles.toneNeutral };
+    case "ATTACHMENT_ADDED":
+      return { icon: FiImage, tone: styles.toneBrand };
+    case "ATTACHMENT_REMOVED":
+      return { icon: FiImage, tone: styles.toneNeutral };
     case "MEMBER_ADDED":
       return { icon: FiUserPlus, tone: styles.toneBrand };
     default:

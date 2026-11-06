@@ -1,6 +1,7 @@
 package com.tool.ProjectTool.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 
@@ -55,9 +56,9 @@ public class TaskController {
 			return errorMap;
 		}
 
-		String message = taskService.addProjectTask(taskRequest);
+		String taskSequence = taskService.addProjectTask(taskRequest);
 
-		return ApiResponseBuilder.created(message);
+		return ApiResponseBuilder.created("Task created successfully", Map.of("taskSequence", taskSequence));
 	}
 
 	@GetMapping("/getTasks/{backlog_id}")

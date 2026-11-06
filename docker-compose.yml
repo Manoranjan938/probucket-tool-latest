@@ -51,6 +51,10 @@ services:
     environment:
       - DB_HOST=postgresdb
       - DB_PORT=5432
+      - ATTACHMENTS_DIR=/application/attachments
+    # Task images; kept when the container is rebuilt
+    volumes:
+      - attachments-data:/application/attachments
     restart: on-failure
     networks:
       - probucketool
@@ -67,6 +71,8 @@ services:
 
 volumes:
   postgres-data:
+    driver: local
+  attachments-data:
     driver: local
 
 networks:

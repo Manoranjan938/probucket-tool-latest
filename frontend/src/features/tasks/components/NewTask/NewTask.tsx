@@ -8,16 +8,29 @@ import { FiCheckSquare, FiX } from "react-icons/fi";
 import * as task from "features/tasks/styles/taskClasses";
 
 import AssigneePicker from "features/tasks/components/AssigneePicker/AssigneePicker";
+import AttachmentDropZone from "features/tasks/components/Attachments/AttachmentDropZone";
+import AttachmentTile from "features/tasks/components/Attachments/AttachmentTile";
+import ImageViewer from "features/tasks/components/Attachments/ImageViewer";
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
 import LabelsField from "features/tasks/components/LabelsField/LabelsField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
 import SegmentedPicker from "features/tasks/components/SegmentedPicker/SegmentedPicker";
 import SeverityPicker from "features/tasks/components/SeverityPicker/SeverityPicker";
 import StoryPointsPicker from "features/tasks/components/StoryPointsPicker/StoryPointsPicker";
-import { useCreateTaskMutation, useGetProjectLabelsQuery } from "features/tasks/api/tasksApi";
+import { useCreateTaskMutation, useGetProjectLabelsQuery, useUploadAttachmentsMutation } from "features/tasks/api/tasksApi";
 import useAssigneeOptions, { type AssigneeOption } from "features/tasks/hooks/useAssigneeOptions";
 import useCurrentProject from "features/projects/hooks/useCurrentProject";
-import { datesClash, isBug, MAX_DESCRIPTION, START_AFTER_DUE, taskTypesFor, toastOptions } from "features/tasks/data";
+import {
+  checkImages,
+  datesClash,
+  isBug,
+  MAX_ATTACHMENTS,
+  MAX_DESCRIPTION,
+  pastedImages,
+  START_AFTER_DUE,
+  taskTypesFor,
+  toastOptions,
+} from "features/tasks/data";
 import { useAppSelector } from "app/hooks";
 import { getApiErrorMessage } from "shared/services/apiError";
 
@@ -25,6 +38,13 @@ import { getApiErrorMessage } from "shared/services/apiError";
 const MAX_TITLE = 255;
 
 const START_DATE_INPUT = "startDate";
+
+interface PendingImage {
+  key: string;
+  file: File;
+}
+
+let nextImageKey = 0;
 
 const typeOptions = [
   { value: "TASK", label: "Task", icon: FiCheckSquare },
@@ -61,6 +81,11 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   const [startDateError, setStartDateError] = useState("");
   const [storyPoints, setStoryPoints] = useState<number | null>(null);
   const [labels, setLabels] = useState<string[]>([]);
+  // Uploaded once the task exists
+  const [images, setImages] = useState<PendingImage[]>([]);
+  const [imageError, setImageError] = useState("");
+  const [viewing, setViewing] = useState<number | null>(null);
+  const [uploadAttachments] = useUploadAttachmentsMutation();
   const { data: projectLabels = [] } = useGetProjectLabelsQuery(open && projectIdentifier ? projectIdentifier : skipToken);
   const [error, setError] = useState("");
   const [createAnother, setCreateAnother] = useState(false);
@@ -78,7 +103,20 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   const noun = bug ? "bug" : "task";
 
   // What describes this one item; the settings are kept for the next one with "Create another"
+  const addImages = (files: File[]) => {
+    const { accepted, problem } = checkImages(files, images.length);
+    setImageError(problem);
+    setImages((current) => [...current, ...accepted.map((file) => ({ key: `image-${nextImageKey++}`, file }))]);
+  };
+
+  const removeImage = (key: string) => {
+    setImages((current) => current.filter((image) => image.key !== key));
+    setImageError("");
+  };
+
   const clearContent = () => {
+    setImages([]);
+    setImageError("");
     setTaskName("");
     setDescription("");
     setStepsToReproduce("");
@@ -125,7 +163,7 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
 
     setSaving(true);
     try {
-      await createProjectTask({
+      const created = await createProjectTask({
         projectIdentifier: projectIdentifier!,
         taskName: name,
         description: description.trim(),
@@ -142,7 +180,26 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
         status: "",
         dueDate,
       }).unwrap();
-      enqueueSnackbar(bug ? "Bug created" : "Task created", { ...toastOptions, variant: "success" });
+      const createdMessage = bug ? "Bug created" : "Task created";
+      const files = images.map((image) => image.file);
+      const taskSequence = created.data?.taskSequence;
+      if (files.length && taskSequence) {
+        try {
+          await uploadAttachments({ taskId: taskSequence, files }).unwrap();
+          enqueueSnackbar(`${createdMessage} with ${files.length === 1 ? "1 image" : `${files.length} images`}`, {
+            ...toastOptions,
+            variant: "success",
+          });
+        } catch (err) {
+          // The task is there; only its images are missing, and they can be attached from its details
+          enqueueSnackbar(
+            `${createdMessage}, but its images couldn't be attached: ${getApiErrorMessage(err, "please try again from its details")}`,
+            { ...toastOptions, variant: "warning" },
+          );
+        }
+      } else {
+        enqueueSnackbar(createdMessage, { ...toastOptions, variant: "success" });
+      }
       if (createAnother) {
         clearContent();
         titleRef.current?.focus();
@@ -203,6 +260,14 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
                 rows={8}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                // A pasted screenshot is attached rather than pasted as text
+                onPaste={(e) => {
+                  const pasted = pastedImages(e.clipboardData);
+                  if (pasted.length) {
+                    e.preventDefault();
+                    addImages(pasted);
+                  }
+                }}
                 className={task.textarea}
                 placeholder={bug ? "What's wrong, and where?" : "Add the details someone needs to start on this task"}
                 maxLength={MAX_DESCRIPTION}
@@ -250,6 +315,31 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
                 </div>
               </>
             ) : null}
+            <div className={task.field}>
+              <div className={task.labelRow}>
+                {/* Not a <label>: the drop zone's own text says what to do */}
+                <span className={task.label}>Images (optional)</span>
+                {images.length ? <span className={task.attachmentsCount}>{images.length} / {MAX_ATTACHMENTS}</span> : null}
+              </div>
+              {images.length ? (
+                <ul className={task.attachmentGrid}>
+                  {images.map((image, index) => (
+                    <AttachmentTile
+                      key={image.key}
+                      source={{ file: image.file }}
+                      name={image.file.name}
+                      size={image.file.size}
+                      onOpen={() => setViewing(index)}
+                      onRemove={() => removeImage(image.key)}
+                    />
+                  ))}
+                </ul>
+              ) : null}
+              {images.length < MAX_ATTACHMENTS ? (
+                <AttachmentDropZone id="new-task-images" onFiles={addImages} compact={images.length > 0} />
+              ) : null}
+              {imageError ? <p className={task.error} role="alert">{imageError}</p> : null}
+            </div>
           </div>
 
           <div className={task.newTaskSide}>
@@ -339,6 +429,12 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
           </div>
         </div>
       </form>
+      <ImageViewer
+        images={images.map((image) => ({ key: image.key, source: { file: image.file }, name: image.file.name, size: image.file.size }))}
+        index={viewing}
+        onIndexChange={setViewing}
+        onClose={() => setViewing(null)}
+      />
     </Dialog>
   );
 };

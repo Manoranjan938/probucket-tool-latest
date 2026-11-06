@@ -14,6 +14,8 @@ export type ActivityType =
   | "START_DATE_CHANGED"
   | "LABEL_ADDED"
   | "LABEL_REMOVED"
+  | "ATTACHMENT_ADDED"
+  | "ATTACHMENT_REMOVED"
   | "MEMBER_ADDED";
 
 /** model/response/ActivityResponse.java */

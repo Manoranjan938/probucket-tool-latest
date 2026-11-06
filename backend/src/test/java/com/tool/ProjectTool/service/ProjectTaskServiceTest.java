@@ -455,7 +455,8 @@ class ProjectTaskServiceTest {
 		backlog.setPTSequence(0);
 		when(backlogRepo.findByProjectIdentifier("AB")).thenReturn(backlog);
 
-		service.addProjectTask(newTask("2026-11-20"));
+		// Returns the new task's key, so its images can be uploaded next
+		assertEquals("AB-1", service.addProjectTask(newTask("2026-11-20")));
 
 		ArgumentCaptor<ProjectTask> saved = ArgumentCaptor.forClass(ProjectTask.class);
 		verify(projectTaskRepo).save(saved.capture());

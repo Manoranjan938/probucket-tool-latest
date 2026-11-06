@@ -12,3 +12,6 @@ buildNumber.properties
 
 # Environment files
 .env
+
+# Task images saved by a local run (app.attachments.dir)
+attachments/

@@ -172,5 +172,55 @@ export const datesClash = (startDate: string | null | undefined, dueDate: string
 export const START_AFTER_DUE = "The start date can't be after the due date";
 export const DUE_BEFORE_START = "The due date can't be before the start date";
 
+/** Same limits as AttachmentService in the backend */
+export const MAX_ATTACHMENTS = 10;
+export const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
+export const ATTACHMENT_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
+
+/** 2048 -> "2 KB", 1572864 -> "1.5 MB" */
+export const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${Math.round(bytes / 1024)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(/\.0$/, "")} MB`;
+};
+
+/**
+ * Splits picked, dropped or pasted files into the images that can be attached and a message about the rest.
+ * The backend checks the same again, by the files' contents.
+ */
+export const checkImages = (files: File[], alreadyAttached: number) => {
+  const problems: string[] = [];
+  const accepted: File[] = [];
+  for (const file of files) {
+    if (!ATTACHMENT_TYPES.includes(file.type)) {
+      problems.push(`${file.name || "That file"} isn't a PNG, JPG, GIF or WebP image`);
+    } else if (file.size > MAX_ATTACHMENT_SIZE) {
+      problems.push(`${file.name} is over 5 MB`);
+    } else if (alreadyAttached + accepted.length >= MAX_ATTACHMENTS) {
+      problems.push(`A task can have at most ${MAX_ATTACHMENTS} images`);
+      break;
+    } else {
+      accepted.push(file);
+    }
+  }
+  const problem = problems.length > 1 ? `${problems[0]} (and ${problems.length - 1} more)` : problems[0] ?? "";
+  return { accepted, problem };
+};
+
+/** Images in a paste, renamed: a pasted screenshot is always called "image.png" */
+export const pastedImages = (data: DataTransfer | null) => {
+  const files = Array.from(data?.files ?? []).filter((file) => file.type.startsWith("image/"));
+  const stamp = toIsoDate(new Date()) + "-" + new Date().toTimeString().slice(0, 8).replace(/:/g, "");
+  return files.map((file, index) => {
+    const extension = file.type.split("/")[1]?.replace("jpeg", "jpg") ?? "png";
+    const suffix = files.length > 1 ? `-${index + 1}` : "";
+    return new File([file], `screenshot-${stamp}${suffix}.${extension}`, { type: file.type });
+  });
+};
+
 /** Toasts in the same corner as the Snackbars on the other pages */
 export const toastOptions: OptionsObject = { anchorOrigin: { vertical: "bottom", horizontal: "right" } };

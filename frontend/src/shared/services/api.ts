@@ -41,7 +41,7 @@ const axiosBaseQuery: BaseQueryFn<ApiRequest, ApiResponse<unknown>, ApiRequestEr
 // Each feature adds its endpoints in features/<feature>/api with injectEndpoints
 export const api = createApi({
   baseQuery: axiosBaseQuery,
-  tagTypes: ["Project", "Task", "Activity", "Comment", "Note", "TeamMember"],
+  tagTypes: ["Project", "Task", "Activity", "Comment", "Note", "TeamMember", "Attachment"],
   endpoints: () => ({}),
 });
 

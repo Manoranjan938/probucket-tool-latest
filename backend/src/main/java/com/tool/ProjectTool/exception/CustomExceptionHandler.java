@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.tool.ProjectTool.model.response.ApiResponse;
@@ -21,6 +22,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> createResponseEntity(Object body, HttpHeaders headers, HttpStatusCode statusCode,
 			WebRequest request) {
 		return new ResponseEntity<Object>(ApiResponseBuilder.error(statusCode).getBody(), headers, statusCode);
+	}
+
+	// An image over the multipart limit never reaches AttachmentService, so it gets the same message here
+	@Override
+	protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex,
+			HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+		ResponseEntity<ApiResponse<Void>> error = ApiResponseBuilder.error(ApiErrorCode.BAD_REQUEST, "Each image can be at most 5 MB");
+		return new ResponseEntity<Object>(error.getBody(), error.getStatusCode());
 	}
 
 	@ExceptionHandler

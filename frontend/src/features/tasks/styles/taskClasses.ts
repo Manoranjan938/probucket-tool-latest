@@ -29,6 +29,7 @@ const btn =
   "inline-flex shrink-0 items-center justify-center gap-2 h-10 px-4 border rounded-[10px] [font-family:inherit] text-[14px] font-semibold no-underline whitespace-nowrap cursor-pointer transition-[background-color,border-color,color] duration-150 ease-[ease] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-primary disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none";
 export const btnPrimary = `${btn} border-transparent bg-brand-strong text-white hover:bg-[#4f49b8] disabled:hover:bg-brand-strong`;
 export const btnGhost = `${btn} border-brand-border bg-brand-surface text-brand-ink hover:border-brand-primary hover:text-brand-strong`;
+export const btnDanger = `${btn} border-transparent bg-brand-danger text-white hover:bg-[#b92f2f] disabled:hover:bg-brand-danger`;
 export const btnSmall = "h-8! px-3! text-[13px]!";
 export const iconButton =
   "flex shrink-0 items-center justify-center w-8 h-8 border-none rounded-lg bg-transparent text-[16px] text-brand-muted cursor-pointer transition-[background-color,color] duration-150 ease-[ease] hover:bg-brand-surface-alt hover:text-brand-ink focus-visible:outline-2 focus-visible:outline-brand-primary motion-reduce:transition-none";
@@ -228,3 +229,40 @@ export const commentAuthor = "text-[14px] font-semibold text-brand-ink";
 export const commentDate = "text-[12px] text-brand-muted";
 export const commentText = "text-[14px] text-brand-ink whitespace-pre-wrap break-words";
 export const commentList = "flex flex-col gap-4 m-0 p-0 list-none";
+
+/* Attachments: a grid of thumbnails, a drop zone, and a full-size viewer */
+export const attachmentsHeader = "flex items-center gap-2";
+export const attachmentsCount = "text-[13px] font-semibold text-brand-muted";
+export const attachmentGrid = "grid grid-cols-[repeat(auto-fill,minmax(112px,1fr))] gap-2.5 m-0 p-0 list-none";
+export const attachmentTile = "relative flex flex-col overflow-hidden border border-brand-border rounded-xl bg-brand-surface";
+export const attachmentOpen =
+  "block w-full h-24 p-0 border-none bg-brand-surface-alt cursor-zoom-in focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-brand-primary";
+export const attachmentImage = "block w-full h-full object-cover";
+export const attachmentPlaceholder = "flex items-center justify-center w-full h-full text-[20px] text-brand-muted";
+export const attachmentCaption = "flex flex-col px-2 py-1.5 min-w-0";
+export const attachmentName = "truncate text-[12px] font-semibold text-brand-ink";
+export const attachmentSize = "text-[11px] text-brand-muted";
+export const attachmentRemove =
+  "absolute top-1.5 right-1.5 flex items-center justify-center w-7 h-7 border-none rounded-full bg-[rgba(31,29,58,0.7)] text-[14px] text-white cursor-pointer hover:bg-brand-danger focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
+export const attachmentUploading = `${attachmentTile} items-center justify-center h-[134px] gap-2 text-[12px] text-brand-muted`;
+export const dropZone =
+  "flex flex-col items-center justify-center gap-1 w-full px-4 py-5 border-2 border-dashed border-brand-border rounded-xl bg-brand-surface-alt [font-family:inherit] text-center text-[13px] text-brand-text cursor-pointer transition-[border-color,background-color] duration-150 hover:border-brand-primary focus-visible:outline-none focus-visible:border-brand-primary focus-visible:shadow-[0_0_0_3px_var(--color-brand-soft)] motion-reduce:transition-none";
+export const dropZoneActive = `${dropZone} border-brand-primary! bg-brand-soft!`;
+export const dropZoneCompact = "py-3!";
+export const dropZoneIcon = "text-[20px] text-brand-strong";
+export const dropZoneTitle = "font-semibold text-brand-ink";
+export const dropZoneBrowse = "font-semibold text-brand-strong underline";
+
+/* Full-size image viewer */
+export const viewerPaper = `${base} w-full max-w-[min(1100px,calc(100vw-32px))]! max-h-[calc(100vh-32px)]! m-4! rounded-2xl! bg-[#16151f]! text-white!`;
+export const viewerHeader = "flex items-center gap-3 px-4 py-3 border-b border-white/10";
+export const viewerTitle = "flex flex-col flex-1 min-w-0";
+export const viewerName = "truncate text-[14px] font-semibold text-white";
+export const viewerMeta = "text-[12px] text-white/60";
+export const viewerButton =
+  "inline-flex items-center justify-center gap-1.5 h-9 px-3 border border-white/20 rounded-lg bg-transparent [font-family:inherit] text-[13px] font-semibold text-white cursor-pointer hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40 disabled:cursor-not-allowed";
+export const viewerIconButton = `${viewerButton} w-9 px-0 text-[18px]`;
+export const viewerStage = "relative flex items-center justify-center min-h-[240px] p-4";
+export const viewerImage = "block max-w-full max-h-[calc(100vh-160px)] object-contain rounded-lg";
+export const viewerNav =
+  "absolute top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 border-none rounded-full bg-black/50 text-[20px] text-white cursor-pointer hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-white";

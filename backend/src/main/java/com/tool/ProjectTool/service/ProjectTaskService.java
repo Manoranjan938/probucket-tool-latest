@@ -143,7 +143,8 @@ public class ProjectTaskService {
 				activityService.recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, projTask, null, assignee.getName());
 			}
 
-			return "Task created successfully";
+			// The key of the new task, e.g. for uploading its images next
+			return projTask.getProjectSequence();
 		} catch (Exception e) {
 			throw new ProjectNotFoundException("Project not found");
 		}
