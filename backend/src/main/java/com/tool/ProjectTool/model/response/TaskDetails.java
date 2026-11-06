@@ -1,6 +1,7 @@
 package com.tool.ProjectTool.model.response;
 
 import java.util.Date;
+import java.util.List;
 
 public class TaskDetails {
 
@@ -164,6 +165,48 @@ public class TaskDetails {
 
 	public void setSeverity(String severity) {
 		this.severity = severity;
+	}
+
+	private Integer storyPoints;
+
+	// yyyy-mm-dd
+	private String startDate;
+
+	private List<String> labels;
+
+	public Integer getStoryPoints() {
+		return storyPoints;
+	}
+
+	public void setStoryPoints(Integer storyPoints) {
+		this.storyPoints = storyPoints;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public List<String> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(List<String> labels) {
+		this.labels = labels;
+	}
+
+	// The assignee's email, so a picker can mark them; null when nobody is assigned
+	private String assigneeEmail;
+
+	public String getAssigneeEmail() {
+		return assigneeEmail;
+	}
+
+	public void setAssigneeEmail(String assigneeEmail) {
+		this.assigneeEmail = assigneeEmail;
 	}
 
 }

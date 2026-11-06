@@ -1,5 +1,7 @@
 package com.tool.ProjectTool.model.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -46,6 +48,39 @@ public class ProjectTaskRequest {
 	private String actualResult;
 
 	private String severity;
+
+	// 1, 2, 3, 5, 8 or 13, optional
+	private Integer storyPoints;
+
+	// yyyy-mm-dd, optional, not after the due date
+	private String startDate;
+
+	// Up to 5, each up to 30 characters
+	private List<String> labels;
+
+	public Integer getStoryPoints() {
+		return storyPoints;
+	}
+
+	public void setStoryPoints(Integer storyPoints) {
+		this.storyPoints = storyPoints;
+	}
+
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public List<String> getLabels() {
+		return labels;
+	}
+
+	public void setLabels(List<String> labels) {
+		this.labels = labels;
+	}
 
 	public String getDescription() {
 		return description;

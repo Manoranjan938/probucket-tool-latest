@@ -1,59 +1,42 @@
 import React, { useState } from "react";
-import { Autocomplete, Dialog, TextField } from "@mui/material";
-import { useSnackbar } from "notistack";
-import { FiFlag, FiX } from "react-icons/fi";
+import { skipToken } from "@reduxjs/toolkit/query/react";
+import { FiFlag } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
+import AssigneePicker from "features/tasks/components/AssigneePicker/AssigneePicker";
 import DueBadge from "features/tasks/components/DueBadge/DueBadge";
-import DueDateDialog from "features/tasks/components/DueDateDialog/DueDateDialog";
-import { useUpdateTaskMutation } from "features/tasks/api/tasksApi";
+import EstimateDialog from "features/tasks/components/EstimateDialog/EstimateDialog";
+import LabelChip from "features/tasks/components/LabelChip/LabelChip";
+import LabelsDialog from "features/tasks/components/LabelsDialog/LabelsDialog";
+import TaskDateDialog, { type TaskDateKind } from "features/tasks/components/TaskDateDialog/TaskDateDialog";
+import { useGetProjectLabelsQuery } from "features/tasks/api/tasksApi";
 import useSelectedTask from "features/tasks/hooks/useSelectedTask";
-import useAssigneeOptions, { type AssigneeOption } from "features/tasks/hooks/useAssigneeOptions";
-import { formatDate, formatEnum, priorityColors, toastOptions } from "features/tasks/data";
+import useAssigneeOptions from "features/tasks/hooks/useAssigneeOptions";
+import useChangeAssignee from "features/tasks/hooks/useChangeAssignee";
+import useCurrentProject from "features/projects/hooks/useCurrentProject";
+import { formatDate, formatDueDate, formatEnum, formatPoints, priorityColors } from "features/tasks/data";
 import type { TaskDetails } from "features/tasks/types";
+import { useAppSelector } from "app/hooks";
 
-// The task's assignee, priority and dates, with dialogs to change the assignee and the due date
+// The task's assignee, priority, estimate, dates and labels. The assignee changes right here; the rest in small dialogs.
 const ExtraDetails = () => {
   const currentTask: Partial<TaskDetails> = useSelectedTask().currentData ?? {};
+  const currentUser = useAppSelector((state) => state.security.user);
   const { options: assigneeOptions } = useAssigneeOptions();
-  const [showAssigneeDialog, setShowAssigneeDialog] = useState(false);
-  const [showDueDateDialog, setShowDueDateDialog] = useState(false);
-  const [assignee, setAssignee] = useState<AssigneeOption | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [updateTask] = useUpdateTaskMutation();
-  const { enqueueSnackbar } = useSnackbar();
+  const changeAssignee = useChangeAssignee();
+  const [dateDialog, setDateDialog] = useState<TaskDateKind | null>(null);
+  const [showEstimateDialog, setShowEstimateDialog] = useState(false);
+  const [showLabelsDialog, setShowLabelsDialog] = useState(false);
+  const projectIdentifier = useCurrentProject().currentData?.projectIdentifier;
+  const { data: projectLabels = [] } = useGetProjectLabelsQuery(projectIdentifier ?? skipToken);
+  const labels = currentTask.labels ?? [];
 
   const assigneeName = currentTask.assignee && currentTask.assignee !== "NA" ? currentTask.assignee : null;
-
-  const handleClose = () => {
-    setShowAssigneeDialog(false);
-    setAssignee(null);
-  };
-
-  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!assignee) {
-      return;
-    }
-    setSaving(true);
-    try {
-      await updateTask({
-        taskId: currentTask.taskSequence!,
-        status: currentTask.status!,
-        assignee: assignee.email,
-        priority: currentTask.priority!,
-        description: currentTask.taskDesc!,
-      }).unwrap();
-      enqueueSnackbar("Assignee updated", { ...toastOptions, variant: "success" });
-      handleClose();
-    } catch (err) {
-      console.log(err);
-      enqueueSnackbar("Couldn't update the assignee. Please try again.", { ...toastOptions, variant: "error" });
-    } finally {
-      setSaving(false);
-    }
-  };
+  const assignee = assigneeName ? { email: currentTask.assigneeEmail ?? null, name: assigneeName } : null;
+  // The shortcut is offered while you could be assigned but aren't
+  const me = assigneeOptions.find((option) => option.email === currentUser.username);
+  const canAssignMe = !!me && currentTask.assigneeEmail !== me.email;
 
   return (
     <>
@@ -62,19 +45,18 @@ const ExtraDetails = () => {
         <div className={task.detailRow}>
           <span className={task.detailLabel}>Assignee</span>
           <span className={task.detailValue}>
-            {assigneeName ? (
-              <>
-                <span className={`${task.avatar} w-6! h-6! text-[11px]!`} aria-hidden="true">
-                  {assigneeName.substring(0, 1)}
-                </span>
-                <span className="truncate">{assigneeName}</span>
-              </>
-            ) : (
-              <span className="font-normal text-brand-muted">Unassigned</span>
-            )}
-            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setShowAssigneeDialog(true)}>
-              Change
-            </button>
+            <AssigneePicker
+              id="details-assignee"
+              variant="inline"
+              assignee={assignee}
+              options={assigneeOptions}
+              onChange={(option) => changeAssignee(currentTask.taskSequence!, option)}
+            />
+            {canAssignMe ? (
+              <button type="button" className={`${task.linkButton} ml-auto shrink-0`} onClick={() => changeAssignee(currentTask.taskSequence!, me)}>
+                Assign to me
+              </button>
+            ) : null}
           </span>
         </div>
         <div className={task.detailRow}>
@@ -91,6 +73,35 @@ const ExtraDetails = () => {
           </span>
         </div>
         <div className={task.detailRow}>
+          <span className={task.detailLabel}>Estimate</span>
+          <span className={task.detailValue}>
+            {currentTask.storyPoints ? (
+              <>
+                <span className={task.cardPoints} aria-hidden="true">{currentTask.storyPoints}</span>
+                {formatPoints(currentTask.storyPoints)}
+              </>
+            ) : (
+              <span className="font-normal text-brand-muted">None</span>
+            )}
+            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setShowEstimateDialog(true)}>
+              {currentTask.storyPoints ? "Change" : "Set"}
+            </button>
+          </span>
+        </div>
+        <div className={task.detailRow}>
+          <span className={task.detailLabel}>Start date</span>
+          <span className={task.detailValue}>
+            {currentTask.startDate ? (
+              formatDueDate(currentTask.startDate)
+            ) : (
+              <span className="font-normal text-brand-muted">None</span>
+            )}
+            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setDateDialog("start")}>
+              {currentTask.startDate ? "Change" : "Set"}
+            </button>
+          </span>
+        </div>
+        <div className={task.detailRow}>
           <span className={task.detailLabel}>Due date</span>
           <span className={task.detailValue}>
             {currentTask.dueDate ? (
@@ -98,8 +109,21 @@ const ExtraDetails = () => {
             ) : (
               <span className="font-normal text-brand-muted">None</span>
             )}
-            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setShowDueDateDialog(true)}>
+            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setDateDialog("due")}>
               {currentTask.dueDate ? "Change" : "Set"}
+            </button>
+          </span>
+        </div>
+        <div className={task.detailRow}>
+          <span className={task.detailLabel}>Labels</span>
+          <span className={task.detailValueWrap}>
+            {labels.length ? (
+              labels.map((label) => <LabelChip key={label} label={label} />)
+            ) : (
+              <span className="font-normal text-brand-muted">None</span>
+            )}
+            <button type="button" className={`${task.linkButton} ml-auto`} onClick={() => setShowLabelsDialog(true)}>
+              {labels.length ? "Edit" : "Add"}
             </button>
           </span>
         </div>
@@ -113,56 +137,29 @@ const ExtraDetails = () => {
         </div>
       </div>
 
-      <DueDateDialog
-        open={showDueDateDialog}
-        onClose={() => setShowDueDateDialog(false)}
+      <TaskDateDialog
+        kind={dateDialog ?? "due"}
+        open={dateDialog !== null}
+        onClose={() => setDateDialog(null)}
         taskId={currentTask.taskSequence}
-        dueDate={currentTask.dueDate}
+        date={dateDialog === "start" ? currentTask.startDate : currentTask.dueDate}
+        otherDate={dateDialog === "start" ? currentTask.dueDate : currentTask.startDate}
       />
 
-      <Dialog
-        open={showAssigneeDialog}
-        onClose={handleClose}
-        PaperProps={{ className: task.dialogPaper }}
-        aria-labelledby="assignee-dialog-title"
-      >
-        <form onSubmit={handleUpdate} noValidate>
-          <div className={task.dialogHeader}>
-            <h2 id="assignee-dialog-title" className={task.dialogTitle}>Change assignee</h2>
-            <button type="button" className={task.iconButton} onClick={handleClose} aria-label="Close">
-              <FiX />
-            </button>
-          </div>
-          <div className={task.dialogBody}>
-            <Autocomplete
-              fullWidth
-              value={assignee}
-              onChange={(event, value) => setAssignee(value)}
-              options={assigneeOptions}
-              autoHighlight
-              getOptionLabel={(option) => option.name}
-              isOptionEqualToValue={(option, value) => option.email === value.email}
-              noOptionsText="Nobody to assign in this project"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Assign to"
-                  inputProps={{
-                    ...params.inputProps,
-                    autoComplete: "new-password", // disable autocomplete and autofill
-                  }}
-                />
-              )}
-            />
-          </div>
-          <div className={task.dialogFooter}>
-            <button type="button" className={task.btnGhost} onClick={handleClose}>Cancel</button>
-            <button type="submit" className={task.btnPrimary} disabled={!assignee || saving}>
-              {saving ? "Saving…" : "Save"}
-            </button>
-          </div>
-        </form>
-      </Dialog>
+      <EstimateDialog
+        open={showEstimateDialog}
+        onClose={() => setShowEstimateDialog(false)}
+        taskId={currentTask.taskSequence}
+        storyPoints={currentTask.storyPoints}
+      />
+
+      <LabelsDialog
+        open={showLabelsDialog}
+        onClose={() => setShowLabelsDialog(false)}
+        taskId={currentTask.taskSequence}
+        labels={labels}
+        suggestions={projectLabels}
+      />
     </>
   );
 };

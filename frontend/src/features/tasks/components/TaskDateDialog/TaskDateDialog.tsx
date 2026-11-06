@@ -6,41 +6,56 @@ import { FiX } from "react-icons/fi";
 import * as task from "features/tasks/styles/taskClasses";
 
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
-import { useUpdateDueDateMutation } from "features/tasks/api/tasksApi";
-import { toastOptions } from "features/tasks/data";
+import { useUpdateDueDateMutation, useUpdateStartDateMutation } from "features/tasks/api/tasksApi";
+import { datesClash, DUE_BEFORE_START, START_AFTER_DUE, toastOptions } from "features/tasks/data";
 import { getApiErrorMessage } from "shared/services/apiError";
 
-interface DueDateDialogProps {
+export type TaskDateKind = "due" | "start";
+
+const copy: Record<TaskDateKind, { name: string; title: string; clash: string }> = {
+  due: { name: "Due date", title: "due date", clash: DUE_BEFORE_START },
+  start: { name: "Start date", title: "start date", clash: START_AFTER_DUE },
+};
+
+interface TaskDateDialogProps {
+  kind: TaskDateKind;
   open: boolean;
   onClose: () => void;
   taskId: string | undefined;
-  /** The current due date, yyyy-mm-dd */
-  dueDate: string | null | undefined;
+  /** The date being changed, yyyy-mm-dd */
+  date: string | null | undefined;
+  /** The task's other date: its due date when the start date changes, and the other way round */
+  otherDate: string | null | undefined;
 }
 
-// Dialog that sets, changes or removes a task's due date
-const DueDateDialog = ({ open, onClose, taskId, dueDate }: DueDateDialogProps) => {
+// Dialog that sets, changes or removes a task's due date or start date. The start date can't be after the due date.
+const TaskDateDialog = ({ kind, open, onClose, taskId, date, otherDate }: TaskDateDialogProps) => {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [updateDueDate] = useUpdateDueDateMutation();
+  const [updateStartDate] = useUpdateStartDateMutation();
   const { enqueueSnackbar } = useSnackbar();
+  const { name, title, clash } = copy[kind];
 
   useEffect(() => {
     if (open) {
-      setValue(dueDate ?? "");
+      setValue(date ?? "");
       setError("");
     }
-  }, [open, dueDate]);
+  }, [open, date]);
 
   const save = async (newDate: string) => {
     setSaving(true);
     try {
-      await updateDueDate({ taskId: taskId!, dueDate: newDate }).unwrap();
-      enqueueSnackbar(newDate ? "Due date updated" : "Due date removed", { ...toastOptions, variant: "success" });
+      await (kind === "due"
+        ? updateDueDate({ taskId: taskId!, dueDate: newDate })
+        : updateStartDate({ taskId: taskId!, startDate: newDate })
+      ).unwrap();
+      enqueueSnackbar(newDate ? `${name} updated` : `${name} removed`, { ...toastOptions, variant: "success" });
       onClose();
     } catch (err) {
-      setError(getApiErrorMessage(err, "Couldn't save the due date. Please try again."));
+      setError(getApiErrorMessage(err, `Couldn't save the ${title}. Please try again.`));
     } finally {
       setSaving(false);
     }
@@ -52,22 +67,26 @@ const DueDateDialog = ({ open, onClose, taskId, dueDate }: DueDateDialogProps) =
       setError("Please enter a valid date");
       return;
     }
+    if (kind === "due" ? datesClash(otherDate, value) : datesClash(value, otherDate)) {
+      setError(clash);
+      return;
+    }
     save(value);
   };
 
   return (
-    <Dialog open={open} onClose={onClose} PaperProps={{ className: task.dialogPaper }} aria-labelledby="due-date-dialog-title">
+    <Dialog open={open} onClose={onClose} PaperProps={{ className: task.dialogPaper }} aria-labelledby="task-date-dialog-title">
       <form onSubmit={handleSubmit} noValidate>
         <div className={task.dialogHeader}>
-          <h2 id="due-date-dialog-title" className={task.dialogTitle}>{dueDate ? "Change due date" : "Set due date"}</h2>
+          <h2 id="task-date-dialog-title" className={task.dialogTitle}>{date ? `Change ${title}` : `Set ${title}`}</h2>
           <button type="button" className={task.iconButton} onClick={onClose} aria-label="Close">
             <FiX />
           </button>
         </div>
         <div className={task.dialogBody}>
           <DueDateField
-            id="due-date-input"
-            label="Due date"
+            id="task-date-input"
+            label={name}
             value={value}
             onChange={(newValue) => {
               setValue(newValue);
@@ -77,9 +96,9 @@ const DueDateDialog = ({ open, onClose, taskId, dueDate }: DueDateDialogProps) =
           />
         </div>
         <div className={task.dialogFooter}>
-          {dueDate ? (
+          {date ? (
             <button type="button" className={`${task.linkButton} mr-auto`} onClick={() => save("")} disabled={saving}>
-              Remove due date
+              Remove {title}
             </button>
           ) : null}
           <button type="button" className={task.btnGhost} onClick={onClose}>Cancel</button>
@@ -92,4 +111,4 @@ const DueDateDialog = ({ open, onClose, taskId, dueDate }: DueDateDialogProps) =
   );
 };
 
-export default DueDateDialog;
+export default TaskDateDialog;

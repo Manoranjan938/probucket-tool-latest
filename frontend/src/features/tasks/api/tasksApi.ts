@@ -6,8 +6,12 @@ import type {
   TaskDetails,
   TaskListItem,
   TaskStatistics,
+  UpdateAssigneeRequest,
   UpdateBugDetailsRequest,
   UpdateDueDateRequest,
+  UpdateEstimateRequest,
+  UpdateLabelsRequest,
+  UpdateStartDateRequest,
   UpdateTaskRequest,
 } from "features/tasks/types";
 import type { ApiResponse } from "shared/types";
@@ -38,6 +42,12 @@ const tasksApi = api.injectEndpoints({
       transformResponse: responseData<TaskStatistics>,
       providesTags: ["Task"],
     }),
+    // Labels used anywhere in the project, offered as suggestions
+    getProjectLabels: build.query<string[], string>({
+      query: (projectIdentifier) => ({ url: `/task/getLabels/${projectIdentifier}` }),
+      transformResponse: responseData<string[]>,
+      providesTags: ["Task"],
+    }),
     createTask: build.mutation<ApiResponse, ProjectTaskRequest>({
       query: (taskRequest) => ({ url: "/task/createTask", method: "POST", data: taskRequest }),
       invalidatesTags: taskChanges,
@@ -58,6 +68,22 @@ const tasksApi = api.injectEndpoints({
       query: (request) => ({ url: "/task/updateDueDate", method: "POST", data: request }),
       invalidatesTags: taskChanges,
     }),
+    updateAssignee: build.mutation<ApiResponse, UpdateAssigneeRequest>({
+      query: (request) => ({ url: "/task/updateAssignee", method: "POST", data: request }),
+      invalidatesTags: taskChanges,
+    }),
+    updateStartDate: build.mutation<ApiResponse, UpdateStartDateRequest>({
+      query: (request) => ({ url: "/task/updateStartDate", method: "POST", data: request }),
+      invalidatesTags: taskChanges,
+    }),
+    updateEstimate: build.mutation<ApiResponse, UpdateEstimateRequest>({
+      query: (request) => ({ url: "/task/updateEstimate", method: "POST", data: request }),
+      invalidatesTags: taskChanges,
+    }),
+    updateLabels: build.mutation<ApiResponse, UpdateLabelsRequest>({
+      query: (request) => ({ url: "/task/updateLabels", method: "POST", data: request }),
+      invalidatesTags: taskChanges,
+    }),
   }),
 });
 
@@ -66,9 +92,14 @@ export const {
   useGetTaskDetailsQuery,
   useGetSubtasksQuery,
   useGetTaskStatisticsQuery,
+  useGetProjectLabelsQuery,
   useCreateTaskMutation,
   useCreateSubtaskMutation,
   useUpdateTaskMutation,
   useUpdateBugDetailsMutation,
   useUpdateDueDateMutation,
+  useUpdateAssigneeMutation,
+  useUpdateStartDateMutation,
+  useUpdateEstimateMutation,
+  useUpdateLabelsMutation,
 } = tasksApi;

@@ -33,9 +33,13 @@ import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateAssigneeRequest;
 import com.tool.ProjectTool.model.request.UpdateBugDetailsRequest;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
+import com.tool.ProjectTool.model.request.UpdateEstimateRequest;
+import com.tool.ProjectTool.model.request.UpdateLabelsRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
+import com.tool.ProjectTool.model.request.UpdateStartDateRequest;
 import com.tool.ProjectTool.model.response.SubtaskList;
 import com.tool.ProjectTool.model.response.TaskDetails;
 import com.tool.ProjectTool.model.response.TaskListResponse;
@@ -597,6 +601,7 @@ class ProjectTaskServiceTest {
 		assertEquals("user-1", tasks.get(0).getAssignee());
 		assertEquals("Asha", tasks.get(0).getAssigneeName());
 		assertNull(tasks.get(1).getAssignee());
+		assertNull(tasks.get(1).getAssigneeEmail());
 		assertNull(tasks.get(1).getAssigneeName());
 	}
 
@@ -656,6 +661,304 @@ class ProjectTaskServiceTest {
 
 		assertThrows(TaskIdNotFoundException.class, () -> service.createSubtask(subtaskOf("AB-9")));
 		verify(projectTaskRepo, never()).save(any());
+	}
+
+	// Estimate, start date and labels
+
+	private ProjectTask existingTask() {
+		ProjectTask existing = task("AB-1", false, null);
+		existing.setProjectIdentifier("AB");
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+		return existing;
+	}
+
+	private UpdateStartDateRequest startDateChange(String startDate) {
+		UpdateStartDateRequest request = new UpdateStartDateRequest();
+		request.setTaskId("AB-1");
+		request.setStartDate(startDate);
+		return request;
+	}
+
+	private UpdateEstimateRequest estimateChange(Integer points) {
+		UpdateEstimateRequest request = new UpdateEstimateRequest();
+		request.setTaskId("AB-1");
+		request.setStoryPoints(points);
+		return request;
+	}
+
+	private UpdateLabelsRequest labelsChange(String... labels) {
+		UpdateLabelsRequest request = new UpdateLabelsRequest();
+		request.setTaskId("AB-1");
+		request.setLabels(List.of(labels));
+		return request;
+	}
+
+	@Test
+	void newTaskKeepsItsEstimateStartDateAndTidiedLabels() {
+		projectFrom("project");
+		when(projectTaskRepo.findLabelsByProjectIdentifier("AB")).thenReturn(List.of("UI"));
+		ProjectTaskRequest request = newTask("2026-11-20");
+		request.setStartDate("2026-11-10");
+		request.setStoryPoints(5);
+		request.setLabels(List.of(" frontend ", "ui", "Frontend", "  big   bug ", ""));
+
+		service.addProjectTask(request);
+
+		ProjectTask saved = savedTask();
+		assertEquals(5, saved.getStoryPoints());
+		assertEquals(LocalDate.of(2026, 11, 10), saved.getStartDate());
+		// Duplicates merged ignoring case, and "ui" takes the project's spelling
+		assertEquals(List.of("frontend", "UI", "big bug"), saved.getLabels());
+	}
+
+	@Test
+	void newTaskWithoutTheNewFieldsHasNone() {
+		projectFrom("project");
+
+		service.addProjectTask(newTask(""));
+
+		ProjectTask saved = savedTask();
+		assertNull(saved.getStoryPoints());
+		assertNull(saved.getStartDate());
+		assertTrue(saved.getLabels().isEmpty());
+	}
+
+	@Test
+	void newTaskStartingAfterItsDueDateIsRefused() {
+		ProjectTaskRequest request = newTask("2026-11-20");
+		request.setStartDate("2026-11-21");
+
+		BadRequestException error = assertThrows(BadRequestException.class, () -> service.addProjectTask(request));
+		assertEquals("The start date can't be after the due date", error.getMessage());
+
+		// The same day is fine
+		projectFrom("project");
+		request.setStartDate("2026-11-20");
+		service.addProjectTask(request);
+		assertEquals(LocalDate.of(2026, 11, 20), savedTask().getStartDate());
+	}
+
+	@Test
+	void onlyFibonacciStoryPointsAreTaken() {
+		ProjectTaskRequest request = newTask("");
+		request.setStoryPoints(4);
+
+		BadRequestException error = assertThrows(BadRequestException.class, () -> service.addProjectTask(request));
+		assertEquals("Story points must be 1, 2, 3, 5, 8 or 13", error.getMessage());
+
+		assertThrows(BadRequestException.class, () -> service.updateEstimate(estimateChange(0)));
+		verify(projectTaskRepo, never()).save(any());
+	}
+
+	@Test
+	void tooManyOrTooLongLabelsAreRefused() {
+		ProjectTaskRequest request = newTask("");
+		request.setLabels(List.of("a", "b", "c", "d", "e", "f"));
+		BadRequestException tooMany = assertThrows(BadRequestException.class, () -> service.addProjectTask(request));
+		assertEquals("A task can have at most 5 labels", tooMany.getMessage());
+
+		request.setLabels(List.of("x".repeat(31)));
+		BadRequestException tooLong = assertThrows(BadRequestException.class, () -> service.addProjectTask(request));
+		assertEquals("A label can be at most 30 characters", tooLong.getMessage());
+
+		// Six that merge into five are fine
+		projectFrom("project");
+		request.setLabels(List.of("a", "b", "c", "d", "e", "A"));
+		service.addProjectTask(request);
+		assertEquals(5, savedTask().getLabels().size());
+	}
+
+	@Test
+	void startDateAndDueDateCannotClashEitherWay() {
+		ProjectTask existing = existingTask();
+		existing.setDueDate(LocalDate.of(2026, 11, 20));
+
+		BadRequestException late = assertThrows(BadRequestException.class,
+				() -> service.updateStartDate(startDateChange("2026-11-21")));
+		assertEquals("The start date can't be after the due date", late.getMessage());
+
+		existing.setStartDate(LocalDate.of(2026, 11, 10));
+		BadRequestException early = assertThrows(BadRequestException.class,
+				() -> service.updateDueDate(dueDateChange("2026-11-05")));
+		assertEquals("The due date can't be before the start date", early.getMessage());
+
+		verify(projectTaskRepo, never()).save(any());
+		verifyNothingRecorded();
+	}
+
+	@Test
+	void startDateCanBeSetAndRemovedAndIsRecorded() {
+		ProjectTask existing = existingTask();
+
+		assertEquals("Start date updated", service.updateStartDate(startDateChange("2026-11-10")));
+		assertEquals(LocalDate.of(2026, 11, 10), existing.getStartDate());
+		verify(activityService).recordTaskActivity(eq(ActivityType.START_DATE_CHANGED), eq(existing), isNull(), eq("2026-11-10"));
+
+		assertEquals("Start date removed", service.updateStartDate(startDateChange("")));
+		assertNull(existing.getStartDate());
+		verify(activityService).recordTaskActivity(eq(ActivityType.START_DATE_CHANGED), eq(existing), eq("2026-11-10"), isNull());
+
+		BadRequestException invalid = assertThrows(BadRequestException.class,
+				() -> service.updateStartDate(startDateChange("0002-01-01")));
+		assertEquals("Invalid start date", invalid.getMessage());
+	}
+
+	@Test
+	void estimateChangesAreRecordedOnlyWhenTheyChange() {
+		ProjectTask existing = existingTask();
+
+		assertEquals("Estimate updated", service.updateEstimate(estimateChange(5)));
+		service.updateEstimate(estimateChange(5));
+		assertEquals("Estimate removed", service.updateEstimate(estimateChange(null)));
+
+		assertNull(existing.getStoryPoints());
+		verify(activityService).recordTaskActivity(eq(ActivityType.ESTIMATE_CHANGED), eq(existing), isNull(), eq("5"));
+		verify(activityService).recordTaskActivity(eq(ActivityType.ESTIMATE_CHANGED), eq(existing), eq("5"), isNull());
+		verify(activityService, times(2)).recordTaskActivity(any(), any(), any(), any());
+	}
+
+	@Test
+	void labelChangesRecordEachAddedAndRemovedLabel() {
+		ProjectTask existing = existingTask();
+		existing.setLabels(List.of("api", "ui"));
+		when(projectTaskRepo.findLabelsByProjectIdentifier("AB")).thenReturn(List.of("api", "ui"));
+
+		assertEquals("Labels updated", service.updateLabels(labelsChange("UI", "backend")));
+
+		assertEquals(List.of("ui", "backend"), existing.getLabels());
+		verify(activityService).recordTaskActivity(eq(ActivityType.LABEL_REMOVED), eq(existing), eq("api"), isNull());
+		verify(activityService).recordTaskActivity(eq(ActivityType.LABEL_ADDED), eq(existing), isNull(), eq("backend"));
+		verify(activityService, times(2)).recordTaskActivity(any(), any(), any(), any());
+	}
+
+	@Test
+	void changingTheNewFieldsOfAnUnknownTaskFails() {
+		assertThrows(TaskIdNotFoundException.class, () -> service.updateStartDate(startDateChange("2026-11-10")));
+		assertThrows(TaskIdNotFoundException.class, () -> service.updateEstimate(estimateChange(3)));
+		assertThrows(TaskIdNotFoundException.class, () -> service.updateLabels(labelsChange("ui")));
+	}
+
+	@Test
+	void projectLabelsAreSortedIgnoringCase() {
+		when(projectTaskRepo.findLabelsByProjectIdentifier("AB")).thenReturn(List.of("ui", "Backend", "api"));
+
+		assertEquals(List.of("api", "Backend", "ui"), service.getProjectLabels("AB"));
+	}
+
+	@Test
+	void boardListAndDetailsSendTheNewFields() {
+		ProjectTask existing = task("AB-1", false, null);
+		existing.setStoryPoints(8);
+		existing.setStartDate(LocalDate.of(2026, 11, 10));
+		existing.setLabels(List.of("ui"));
+		when(projectTaskRepo.findByProjectIdentifierOrderByPriority("AB")).thenReturn(List.of(existing));
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+
+		TaskListResponse card = service.getTaskLists("AB").get(0);
+		assertEquals(8, card.getStoryPoints());
+		assertEquals("2026-11-10", card.getStartDate());
+		assertEquals(List.of("ui"), card.getLabels());
+
+		TaskDetails details = service.getTaskDetails("AB-1");
+		assertEquals(8, details.getStoryPoints());
+		assertEquals("2026-11-10", details.getStartDate());
+		assertEquals(List.of("ui"), details.getLabels());
+	}
+
+	// Assigning, reassigning and unassigning from the picker
+
+	private Users user(String id, String name, String email) {
+		Users user = new Users();
+		user.setUserId(id);
+		user.setName(name);
+		user.setEmail(email);
+		return user;
+	}
+
+	private UpdateAssigneeRequest assign(String email) {
+		UpdateAssigneeRequest request = new UpdateAssigneeRequest();
+		request.setTaskId("AB-1");
+		request.setAssignee(email);
+		return request;
+	}
+
+	@Test
+	void assigningAnUnassignedTaskRecordsTheNewName() {
+		ProjectTask existing = existingTask();
+		when(userRepo.findByEmail("ravi@example.com")).thenReturn(user("user-2", "Ravi", "ravi@example.com"));
+
+		assertEquals("Assignee updated", service.updateAssignee(assign("ravi@example.com")));
+
+		assertEquals("user-2", existing.getAssignee());
+		verify(activityService).recordTaskActivity(eq(ActivityType.ASSIGNEE_CHANGED), eq(existing), isNull(), eq("Ravi"));
+	}
+
+	@Test
+	void reassigningRecordsBothNames() {
+		ProjectTask existing = existingTask();
+		existing.setAssignee("user-1");
+		when(userRepo.findByUserId("user-1")).thenReturn(user("user-1", "Asha", "asha@example.com"));
+		when(userRepo.findByEmail("ravi@example.com")).thenReturn(user("user-2", "Ravi", "ravi@example.com"));
+
+		service.updateAssignee(assign("ravi@example.com"));
+
+		assertEquals("user-2", existing.getAssignee());
+		verify(activityService).recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, existing, "Asha", "Ravi");
+	}
+
+	@Test
+	void unassigningKeepsTheStatusAndRecordsTheOldName() {
+		ProjectTask existing = existingTask();
+		existing.setAssignee("user-1");
+		existing.setStatus("INPROGRESS");
+		when(userRepo.findByUserId("user-1")).thenReturn(user("user-1", "Asha", "asha@example.com"));
+
+		assertEquals("Task unassigned", service.updateAssignee(assign("")));
+
+		assertNull(existing.getAssignee());
+		assertEquals("INPROGRESS", existing.getStatus());
+		verify(activityService).recordTaskActivity(eq(ActivityType.ASSIGNEE_CHANGED), eq(existing), eq("Asha"), isNull());
+		verify(projectTaskRepo).save(existing);
+	}
+
+	@Test
+	void assigningTheSamePersonOrUnassigningAgainChangesNothing() {
+		ProjectTask existing = existingTask();
+		existing.setAssignee("user-1");
+		when(userRepo.findByEmail("asha@example.com")).thenReturn(user("user-1", "Asha", "asha@example.com"));
+		service.updateAssignee(assign("asha@example.com"));
+
+		existing.setAssignee(null);
+		service.updateAssignee(assign(null));
+
+		verifyNothingRecorded();
+		verify(projectTaskRepo, never()).save(any());
+	}
+
+	@Test
+	void assigningAnUnknownPersonOrTaskFails() {
+		existingTask();
+		BadRequestException unknown = assertThrows(BadRequestException.class, () -> service.updateAssignee(assign("nobody@example.com")));
+		assertEquals("The person to assign was not found", unknown.getMessage());
+
+		UpdateAssigneeRequest missing = assign("");
+		missing.setTaskId("AB-9");
+		assertThrows(TaskIdNotFoundException.class, () -> service.updateAssignee(missing));
+		verify(projectTaskRepo, never()).save(any());
+	}
+
+	@Test
+	void boardListAndDetailsSendTheAssigneesEmail() {
+		ProjectTask existing = task("AB-1", false, null);
+		existing.setAssignee("user-1");
+		Users asha = user("user-1", "Asha", "asha@example.com");
+		when(projectTaskRepo.findByProjectIdentifierOrderByPriority("AB")).thenReturn(List.of(existing));
+		when(userRepo.findByUserIdIn(Set.of("user-1"))).thenReturn(List.of(asha));
+		when(projectTaskRepo.findByProjectSequence("AB-1")).thenReturn(existing);
+		when(userRepo.findByUserId("user-1")).thenReturn(asha);
+
+		assertEquals("asha@example.com", service.getTaskLists("AB").get(0).getAssigneeEmail());
+		assertEquals("asha@example.com", service.getTaskDetails("AB-1").getAssigneeEmail());
 	}
 
 }

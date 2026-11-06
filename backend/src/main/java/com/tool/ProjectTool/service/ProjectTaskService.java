@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -25,9 +27,13 @@ import com.tool.ProjectTool.exception.ProjectNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateAssigneeRequest;
 import com.tool.ProjectTool.model.request.UpdateBugDetailsRequest;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
+import com.tool.ProjectTool.model.request.UpdateEstimateRequest;
+import com.tool.ProjectTool.model.request.UpdateLabelsRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
+import com.tool.ProjectTool.model.request.UpdateStartDateRequest;
 import com.tool.ProjectTool.model.response.HomeTaskCounts;
 import com.tool.ProjectTool.model.response.StatisticsResponse;
 import com.tool.ProjectTool.model.response.SubtaskList;
@@ -63,11 +69,19 @@ public class ProjectTaskService {
 	public static final String TASK = "TASK";
 	public static final String BUG = "BUG";
 	private static final Set<String> SEVERITIES = Set.of("MINOR", "MAJOR", "CRITICAL");
+	private static final Set<Integer> STORY_POINTS = Set.of(1, 2, 3, 5, 8, 13);
+	public static final int MAX_LABELS = 5;
+	public static final int MAX_LABEL_LENGTH = 30;
+	private static final String START_AFTER_DUE = "The start date can't be after the due date";
 
 	@Transactional
 	public String addProjectTask(ProjectTaskRequest request) {
 
 		LocalDate dueDate = parseDueDate(request.getDueDate());
+		LocalDate startDate = parseDate(request.getStartDate(), "Invalid start date");
+		checkDates(startDate, dueDate, START_AFTER_DUE);
+		Integer storyPoints = checkStoryPoints(request.getStoryPoints());
+		List<String> labels = normaliseLabels(request.getProjectIdentifier(), request.getLabels());
 		// Looked up before the try below, which reports every failure as a missing project
 		Users assignee = null;
 		if (request.getAssignee() != null && !request.getAssignee().isBlank()) {
@@ -107,6 +121,9 @@ public class ProjectTaskService {
 			;
 			projTask.setSprintId(request.getSprintId());
 			projTask.setDueDate(dueDate);
+			projTask.setStartDate(startDate);
+			projTask.setStoryPoints(storyPoints);
+			projTask.setLabels(labels);
 			projTask.setSubtask(false);
 			projTask.setTaskDesc(trimToNull(request.getDescription()));
 			projTask.setTaskType(taskType);
@@ -160,6 +177,56 @@ public class ProjectTaskService {
 		return value;
 	}
 
+	private Integer checkStoryPoints(Integer points) {
+		if (points != null && !STORY_POINTS.contains(points)) {
+			throw new BadRequestException("Story points must be 1, 2, 3, 5, 8 or 13");
+		}
+		return points;
+	}
+
+	private void checkDates(LocalDate startDate, LocalDate dueDate, String message) {
+		if (startDate != null && dueDate != null && startDate.isAfter(dueDate)) {
+			throw new BadRequestException(message);
+		}
+	}
+
+	// Trimmed, inner spaces collapsed, empty ones dropped and duplicates merged ignoring case.
+	// A label the project already uses keeps the project's spelling, so "UI" and "ui" stay one label.
+	private List<String> normaliseLabels(String projectIdentifier, List<String> requested) {
+		if (requested == null || requested.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		Map<String, String> spellings = new HashMap<>();
+		for (String existing : projectTaskRepo.findLabelsByProjectIdentifier(projectIdentifier)) {
+			spellings.putIfAbsent(existing.toLowerCase(Locale.ROOT), existing);
+		}
+
+		Map<String, String> labels = new LinkedHashMap<>();
+		for (String raw : requested) {
+			String label = raw == null ? "" : raw.trim().replaceAll("\\s+", " ");
+			if (label.isEmpty()) {
+				continue;
+			}
+			if (label.length() > MAX_LABEL_LENGTH) {
+				throw new BadRequestException("A label can be at most " + MAX_LABEL_LENGTH + " characters");
+			}
+			String key = label.toLowerCase(Locale.ROOT);
+			labels.putIfAbsent(key, spellings.getOrDefault(key, label));
+		}
+		if (labels.size() > MAX_LABELS) {
+			throw new BadRequestException("A task can have at most " + MAX_LABELS + " labels");
+		}
+		return new ArrayList<>(labels.values());
+	}
+
+	// The labels used anywhere in the project, offered as suggestions
+	public List<String> getProjectLabels(String projectIdentifier) {
+		List<String> labels = new ArrayList<>(projectTaskRepo.findLabelsByProjectIdentifier(projectIdentifier));
+		labels.sort(String.CASE_INSENSITIVE_ORDER);
+		return labels;
+	}
+
 	private String trimToNull(String value) {
 		return emptyToNull(value == null ? null : value.trim());
 	}
@@ -182,8 +249,10 @@ public class ProjectTaskService {
 			}
 
 			Map<String, String> assigneeNames = new HashMap<>();
+			Map<String, String> assigneeEmails = new HashMap<>();
 			for (Users user : userRepo.findByUserIdIn(assigneeIds)) {
 				assigneeNames.put(user.getUserId(), user.getName());
+				assigneeEmails.put(user.getUserId(), user.getEmail());
 			}
 
 			for (ProjectTask project : tasks) {
@@ -195,11 +264,15 @@ public class ProjectTaskService {
 				tas.setStatus(project.getStatus());
 				tas.setAssignee(project.getAssignee());
 				tas.setAssigneeName(assigneeNames.get(project.getAssignee()));
+				tas.setAssigneeEmail(assigneeEmails.get(project.getAssignee()));
 				tas.setDueDate(formatDueDate(project.getDueDate()));
 				tas.setCreatedOn(project.getCreatedAt());
 				tas.setUpdatedOn(project.getUpdatedAt());
 				tas.setSubtask(project.isSubtask());
 				tas.setTaskType(project.getTaskType());
+				tas.setStoryPoints(project.getStoryPoints());
+				tas.setStartDate(formatDueDate(project.getStartDate()));
+				tas.setLabels(new ArrayList<>(project.getLabels()));
 				tas.setParentTaskId(project.getParentTaskId());
 				tas.setSubtaskCount(subtaskCounts.getOrDefault(project.getProjectSequence(), 0));
 
@@ -268,6 +341,9 @@ public class ProjectTaskService {
 			getTask.setExpectedResult(task.getExpectedResult());
 			getTask.setActualResult(task.getActualResult());
 			getTask.setSeverity(task.getSeverity());
+			getTask.setStoryPoints(task.getStoryPoints());
+			getTask.setStartDate(formatDueDate(task.getStartDate()));
+			getTask.setLabels(new ArrayList<>(task.getLabels()));
 
 			if (user == null) {
 				getTask.setTaskName(task.getTaskName());
@@ -288,6 +364,7 @@ public class ProjectTaskService {
 				getTask.setCreatedOn(task.getCreatedAt());
 				getTask.setUpdatedOn(task.getUpdatedAt());
 				getTask.setAssignee(user.getName());
+				getTask.setAssigneeEmail(user.getEmail());
 			}
 
 			return getTask;
@@ -395,6 +472,8 @@ public class ProjectTaskService {
 
 		if (task != null) {
 
+			checkDates(task.getStartDate(), dueDate, "The due date can't be before the start date");
+
 			if (!Objects.equals(task.getDueDate(), dueDate)) {
 				activityService.recordTaskActivity(ActivityType.DUE_DATE_CHANGED, task,
 						formatDueDate(task.getDueDate()), formatDueDate(dueDate));
@@ -410,23 +489,115 @@ public class ProjectTaskService {
 		throw new TaskIdNotFoundException("Task id not found");
 	}
 
+	// Assigns the task to someone, or unassigns it. Its status stays as it is; an unassigned task just can't move until
+	// someone is assigned again. Kept apart from updateTask, whose callers send the assignee's name and rely on it being ignored.
+	@Transactional
+	public String updateAssignee(UpdateAssigneeRequest request) {
+
+		ProjectTask task = findTask(request.getTaskId());
+		Users assignee = null;
+		if (request.getAssignee() != null && !request.getAssignee().isBlank()) {
+			assignee = userRepo.findByEmail(request.getAssignee());
+			if (assignee == null) {
+				throw new BadRequestException("The person to assign was not found");
+			}
+		}
+
+		String newId = assignee != null ? assignee.getUserId() : null;
+		if (Objects.equals(emptyToNull(task.getAssignee()), newId)) {
+			return assignee != null ? "Assignee updated" : "Task unassigned";
+		}
+
+		Users oldAssignee = task.getAssignee() != null ? userRepo.findByUserId(task.getAssignee()) : null;
+		activityService.recordTaskActivity(ActivityType.ASSIGNEE_CHANGED, task,
+				oldAssignee != null ? oldAssignee.getName() : null, assignee != null ? assignee.getName() : null);
+		task.setAssignee(newId);
+		projectTaskRepo.save(task);
+		return assignee != null ? "Assignee updated" : "Task unassigned";
+	}
+
+	@Transactional
+	public String updateStartDate(UpdateStartDateRequest request) {
+
+		LocalDate startDate = parseDate(request.getStartDate(), "Invalid start date");
+		ProjectTask task = findTask(request.getTaskId());
+		checkDates(startDate, task.getDueDate(), START_AFTER_DUE);
+
+		if (!Objects.equals(task.getStartDate(), startDate)) {
+			activityService.recordTaskActivity(ActivityType.START_DATE_CHANGED, task,
+					formatDueDate(task.getStartDate()), formatDueDate(startDate));
+		}
+		task.setStartDate(startDate);
+		projectTaskRepo.save(task);
+		return startDate != null ? "Start date updated" : "Start date removed";
+	}
+
+	@Transactional
+	public String updateEstimate(UpdateEstimateRequest request) {
+
+		Integer storyPoints = checkStoryPoints(request.getStoryPoints());
+		ProjectTask task = findTask(request.getTaskId());
+
+		if (!Objects.equals(task.getStoryPoints(), storyPoints)) {
+			activityService.recordTaskActivity(ActivityType.ESTIMATE_CHANGED, task,
+					Objects.toString(task.getStoryPoints(), null), Objects.toString(storyPoints, null));
+		}
+		task.setStoryPoints(storyPoints);
+		projectTaskRepo.save(task);
+		return storyPoints != null ? "Estimate updated" : "Estimate removed";
+	}
+
+	// One history row per label added or removed
+	@Transactional
+	public String updateLabels(UpdateLabelsRequest request) {
+
+		ProjectTask task = findTask(request.getTaskId());
+		List<String> labels = normaliseLabels(task.getProjectIdentifier(), request.getLabels());
+
+		for (String label : task.getLabels()) {
+			if (!labels.contains(label)) {
+				activityService.recordTaskActivity(ActivityType.LABEL_REMOVED, task, label, null);
+			}
+		}
+		for (String label : labels) {
+			if (!task.getLabels().contains(label)) {
+				activityService.recordTaskActivity(ActivityType.LABEL_ADDED, task, null, label);
+			}
+		}
+		task.setLabels(labels);
+		projectTaskRepo.save(task);
+		return "Labels updated";
+	}
+
+	private ProjectTask findTask(String taskId) {
+		ProjectTask task = projectTaskRepo.findByProjectSequence(taskId);
+		if (task == null) {
+			throw new TaskIdNotFoundException("Task id not found");
+		}
+		return task;
+	}
+
 	private LocalDate parseDueDate(String value) {
+		return parseDate(value, "Invalid due date");
+	}
+
+	private LocalDate parseDate(String value, String invalid) {
 
 		if (value == null || value.isBlank()) {
 			return null;
 		}
 
 		try {
-			LocalDate dueDate = LocalDate.parse(value);
+			LocalDate date = LocalDate.parse(value);
 
 			// A date input passes through years like 0002 while the user is still typing
-			if (dueDate.getYear() < MIN_DUE_YEAR || dueDate.getYear() > MAX_DUE_YEAR) {
-				throw new BadRequestException("Invalid due date");
+			if (date.getYear() < MIN_DUE_YEAR || date.getYear() > MAX_DUE_YEAR) {
+				throw new BadRequestException(invalid);
 			}
 
-			return dueDate;
+			return date;
 		} catch (DateTimeParseException e) {
-			throw new BadRequestException("Invalid due date");
+			throw new BadRequestException(invalid);
 		}
 	}
 

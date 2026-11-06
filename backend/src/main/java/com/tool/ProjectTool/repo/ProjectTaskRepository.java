@@ -14,6 +14,9 @@ public interface ProjectTaskRepository extends JpaRepository<ProjectTask, Long> 
 	List<ProjectTask> findByProjectIdentifierOrderByPriority(String projectIdentifier);
 	
 	ProjectTask findByProjectSequence(String projectSequence);
+
+	@Query("select distinct l from ProjectTask t join t.labels l where t.projectIdentifier = :projectIdentifier")
+	List<String> findLabelsByProjectIdentifier(String projectIdentifier);
 	
 	@Query(value = "select\r\n"
 			+ "	task_name,\r\n"

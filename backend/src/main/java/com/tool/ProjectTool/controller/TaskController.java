@@ -18,9 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tool.ProjectTool.model.request.ProjectTaskRequest;
 import com.tool.ProjectTool.model.request.RequestCreateSubtask;
+import com.tool.ProjectTool.model.request.UpdateAssigneeRequest;
 import com.tool.ProjectTool.model.request.UpdateBugDetailsRequest;
 import com.tool.ProjectTool.model.request.UpdateDueDateRequest;
+import com.tool.ProjectTool.model.request.UpdateEstimateRequest;
+import com.tool.ProjectTool.model.request.UpdateLabelsRequest;
 import com.tool.ProjectTool.model.request.UpdateProjectTaskRequest;
+import com.tool.ProjectTool.model.request.UpdateStartDateRequest;
 import com.tool.ProjectTool.model.response.ApiResponse;
 import com.tool.ProjectTool.model.response.ApiResponseBuilder;
 import com.tool.ProjectTool.model.response.HomeTaskCounts;
@@ -97,6 +101,55 @@ public class TaskController {
 		return ApiResponseBuilder.ok(taskService.updateDueDate(request));
 	}
 	
+	@PostMapping("/updateAssignee")
+	public ResponseEntity<?> updateAssignee(@Valid @RequestBody UpdateAssigneeRequest request, BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+
+		return ApiResponseBuilder.ok(taskService.updateAssignee(request));
+	}
+
+	@PostMapping("/updateStartDate")
+	public ResponseEntity<?> updateStartDate(@Valid @RequestBody UpdateStartDateRequest request, BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+
+		return ApiResponseBuilder.ok(taskService.updateStartDate(request));
+	}
+
+	@PostMapping("/updateEstimate")
+	public ResponseEntity<?> updateEstimate(@Valid @RequestBody UpdateEstimateRequest request, BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+
+		return ApiResponseBuilder.ok(taskService.updateEstimate(request));
+	}
+
+	@PostMapping("/updateLabels")
+	public ResponseEntity<?> updateLabels(@Valid @RequestBody UpdateLabelsRequest request, BindingResult result) {
+
+		ResponseEntity<?> errorMap = errorService.mapValidationError(result);
+		if (errorMap != null) {
+			return errorMap;
+		}
+
+		return ApiResponseBuilder.ok(taskService.updateLabels(request));
+	}
+
+	@GetMapping("/getLabels/{projectIdentifier}")
+	public ResponseEntity<ApiResponse<List<String>>> getProjectLabels(@PathVariable("projectIdentifier") String projectIdentifier) {
+		return ApiResponseBuilder.ok(taskService.getProjectLabels(projectIdentifier));
+	}
+
 	@PostMapping("/createSubTask")
 	public ResponseEntity<?> createSubTask(@RequestBody RequestCreateSubtask subtaskRequest){
 		

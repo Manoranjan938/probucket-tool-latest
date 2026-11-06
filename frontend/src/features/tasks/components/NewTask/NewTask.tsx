@@ -1,24 +1,30 @@
 import React, { useRef, useState } from "react";
-import { Autocomplete, Dialog, TextField } from "@mui/material";
+import { Dialog } from "@mui/material";
+import { skipToken } from "@reduxjs/toolkit/query/react";
 import { useSnackbar } from "notistack";
 import { FaBug } from "react-icons/fa";
 import { FiCheckSquare, FiX } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
+import AssigneePicker from "features/tasks/components/AssigneePicker/AssigneePicker";
 import DueDateField, { isDueDateInputValid } from "features/tasks/components/DueDateField/DueDateField";
+import LabelsField from "features/tasks/components/LabelsField/LabelsField";
 import PriorityPicker from "features/tasks/components/PriorityPicker/PriorityPicker";
 import SegmentedPicker from "features/tasks/components/SegmentedPicker/SegmentedPicker";
 import SeverityPicker from "features/tasks/components/SeverityPicker/SeverityPicker";
-import { useCreateTaskMutation } from "features/tasks/api/tasksApi";
+import StoryPointsPicker from "features/tasks/components/StoryPointsPicker/StoryPointsPicker";
+import { useCreateTaskMutation, useGetProjectLabelsQuery } from "features/tasks/api/tasksApi";
 import useAssigneeOptions, { type AssigneeOption } from "features/tasks/hooks/useAssigneeOptions";
 import useCurrentProject from "features/projects/hooks/useCurrentProject";
-import { isBug, MAX_DESCRIPTION, taskTypesFor, toastOptions } from "features/tasks/data";
+import { datesClash, isBug, MAX_DESCRIPTION, START_AFTER_DUE, taskTypesFor, toastOptions } from "features/tasks/data";
 import { useAppSelector } from "app/hooks";
 import { getApiErrorMessage } from "shared/services/apiError";
 
 // task_name is a varchar(255)
 const MAX_TITLE = 255;
+
+const START_DATE_INPUT = "startDate";
 
 const typeOptions = [
   { value: "TASK", label: "Task", icon: FiCheckSquare },
@@ -51,6 +57,11 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   const [priority, setPriority] = useState("LOW");
   const [dueDate, setDueDate] = useState("");
   const [dueDateError, setDueDateError] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [startDateError, setStartDateError] = useState("");
+  const [storyPoints, setStoryPoints] = useState<number | null>(null);
+  const [labels, setLabels] = useState<string[]>([]);
+  const { data: projectLabels = [] } = useGetProjectLabelsQuery(open && projectIdentifier ? projectIdentifier : skipToken);
   const [error, setError] = useState("");
   const [createAnother, setCreateAnother] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -61,6 +72,7 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
   // On a personal project the only person to assign is you, so that's the default
   const defaultAssignee = isTeam ? null : assigneeOptions.find((option) => option.email === currentUser.username) ?? null;
   const assignee = pickedAssignee === undefined ? defaultAssignee : pickedAssignee;
+  const me = assigneeOptions.find((option) => option.email === currentUser.username);
   const taskType = pickedType && taskTypes.includes(pickedType) ? pickedType : taskTypes[0];
   const bug = isBug(taskType);
   const noun = bug ? "bug" : "task";
@@ -82,6 +94,10 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
     setPriority("LOW");
     setDueDate("");
     setDueDateError("");
+    setStartDate("");
+    setStartDateError("");
+    setStoryPoints(null);
+    setLabels([]);
     setError("");
     setCreateAnother(false);
     onClose();
@@ -94,8 +110,16 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
       setError(`Please describe the ${noun}`);
       return;
     }
+    if (!isDueDateInputValid(e.currentTarget, START_DATE_INPUT)) {
+      setStartDateError("Please enter a valid date");
+      return;
+    }
     if (!isDueDateInputValid(e.currentTarget)) {
       setDueDateError("Please enter a valid date");
+      return;
+    }
+    if (datesClash(startDate, dueDate)) {
+      setStartDateError(START_AFTER_DUE);
       return;
     }
 
@@ -111,6 +135,9 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
           ? { stepsToReproduce: stepsToReproduce.trim(), expectedResult: expectedResult.trim(), actualResult: actualResult.trim(), severity }
           : {}),
         priority,
+        storyPoints,
+        startDate,
+        labels,
         sprintId: "",
         status: "",
         dueDate,
@@ -234,28 +261,20 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
               </div>
             ) : null}
             <div className={task.field}>
-              <label htmlFor="new-task-assignee" className={task.label}>Assignee</label>
-              <Autocomplete
+              <div className={task.labelRow}>
+                <label htmlFor="new-task-assignee" className={task.label}>Assignee</label>
+                {me && assignee?.email !== me.email ? (
+                  <button type="button" className={task.linkButton} onClick={() => setPickedAssignee(me)}>
+                    Assign to me
+                  </button>
+                ) : null}
+              </div>
+              <AssigneePicker
                 id="new-task-assignee"
-                size="small"
-                value={assignee}
-                onChange={(event, value) => setPickedAssignee(value)}
+                variant="field"
+                assignee={assignee}
                 options={assigneeOptions}
-                autoHighlight
-                getOptionLabel={(option) => option.name}
-                isOptionEqualToValue={(option, value) => option.email === value.email}
-                noOptionsText="Nobody to assign in this project"
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    placeholder="Unassigned"
-                    sx={{ bgcolor: "#fff" }}
-                    inputProps={{
-                      ...params.inputProps,
-                      autoComplete: "new-password", // disable autocomplete and autofill
-                    }}
-                  />
-                )}
+                onChange={setPickedAssignee}
               />
               <p className={task.fieldHint}>Only an assigned task can change its status.</p>
             </div>
@@ -269,6 +288,21 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
                 <SeverityPicker name="new-task-severity" value={severity} onChange={setSeverity} />
               </div>
             ) : null}
+            <div className={task.field}>
+              <span className={task.label}>Estimate (optional)</span>
+              <StoryPointsPicker name="new-task-points" value={storyPoints} onChange={setStoryPoints} />
+            </div>
+            <DueDateField
+              id="new-task-start-date"
+              name={START_DATE_INPUT}
+              label="Start date (optional)"
+              value={startDate}
+              onChange={(value) => {
+                setStartDate(value);
+                setStartDateError("");
+              }}
+              error={startDateError}
+            />
             <DueDateField
               id="new-task-due-date"
               label="Due date (optional)"
@@ -276,9 +310,14 @@ const NewTask = ({ open, onClose, projectIdentifier }: NewTaskProps) => {
               onChange={(value) => {
                 setDueDate(value);
                 setDueDateError("");
+                setStartDateError("");
               }}
               error={dueDateError}
             />
+            <div className={task.field}>
+              <label htmlFor="new-task-labels" className={task.label}>Labels (optional)</label>
+              <LabelsField id="new-task-labels" value={labels} onChange={setLabels} suggestions={projectLabels} />
+            </div>
           </div>
         </div>
 

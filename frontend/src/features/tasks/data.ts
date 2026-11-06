@@ -51,6 +51,53 @@ export const severityColors: Record<string, string> = {
   MINOR: "text-priority-low",
 };
 
+/** Story points a task can be estimated at */
+export const storyPoints = [1, 2, 3, 5, 8, 13];
+
+/** 1 -> "1 point", 5 -> "5 points" */
+export const formatPoints = (points: number) => `${points} ${points === 1 ? "point" : "points"}`;
+
+/** Same limits as ProjectTaskService in the backend */
+export const MAX_LABELS = 5;
+export const MAX_LABEL_LENGTH = 30;
+
+// Full class names, so Tailwind finds them
+const labelPalette = [
+  "bg-label-blue-soft text-label-blue",
+  "bg-label-green-soft text-label-green",
+  "bg-label-violet-soft text-label-violet",
+  "bg-label-amber-soft text-label-amber",
+  "bg-label-rose-soft text-label-rose",
+  "bg-label-teal-soft text-label-teal",
+  "bg-label-slate-soft text-label-slate",
+];
+
+/** The colours of a label. The same name, in any case, always gets the same colours. */
+export const labelColor = (label: string) => {
+  let hash = 0;
+  for (const char of label.toLowerCase()) {
+    hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
+  }
+  return labelPalette[hash % labelPalette.length];
+};
+
+/**
+ * Labels as the backend keeps them: trimmed, inner spaces collapsed, empty ones dropped, duplicates merged
+ * ignoring case, a label the project already uses in the project's spelling, and no more than MAX_LABELS.
+ */
+export const tidyLabels = (labels: string[], projectLabels: string[]) => {
+  const spellings = new Map(projectLabels.map((label) => [label.toLowerCase(), label]));
+  const tidied = new Map<string, string>();
+  for (const raw of labels) {
+    const label = raw.trim().replace(/\s+/g, " ").slice(0, MAX_LABEL_LENGTH);
+    const key = label.toLowerCase();
+    if (label && !tidied.has(key)) {
+      tidied.set(key, spellings.get(key) ?? label);
+    }
+  }
+  return [...tidied.values()].slice(0, MAX_LABELS);
+};
+
 /** "LOW" -> "Low" */
 export const formatEnum = (value: string | undefined) =>
   value ? value.charAt(0) + value.slice(1).toLowerCase() : "";
@@ -87,7 +134,7 @@ export const dueStyles: Record<DueState, string> = {
 };
 
 /** A date in the user's own timezone as yyyy-mm-dd, which sorts and compares correctly as text */
-const toIsoDate = (date: Date) =>
+export const toIsoDate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
 /** A due date has no time, so it is compared with the user's own today. A completed task is never overdue. */
@@ -117,6 +164,13 @@ export const formatDueDate = (dueDate: string) => {
     year: year === new Date().getFullYear() ? undefined : "numeric",
   });
 };
+
+/** A start date after the due date is refused, here and by the backend */
+export const datesClash = (startDate: string | null | undefined, dueDate: string | null | undefined) =>
+  !!startDate && !!dueDate && startDate > dueDate;
+
+export const START_AFTER_DUE = "The start date can't be after the due date";
+export const DUE_BEFORE_START = "The due date can't be before the start date";
 
 /** Toasts in the same corner as the Snackbars on the other pages */
 export const toastOptions: OptionsObject = { anchorOrigin: { vertical: "bottom", horizontal: "right" } };

@@ -5,6 +5,8 @@ import { useGetTeamMembersQuery } from "features/team/api/teamApi";
 export interface AssigneeOption {
   name: string;
   email: string;
+  /** The project lead, shown with a Lead badge */
+  lead: boolean;
 }
 
 // Who a task of the current project can be assigned to: its team members, plus the project lead,
@@ -19,9 +21,9 @@ const useAssigneeOptions = () => {
 
   const options: AssigneeOption[] = [
     ...(leadEmail && !team.some((member) => member.email === leadEmail)
-      ? [{ name: `${leadBy} (Lead)`, email: leadEmail }]
+      ? [{ name: leadBy ?? leadEmail, email: leadEmail, lead: true }]
       : []),
-    ...team.map(({ name, email }) => ({ name, email })),
+    ...team.map(({ name, email }) => ({ name, email, lead: email === leadEmail })),
   ];
 
   return { options, isTeam };

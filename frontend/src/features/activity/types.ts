@@ -10,6 +10,10 @@ export type ActivityType =
   | "COMMENT_ADDED"
   | "SEVERITY_CHANGED"
   | "BUG_DETAILS_CHANGED"
+  | "ESTIMATE_CHANGED"
+  | "START_DATE_CHANGED"
+  | "LABEL_ADDED"
+  | "LABEL_REMOVED"
   | "MEMBER_ADDED";
 
 /** model/response/ActivityResponse.java */

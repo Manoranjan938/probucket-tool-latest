@@ -1,10 +1,17 @@
 package com.tool.ProjectTool.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -12,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -243,6 +251,46 @@ public class ProjectTask {
 
 	public void setSeverity(String severity) {
 		this.severity = severity;
+	}
+
+	// 1, 2, 3, 5, 8 or 13, null when not estimated
+	private Integer storyPoints;
+
+	// Never after the due date
+	private LocalDate startDate;
+
+	// In the order they were added. SUBSELECT loads them for a whole list of tasks in one query, not one per task.
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "project_task_label", joinColumns = @JoinColumn(name = "task_id"))
+	@OrderColumn(name = "position")
+	@Column(name = "label", length = 30)
+	@Fetch(FetchMode.SUBSELECT)
+	private List<String> labels = new ArrayList<>();
+
+	public Integer getStoryPoints() {
+		return storyPoints;
+	}
+
+	public void setStoryPoints(Integer storyPoints) {
+		this.storyPoints = storyPoints;
+	}
+
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
+	public List<String> getLabels() {
+		return labels;
+	}
+
+	// Keeps Hibernate's own list, which it needs to track the changes
+	public void setLabels(List<String> labels) {
+		this.labels.clear();
+		this.labels.addAll(labels);
 	}
 
 }

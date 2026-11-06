@@ -1,12 +1,16 @@
 import React from "react";
-import { Tooltip } from "@mui/material";
 import { FaBug } from "react-icons/fa";
-import { FiCornerDownRight, FiFlag, FiGitMerge, FiUserPlus } from "react-icons/fi";
+import { FiCornerDownRight, FiFlag, FiGitMerge } from "react-icons/fi";
 
 import * as task from "features/tasks/styles/taskClasses";
 
+import AssigneePicker from "features/tasks/components/AssigneePicker/AssigneePicker";
 import DueBadge from "features/tasks/components/DueBadge/DueBadge";
-import { formatEnum, isBug, priorityColors } from "features/tasks/data";
+import LabelChip from "features/tasks/components/LabelChip/LabelChip";
+import StartBadge from "features/tasks/components/StartBadge/StartBadge";
+import useAssigneeOptions from "features/tasks/hooks/useAssigneeOptions";
+import useChangeAssignee from "features/tasks/hooks/useChangeAssignee";
+import { formatEnum, formatPoints, isBug, priorityColors, toIsoDate } from "features/tasks/data";
 import type { TaskListItem } from "features/tasks/types";
 
 interface WorkTaskProps {
@@ -16,24 +20,51 @@ interface WorkTaskProps {
   onOpen: (sequence: string) => void;
 }
 
-// A task card on the board; clicking it opens the task details
+// How many labels a card shows before "+N"
+const CARD_LABELS = 3;
+
+// A task card on the board. Clicking it opens the task details; clicking the avatar changes the assignee.
 const WorkTask = ({ taskDetails, selected, onOpen }: WorkTaskProps) => {
-  const assigneeName = taskDetails.assigneeName ?? "Unknown";
+  const { options: assigneeOptions } = useAssigneeOptions();
+  const changeAssignee = useChangeAssignee();
+  const assignee = taskDetails.assignee
+    ? { email: taskDetails.assigneeEmail, name: taskDetails.assigneeName ?? "Unknown" }
+    : null;
+  const labels = taskDetails.labels ?? [];
+  const hiddenLabels = labels.slice(CARD_LABELS);
+  // Only while it's still ahead; once work has started the due date is what matters
+  const upcomingStart = taskDetails.startDate && taskDetails.startDate > toIsoDate(new Date()) ? taskDetails.startDate : null;
 
   return (
-    <button
-      type="button"
-      className={selected ? task.cardSelected : task.card}
-      onClick={() => onOpen(taskDetails.taskSequence)}
-    >
+    <div className={selected ? task.cardSelected : task.card}>
       {taskDetails.subtask ? (
         <span className={task.cardParent}>
           <FiCornerDownRight aria-hidden="true" />
           Subtask of {taskDetails.parentTaskId}
         </span>
       ) : null}
-      <span className={task.cardName}>{taskDetails.taskName}</span>
-      {taskDetails.dueDate ? <DueBadge dueDate={taskDetails.dueDate} status={taskDetails.status} /> : null}
+      <button type="button" className={task.cardOpen} onClick={() => onOpen(taskDetails.taskSequence)}>
+        <span className={task.cardName}>{taskDetails.taskName}</span>
+      </button>
+      {labels.length ? (
+        <span className={task.cardLabels}>
+          {labels.slice(0, CARD_LABELS).map((label) => (
+            <LabelChip key={label} label={label} />
+          ))}
+          {hiddenLabels.length ? (
+            <span className={task.cardMoreLabels} title={hiddenLabels.join(", ")}>
+              +{hiddenLabels.length}
+              <span className="sr-only"> more: {hiddenLabels.join(", ")}</span>
+            </span>
+          ) : null}
+        </span>
+      ) : null}
+      {upcomingStart || taskDetails.dueDate ? (
+        <span className={task.cardDates}>
+          {upcomingStart ? <StartBadge startDate={upcomingStart} /> : null}
+          {taskDetails.dueDate ? <DueBadge dueDate={taskDetails.dueDate} status={taskDetails.status} /> : null}
+        </span>
+      ) : null}
       <span className={task.cardFooter}>
         {isBug(taskDetails.taskType) ? (
           <span className={task.cardBug}>
@@ -48,6 +79,12 @@ const WorkTask = ({ taskDetails, selected, onOpen }: WorkTaskProps) => {
             {formatEnum(taskDetails.priority)}
           </span>
         ) : null}
+        {taskDetails.storyPoints ? (
+          <span className={task.cardPoints} title={formatPoints(taskDetails.storyPoints)}>
+            {taskDetails.storyPoints}
+            <span className="sr-only"> story points</span>
+          </span>
+        ) : null}
         {taskDetails.subtaskCount > 0 ? (
           <span
             className={task.cardSubtaskCount}
@@ -57,20 +94,15 @@ const WorkTask = ({ taskDetails, selected, onOpen }: WorkTaskProps) => {
             {taskDetails.subtaskCount}
           </span>
         ) : null}
-        {taskDetails.assignee ? (
-          <Tooltip title={assigneeName}>
-            <span className={task.cardAssignee} aria-label={`Assignee: ${assigneeName}`}>
-              {assigneeName.substring(0, 1)}
-            </span>
-          </Tooltip>
-        ) : (
-          // Assigning from the card isn't wired up yet – the assignee is changed in the task details
-          <span className={task.cardAssign} aria-hidden="true">
-            <FiUserPlus />
-          </span>
-        )}
+        <AssigneePicker
+          id={`card-assignee-${taskDetails.taskSequence}`}
+          variant="avatar"
+          assignee={assignee}
+          options={assigneeOptions}
+          onChange={(option) => changeAssignee(taskDetails.taskSequence, option)}
+        />
       </span>
-    </button>
+    </div>
   );
 };
 

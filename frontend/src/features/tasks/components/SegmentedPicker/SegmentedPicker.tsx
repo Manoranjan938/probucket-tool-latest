@@ -6,7 +6,7 @@ import * as task from "features/tasks/styles/taskClasses";
 export interface SegmentOption {
   value: string;
   label: string;
-  icon: IconType;
+  icon?: IconType;
   /** Text colour of the icon */
   iconClass?: string;
 }
@@ -40,7 +40,7 @@ const SegmentedPicker = ({ name, label, options, value, onChange }: SegmentedPic
             onChange={() => onChange(option.value)}
             className="sr-only"
           />
-          <option.icon className={option.iconClass} aria-hidden="true" />
+          {option.icon ? <option.icon className={option.iconClass} aria-hidden="true" /> : null}
           {option.label}
         </label>
       ))}

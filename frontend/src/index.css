@@ -36,6 +36,21 @@
   --color-priority-high: #e5603e;
   --color-priority-medium: #d99a00;
   --color-priority-low: #8a889f;
+  /* Label chips; each label name always gets the same pair (labelColor in tasks/data.ts) */
+  --color-label-blue: #1d4ed8;
+  --color-label-blue-soft: #eaf1fe;
+  --color-label-green: #15803d;
+  --color-label-green-soft: #e9f7ef;
+  --color-label-violet: #6d28d9;
+  --color-label-violet-soft: #f3effd;
+  --color-label-amber: #92400e;
+  --color-label-amber-soft: #fdf3dc;
+  --color-label-rose: #be123c;
+  --color-label-rose-soft: #fdeef2;
+  --color-label-teal: #0f766e;
+  --color-label-teal-soft: #e6f6f4;
+  --color-label-slate: #475569;
+  --color-label-slate-soft: #f1f5f9;
 
   --radius-brand: 14px;
 

@@ -12,7 +12,10 @@ import {
   FiFlag,
   FiGitMerge,
   FiMessageSquare,
+  FiPlayCircle,
   FiPlus,
+  FiTag,
+  FiTarget,
   FiUserCheck,
   FiUserPlus,
 } from "react-icons/fi";
@@ -20,7 +23,8 @@ import {
 import * as styles from "features/activity/styles/activityClasses";
 
 import Timeline from "features/activity/components/Timeline/Timeline";
-import { formatDueDate, formatEnum, taskStatuses } from "features/tasks/data";
+import LabelChip from "features/tasks/components/LabelChip/LabelChip";
+import { formatDueDate, formatEnum, formatPoints, taskStatuses } from "features/tasks/data";
 import type { Activity } from "features/activity/types";
 
 const Strong = ({ children }: { children: ReactNode }) => <span className={styles.strong}>{children}</span>;
@@ -54,6 +58,9 @@ const describe = (activity: Activity, target: ReactNode): ReactNode => {
           <Strong>{formatEnum(newValue ?? undefined)}</Strong></>
       );
     case "ASSIGNEE_CHANGED":
+      if (!newValue) {
+        return <>unassigned <Strong>{oldValue ?? "someone"}</Strong> from {target}</>;
+      }
       return oldValue ? (
         <>reassigned {target} from <Strong>{oldValue}</Strong> to <Strong>{newValue}</Strong></>
       ) : (
@@ -84,6 +91,30 @@ const describe = (activity: Activity, target: ReactNode): ReactNode => {
       );
     case "BUG_DETAILS_CHANGED":
       return <>edited the bug details of {target}</>;
+    case "ESTIMATE_CHANGED":
+      if (!newValue) {
+        return <>removed the estimate of {target}</>;
+      }
+      return oldValue ? (
+        <>changed the estimate of {target} from <Strong>{formatPoints(Number(oldValue))}</Strong> to{" "}
+          <Strong>{formatPoints(Number(newValue))}</Strong></>
+      ) : (
+        <>estimated {target} at <Strong>{formatPoints(Number(newValue))}</Strong></>
+      );
+    case "START_DATE_CHANGED":
+      if (!newValue) {
+        return <>removed the start date of {target}</>;
+      }
+      return oldValue ? (
+        <>changed the start date of {target} from <Strong>{formatDueDate(oldValue)}</Strong> to{" "}
+          <Strong>{formatDueDate(newValue)}</Strong></>
+      ) : (
+        <>set the start date of {target} to <Strong>{formatDueDate(newValue)}</Strong></>
+      );
+    case "LABEL_ADDED":
+      return <>added the label <LabelChip label={newValue ?? ""} /> to {target}</>;
+    case "LABEL_REMOVED":
+      return <>removed the label <LabelChip label={oldValue ?? ""} /> from {target}</>;
     case "MEMBER_ADDED":
       return <>added <Strong>{newValue}</Strong> to the team</>;
     default:
@@ -132,6 +163,13 @@ const appearance = ({ type, newValue }: Activity): { icon: IconType; tone: strin
       return { icon: FiAlertTriangle, tone: (newValue && severityTones[newValue]) || styles.toneNeutral };
     case "BUG_DETAILS_CHANGED":
       return { icon: FiEdit2, tone: styles.toneNeutral };
+    case "ESTIMATE_CHANGED":
+      return { icon: FiTarget, tone: styles.toneNeutral };
+    case "START_DATE_CHANGED":
+      return { icon: FiPlayCircle, tone: newValue ? styles.toneBrand : styles.toneNeutral };
+    case "LABEL_ADDED":
+    case "LABEL_REMOVED":
+      return { icon: FiTag, tone: styles.toneNeutral };
     case "MEMBER_ADDED":
       return { icon: FiUserPlus, tone: styles.toneBrand };
     default:

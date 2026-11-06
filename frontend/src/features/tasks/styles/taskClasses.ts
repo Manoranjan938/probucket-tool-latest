@@ -46,9 +46,13 @@ export const columnActions = "flex items-center gap-0.5 ml-auto";
 export const columnEmpty = "py-6 text-center text-[14px] text-brand-muted";
 export const cardList = "flex flex-col gap-2.5 m-0 p-0 list-none";
 
-/* Task card (a button that opens the task) */
+/* Task card. Its title is the button that opens the task, stretched over the whole card; the assignee button sits above it. */
 export const card =
-  "flex flex-col gap-3 w-full p-3.5 border border-brand-border rounded-xl bg-brand-surface [font-family:inherit] text-left cursor-pointer shadow-[0_1px_2px_rgba(31,29,58,0.05)] transition-[border-color,box-shadow] duration-150 ease-[ease] hover:border-[#d4d2f2] hover:shadow-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-brand-primary motion-reduce:transition-none";
+  "relative flex flex-col gap-3 w-full p-3.5 border border-brand-border rounded-xl bg-brand-surface text-left cursor-pointer shadow-[0_1px_2px_rgba(31,29,58,0.05)] transition-[border-color,box-shadow] duration-150 ease-[ease] hover:border-[#d4d2f2] hover:shadow-brand motion-reduce:transition-none";
+export const cardOpen =
+  "p-0 border-none bg-transparent [font-family:inherit] text-left cursor-pointer after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline-3 focus-visible:after:outline-offset-2 focus-visible:after:outline-brand-primary";
+export const cardAssigneeButton =
+  "relative z-10 ml-auto p-0 border-none rounded-[50%] bg-transparent cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
 export const cardSelected = `${card} border-brand-primary! shadow-[0_0_0_1px_var(--color-brand-primary)]!`;
 export const cardName = "line-clamp-3 text-[14px] font-semibold leading-[1.45] text-brand-ink";
 export const cardFooter = "flex items-center gap-2";
@@ -58,10 +62,26 @@ export const cardKey = "text-[12px] font-semibold uppercase text-brand-muted";
 export const cardBug =
   "inline-flex items-center gap-1 px-1.5 py-px rounded-md bg-due-overdue-soft text-[11px] font-bold uppercase tracking-[0.02em] text-due-overdue";
 export const cardAssign =
-  "flex items-center justify-center w-6 h-6 ml-auto border border-dashed border-brand-muted rounded-[50%] text-[11px] text-brand-muted";
-export const cardAssignee = `${avatarBase} w-6 h-6 ml-auto bg-brand-strong text-[11px] text-white`;
+  "flex items-center justify-center w-6 h-6 border border-dashed hover:border-brand-strong hover:text-brand-strong border-brand-muted rounded-[50%] text-[11px] text-brand-muted";
+export const cardAssignee = `${avatarBase} w-6 h-6 bg-brand-strong text-[11px] text-white`;
+
+// Story points, a small round number
+export const cardPoints =
+  "inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-brand-surface-alt border border-brand-border text-[11px] font-bold text-brand-text";
+// The start and due date badges, side by side
+export const cardDates = "flex flex-wrap items-center gap-1.5";
+export const cardLabels = "flex flex-wrap items-center gap-1";
+export const cardMoreLabels = "text-[11px] font-semibold text-brand-muted";
+
+/* Labels */
+export const labelChip =
+  "inline-flex items-center gap-1 max-w-full px-2 py-px rounded-md text-[12px] font-semibold leading-[1.5] [overflow-wrap:anywhere]";
+export const labelRemove =
+  "inline-flex items-center justify-center w-4 h-4 -mr-1 p-0 border-0 rounded bg-transparent text-current cursor-pointer opacity-70 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-brand-primary";
 
 /* Priority */
+export const startBadge =
+  "inline-flex shrink-0 items-center gap-1 self-start px-2 py-0.5 rounded-full bg-brand-soft text-[12px] font-semibold whitespace-nowrap text-brand-strong";
 export const dueBadge =
   "inline-flex shrink-0 items-center gap-1 self-start px-2 py-0.5 rounded-full text-[12px] font-semibold whitespace-nowrap";
 export const priority = "inline-flex items-center gap-1 text-[12px] font-semibold capitalize";
@@ -112,6 +132,8 @@ export const sideCardTitle = "mb-3 text-[13px] font-bold tracking-[0.06em] upper
 export const detailRow = "grid grid-cols-[110px_minmax(0,1fr)] items-center gap-3 min-h-9 text-[14px]";
 export const detailLabel = "text-brand-muted";
 export const detailValue = "flex items-center gap-2 min-w-0 font-semibold text-brand-ink";
+// For a value that can take more than one line, e.g. the labels
+export const detailValueWrap = `${detailValue} flex-wrap py-1.5 gap-1.5`;
 export const parentLink = "inline-flex items-center gap-1 self-start";
 export const linkButton =
   "p-0 border-none bg-transparent [font-family:inherit] text-[13px] font-semibold text-brand-strong cursor-pointer hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary";
@@ -166,6 +188,31 @@ export const newTaskButtons = "flex items-center gap-2 ml-auto";
 export const checkboxLabel = "inline-flex items-center gap-2 mr-auto text-[14px] text-brand-ink cursor-pointer";
 export const checkbox = "w-4 h-4 accent-brand-strong cursor-pointer";
 export const fieldHint = "text-[12px] text-brand-muted";
+// A field's label with a shortcut on the right, e.g. "Assign to me"
+export const labelRow = "flex items-center justify-between gap-2";
+
+/* Assignee picker: a button that opens a search popover */
+export const assigneeTrigger = `${inputBase} flex items-center gap-2.5 h-11 py-0 text-left text-[14px]! cursor-pointer hover:border-[#d4d2f2]`;
+export const assigneeInline =
+  "inline-flex items-center gap-2 min-w-0 h-8 -ml-2 px-2 border-none rounded-lg bg-transparent [font-family:inherit] text-[14px] font-semibold text-brand-ink cursor-pointer hover:bg-brand-surface-alt focus-visible:outline-2 focus-visible:outline-brand-primary";
+export const assigneeName = "min-w-0 truncate";
+export const assigneeNone = "min-w-0 truncate font-normal text-brand-muted";
+export const assigneeChevron = "shrink-0 ml-auto text-brand-muted";
+export const avatarSmall = `${avatarBase} w-6 h-6 bg-brand-strong text-[11px] text-white`;
+export const avatarNone = `${avatarBase} w-6 h-6 border border-dashed border-brand-muted text-[12px] text-brand-muted`;
+export const leadBadge =
+  "shrink-0 px-1.5 py-px rounded-md bg-brand-soft text-[11px] font-bold uppercase tracking-[0.02em] text-brand-strong";
+export const assigneeMenu = `${base} w-[300px] max-w-[calc(100vw-32px)] mt-1 border border-brand-border rounded-xl! bg-brand-surface! shadow-[0_12px_32px_rgba(31,29,58,0.16)]!`;
+export const assigneeSearch =
+  "flex items-center gap-2 h-10 m-2 px-3 border border-brand-border rounded-lg text-brand-muted focus-within:border-brand-primary focus-within:shadow-[0_0_0_3px_var(--color-brand-soft)]";
+export const assigneeList = "max-h-[280px] overflow-y-auto m-0 px-1.5 pb-1.5 list-none";
+export const assigneeOption = "flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-[14px] text-brand-ink cursor-pointer";
+export const assigneeOptionActive = `${assigneeOption} bg-brand-surface-alt`;
+export const assigneeOptionText = "flex flex-col flex-1 min-w-0";
+export const assigneeOptionName = "flex items-center gap-1.5 min-w-0 font-semibold [&>span:first-child]:truncate";
+export const assigneeOptionEmail = "truncate text-[12px] text-brand-muted";
+export const assigneeCheck = "shrink-0 text-brand-strong";
+export const assigneeEmpty = "px-3 py-4 text-center text-[13px] text-brand-muted";
 // Expected and actual result side by side; the fields' own top margin is replaced by the gap
 export const bugResults = "grid grid-cols-2 gap-4 mt-4 *:mt-0! max-[720px]:grid-cols-1";
 
