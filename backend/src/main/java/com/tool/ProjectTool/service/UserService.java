@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tool.ProjectTool.cache.CacheClearer;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.UserAlreadyExistException;
 import com.tool.ProjectTool.exception.UserNotFoundException;
@@ -19,6 +20,9 @@ import com.tool.ProjectTool.repo.UserRepository;
 
 @Service
 public class UserService {
+
+	@Autowired
+	private CacheClearer cacheClearer;
 
 	@Autowired
 	private UserRepository userRepo;
@@ -114,6 +118,7 @@ public class UserService {
 				user.setEmail(request.getEmail());
 
 				userRepo.save(user);
+				cacheClearer.userChanged(user.getUserId());
 
 				return "User updated successfully";
 			}

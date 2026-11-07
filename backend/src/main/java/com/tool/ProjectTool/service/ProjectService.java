@@ -8,10 +8,13 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.tool.ProjectTool.cache.CacheClearer;
+import com.tool.ProjectTool.cache.CacheNames;
 import com.tool.ProjectTool.entity.Backlog;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.Users;
@@ -27,6 +30,9 @@ import com.tool.ProjectTool.repo.UserRepository;
 
 @Service
 public class ProjectService {
+
+	@Autowired
+	private CacheClearer cacheClearer;
 
 	@Autowired
 	private ProjectRepository projectRepo;
@@ -134,6 +140,9 @@ public class ProjectService {
 			project.setStatus(ProjectEntity.ACTIVE);
 
 			projectRepo.save(project);
+			// The creator's role may have changed with it
+			cacheClearer.loginChanged(user.getUserId());
+			cacheClearer.projectCreated(user.getUserId());
 
 			return "Project created";
 		} catch (Exception e) {
@@ -142,6 +151,7 @@ public class ProjectService {
 		}
 	}
 
+	@Cacheable(cacheNames = CacheNames.PROJECTS, key = "#userId")
 	public List<ProjectResponse> getAllProjects(String userId) {
 
 		Users user = userRepo.findByUserId(userId);
@@ -168,6 +178,7 @@ public class ProjectService {
 		return projectList;
 	}
 
+	@Cacheable(cacheNames = CacheNames.PROJECT_DETAILS, key = "#id")
 	public ProjectResponse getProjectById(String id) {
 
 		ProjectEntity project = projectRepo.findByProjectId(id);
@@ -198,6 +209,7 @@ public class ProjectService {
 		proj.setProjectName(projRequest.getProjectName().trim());
 
 		projectRepo.save(proj);
+		cacheClearer.projectChanged(proj);
 		return "Project Updated successfully";
 	}
 
@@ -211,6 +223,7 @@ public class ProjectService {
 		proj.setProjectTemplateType(request.getProjectTemplate());
 
 		projectRepo.save(proj);
+		cacheClearer.projectChanged(proj);
 		return "Project template changed";
 	}
 
@@ -225,6 +238,7 @@ public class ProjectService {
 		proj.setDeletedDate(new Date());
 
 		projectRepo.save(proj);
+		cacheClearer.projectChanged(proj);
 		return "Project deleted successfully";
 	}
 
@@ -237,6 +251,7 @@ public class ProjectService {
 		proj.setDeletedDate(null);
 
 		projectRepo.save(proj);
+		cacheClearer.projectChanged(proj);
 		return "Project restored";
 	}
 
@@ -250,6 +265,7 @@ public class ProjectService {
 	}
 
 	/** The lead's deleted projects that can still be restored, the latest first */
+	@Cacheable(cacheNames = CacheNames.DELETED_PROJECTS, key = "#userId")
 	public List<DeletedProjectResponse> getDeletedProjects(String userId) {
 
 		Users user = userRepo.findByUserId(userId);

@@ -28,6 +28,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.tool.ProjectTool.cache.CacheClearer;
 import com.tool.ProjectTool.entity.ActivityLog;
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.ProjectTask;
@@ -48,6 +49,9 @@ class ActivityServiceTest {
 
 	@Mock
 	private JobPublisher publisher;
+
+	@Mock
+	private CacheClearer cacheClearer;
 
 	@InjectMocks
 	private ActivityService service;
@@ -74,6 +78,8 @@ class ActivityServiceTest {
 		service.save(queued.getValue());
 		ArgumentCaptor<ActivityLog> saved = ArgumentCaptor.forClass(ActivityLog.class);
 		verify(activityRepo).save(saved.capture());
+		// The cached feeds of that project and task are cleared
+		verify(cacheClearer).activityAdded(saved.getValue().getProjectIdentifier(), saved.getValue().getTaskSequence());
 		return saved.getValue();
 	}
 

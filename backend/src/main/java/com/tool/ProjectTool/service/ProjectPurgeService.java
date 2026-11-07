@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.tool.ProjectTool.cache.CacheClearer;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.messaging.FileCleanupMessage;
 import com.tool.ProjectTool.messaging.JobPublisher;
@@ -28,6 +29,9 @@ import jakarta.persistence.PersistenceContext;
 // Team members keep their accounts; only their place on the team goes.
 @Service
 public class ProjectPurgeService {
+
+	@Autowired
+	private CacheClearer cacheClearer;
 
 	private static final Logger log = LoggerFactory.getLogger(ProjectPurgeService.class);
 
@@ -47,6 +51,7 @@ public class ProjectPurgeService {
 	public void queuePurge(ProjectEntity project) {
 		project.setStatus(ProjectEntity.REMOVING);
 		projectRepo.save(project);
+		cacheClearer.projectChanged(project);
 		publish(project);
 	}
 
@@ -95,6 +100,7 @@ public class ProjectPurgeService {
 		}
 
 		List<String> files = new TransactionTemplate(transactionManager).execute(status -> deleteRows(project));
+		cacheClearer.projectRemoved(project);
 		for (String file : files) {
 			publisher.publish(MessagingConfig.FILE_CLEANUP_ROUTING_KEY, new FileCleanupMessage(file));
 		}

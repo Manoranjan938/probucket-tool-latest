@@ -6,8 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.tool.ProjectTool.cache.CacheClearer;
+import com.tool.ProjectTool.cache.CacheNames;
 import com.tool.ProjectTool.entity.NotesEntity;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.model.request.NotesRequest;
@@ -20,8 +23,12 @@ import com.tool.ProjectTool.repo.UserRepository;
 public class NotesService {
 
 	@Autowired
+	private CacheClearer cacheClearer;
+
+	@Autowired
 	private NotesRepository noteRepo;
 
+	@Autowired
 	private UserRepository userRepo;
 
 	public String createNote(NotesRequest notesRequest) {
@@ -35,10 +42,12 @@ public class NotesService {
 		newNote.setStatus("Active");
 
 		noteRepo.save(newNote);
+		cacheClearer.notesChanged(notesRequest.getUserId(), notesRequest.getProjectId());
 
 		return "Note Added Successfully";
 	}
 
+	@Cacheable(cacheNames = CacheNames.NOTES, key = "T(com.tool.ProjectTool.cache.CacheClearer).notesKey(#userId, #projectId)")
 	public List<NoteList> getAllNotes(String projectId, String userId) {
 
 		List<Object> notes = noteRepo.getTaskDetailsByUserAndProjectId(projectId, userId);
@@ -61,6 +70,7 @@ public class NotesService {
 		return noteLists;
 	}
 
+	@Cacheable(cacheNames = CacheNames.NOTE_DETAILS, key = "#id")
 	public NoteDetails getNoteDetails(Long id) {
 
 		NotesEntity note = noteRepo.findById(id).get();
@@ -87,6 +97,8 @@ public class NotesService {
 			note.setDeletedDate(new Date());
 
 			noteRepo.save(note);
+			cacheClearer.notesChanged(note.getUserId(), note.getProjectId());
+			cacheClearer.noteChanged(id);
 			return "Task deleted successfully.";
 		}
 

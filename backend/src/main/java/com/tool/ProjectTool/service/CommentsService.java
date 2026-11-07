@@ -5,9 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tool.ProjectTool.cache.CacheClearer;
+import com.tool.ProjectTool.cache.CacheNames;
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.Comment;
 import com.tool.ProjectTool.entity.ProjectTask;
@@ -23,6 +26,9 @@ import com.tool.ProjectTool.repo.UserRepository;
 
 @Service
 public class CommentsService {
+
+	@Autowired
+	private CacheClearer cacheClearer;
 
 	@Autowired
 	private CommentsRepository commentRepo;
@@ -50,6 +56,7 @@ public class CommentsService {
 				comment.setCommentedOnType(task.getId());
 
 				commentRepo.save(comment);
+				cacheClearer.commentAdded(task.getProjectSequence());
 				activityService.recordTaskActivity(ActivityType.COMMENT_ADDED, task, null, null);
 				return "Comment added successfully";
 			}
@@ -59,6 +66,7 @@ public class CommentsService {
 		throw new UserNotFoundException("User not found");
 	}
 	
+	@Cacheable(cacheNames = CacheNames.COMMENTS, key = "#taskSeq")
 	public List<CommentsList> getCommetLists(String taskSeq){
 		
 		List<Object> comments = commentRepo.findCommentsByTaskId(taskSeq);

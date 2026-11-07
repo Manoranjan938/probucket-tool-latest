@@ -6,11 +6,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tool.ProjectTool.cache.CacheClearer;
+import com.tool.ProjectTool.cache.CacheNames;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.TeamDetails;
 import com.tool.ProjectTool.entity.Users;
@@ -28,6 +31,9 @@ import com.tool.ProjectTool.repo.UserRepository;
 
 @Service
 public class TeamService {
+
+	@Autowired
+	private CacheClearer cacheClearer;
 	
 	@Autowired
 	private UserRepository userRepo;
@@ -102,6 +108,7 @@ public class TeamService {
 		team.setUserId(newUs.getId());
 		
 		teamRepo.save(team);
+		cacheClearer.teamChanged(teamReq.getProjectId());
 
 		activityService.recordMemberAdded(project.getProjectIdentifier(), newUser.getName());
 		
@@ -110,6 +117,7 @@ public class TeamService {
 		return new NewTeamMemberResponse(randomPass);
 	}
 	
+	@Cacheable(cacheNames = CacheNames.TEAM_MEMBERS, key = "#projectId")
 	public List<TeamMembersList> getTeamList(String projectId) {
 
 		List<Object> teams = teamRepo.getTeamListByProject(projectId);
@@ -136,6 +144,7 @@ public class TeamService {
 		throw new ProjectNotFoundException("Project not found with id" + projectId);
 	}
 	
+	@Cacheable(cacheNames = CacheNames.TEAM_PROJECTS, key = "#userId")
 	public List<ProjectResponse> getAllProjects(String userId) {
 
 		Users user = userRepo.findByUserId(userId);
@@ -189,6 +198,8 @@ public class TeamService {
 				}
 
 				userRepo.save(user);
+				cacheClearer.loginChanged(user.getUserId());
+				cacheClearer.teamChanged(team.getProjectId());
 			}
 			return "User updated successfully";
 		}

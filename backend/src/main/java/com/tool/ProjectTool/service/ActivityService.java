@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.tool.ProjectTool.cache.CacheClearer;
+import com.tool.ProjectTool.cache.CacheNames;
 import com.tool.ProjectTool.entity.ActivityLog;
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.ProjectTask;
@@ -29,6 +32,9 @@ import com.tool.ProjectTool.repo.ActivityLogRepository;
 
 @Service
 public class ActivityService {
+
+	@Autowired
+	private CacheClearer cacheClearer;
 
 	private static final int PROJECT_FEED_SIZE = 10;
 
@@ -66,8 +72,10 @@ public class ActivityService {
 		activity.setCreatedAt(Date.from(message.createdAt()));
 
 		activityRepo.save(activity);
+		cacheClearer.activityAdded(message.projectIdentifier(), message.taskSequence());
 	}
 
+	@Cacheable(cacheNames = CacheNames.PROJECT_ACTIVITY, key = "#projectIdentifier")
 	public List<ActivityResponse> getProjectActivity(String projectIdentifier) {
 
 		return activityRepo
@@ -82,6 +90,8 @@ public class ActivityService {
 	 * @param from   earliest time, inclusive
 	 * @param to     latest time, exclusive
 	 */
+	@Cacheable(cacheNames = CacheNames.ACTIVITY_LOG,
+			key = "#projectIdentifier + '|' + #before + '|' + #actorId + '|' + #types + '|' + #from + '|' + #to")
 	public ActivityPageResponse getProjectActivityLog(String projectIdentifier, Long before, String actorId,
 			List<ActivityType> types, Instant from, Instant to) {
 
@@ -127,6 +137,7 @@ public class ActivityService {
 	}
 
 	/** Everyone who has made a change in the project, by their latest name, sorted by name */
+	@Cacheable(cacheNames = CacheNames.ACTIVITY_PEOPLE, key = "#projectIdentifier")
 	public List<ActivityPersonResponse> getProjectActivityPeople(String projectIdentifier) {
 
 		Map<String, String> names = new LinkedHashMap<>();
@@ -139,6 +150,7 @@ public class ActivityService {
 				.toList();
 	}
 
+	@Cacheable(cacheNames = CacheNames.TASK_ACTIVITY, key = "#taskSequence")
 	public List<ActivityResponse> getTaskActivity(String taskSequence) {
 
 		return activityRepo.findByTaskSequenceOrderByCreatedAtDescIdDesc(taskSequence, PageRequest.of(0, TASK_FEED_SIZE))

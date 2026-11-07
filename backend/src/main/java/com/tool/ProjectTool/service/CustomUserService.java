@@ -5,7 +5,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.repo.UserRepository;
@@ -15,6 +14,9 @@ public class CustomUserService implements UserDetailsService {
 
 	@Autowired
 	private UserRepository userRepo;
+
+	@Autowired
+	private UserLookup userLookup;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -28,16 +30,8 @@ public class CustomUserService implements UserDetailsService {
 		return user;
 	}
 
-	@Transactional
+	/** The logged-in user from the cache: what the app reads of it, without the password (see CachedUser) */
 	public Users loadUserByUserId(String userId) {
-
-		Users user = userRepo.findByUserId(userId);
-
-		if (user == null) {
-			throw new UsernameNotFoundException("User not found.");
-		}
-
-		return user;
+		return userLookup.find(userId).toUser();
 	}
-
 }

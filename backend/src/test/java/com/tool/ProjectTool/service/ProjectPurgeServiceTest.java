@@ -31,6 +31,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
+import com.tool.ProjectTool.cache.CacheClearer;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.messaging.FileCleanupMessage;
 import com.tool.ProjectTool.messaging.JobPublisher;
@@ -56,6 +57,9 @@ class ProjectPurgeServiceTest {
 	@Mock
 	private PlatformTransactionManager transactionManager;
 
+	@Mock
+	private CacheClearer cacheClearer;
+
 	private ProjectPurgeService service;
 
 	@BeforeEach
@@ -65,6 +69,7 @@ class ProjectPurgeServiceTest {
 		ReflectionTestUtils.setField(service, "publisher", publisher);
 		ReflectionTestUtils.setField(service, "em", em);
 		ReflectionTestUtils.setField(service, "transactionManager", transactionManager);
+		ReflectionTestUtils.setField(service, "cacheClearer", cacheClearer);
 	}
 
 	private static ProjectEntity project(String projectId, int status) {
@@ -85,8 +90,9 @@ class ProjectPurgeServiceTest {
 		service.queuePurge(project);
 
 		assertEquals(ProjectEntity.REMOVING, project.getStatus());
-		InOrder order = inOrder(projectRepo, publisher);
+		InOrder order = inOrder(projectRepo, cacheClearer, publisher);
 		order.verify(projectRepo).save(project);
+		order.verify(cacheClearer).projectChanged(project);
 		order.verify(publisher).publish(MessagingConfig.PROJECT_PURGE_ROUTING_KEY, new ProjectPurgeMessage("p1"));
 	}
 
@@ -160,6 +166,7 @@ class ProjectPurgeServiceTest {
 
 		verify(transactionManager, times(1)).commit(any());
 		verify(em).createNativeQuery("delete from projects where id = :id");
+		verify(cacheClearer).projectRemoved(any(ProjectEntity.class));
 		verify(publisher).publish(MessagingConfig.FILE_CLEANUP_ROUTING_KEY, new FileCleanupMessage("a.png"));
 		verify(publisher).publish(MessagingConfig.FILE_CLEANUP_ROUTING_KEY, new FileCleanupMessage("b.png"));
 	}
@@ -196,6 +203,7 @@ class ProjectPurgeServiceTest {
 
 		verify(transactionManager).rollback(any());
 		verify(transactionManager, never()).commit(any());
+		verify(cacheClearer, never()).projectRemoved(any());
 		verify(publisher, never()).publish(eq(MessagingConfig.FILE_CLEANUP_ROUTING_KEY), any());
 	}
 }

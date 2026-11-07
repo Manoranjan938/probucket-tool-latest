@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.tool.ProjectTool.cache.CacheClearer;
 import com.tool.ProjectTool.entity.ProjectEntity;
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
@@ -46,12 +47,15 @@ class ProjectServiceTest {
 	@Mock
 	private ProjectPurgeService purgeService;
 
+	@Mock
+	private CacheClearer cacheClearer;
+
 	@InjectMocks
 	private ProjectService service;
 
 	@BeforeEach
 	void user() {
-		lenient().when(userRepo.findByUserId("me")).thenReturn(new Users());
+		lenient().when(userRepo.findByUserId("me")).thenReturn(person("me"));
 	}
 
 	@AfterEach
@@ -106,6 +110,7 @@ class ProjectServiceTest {
 
 		assertEquals("New name", project.getProjectName());
 		verify(projectRepo).save(project);
+		verify(cacheClearer).projectChanged(project);
 	}
 
 	@Test
@@ -137,6 +142,7 @@ class ProjectServiceTest {
 
 		assertEquals("project and bug", project.getProjectTemplateType());
 		verify(projectRepo).save(project);
+		verify(cacheClearer).projectChanged(project);
 	}
 
 	@Test
@@ -207,6 +213,7 @@ class ProjectServiceTest {
 		assertEquals(null, project.getDeletedDate());
 		assertEquals(null, project.getDeletedBy());
 		verify(projectRepo).save(project);
+		verify(cacheClearer).projectChanged(project);
 	}
 
 	@Test
@@ -316,6 +323,7 @@ class ProjectServiceTest {
 		assertEquals(ProjectEntity.DELETED, project.getStatus());
 		assertEquals("lead", project.getDeletedBy());
 		verify(projectRepo).save(project);
+		verify(cacheClearer).projectChanged(project);
 	}
 
 	private ProjectEntity create(String name, String... taken) {
@@ -331,6 +339,9 @@ class ProjectServiceTest {
 
 		ArgumentCaptor<ProjectEntity> saved = ArgumentCaptor.forClass(ProjectEntity.class);
 		verify(projectRepo).save(saved.capture());
+		// The creator's role changes with a new project, and their project list grows
+		verify(cacheClearer).loginChanged("me");
+		verify(cacheClearer).projectCreated("me");
 		return saved.getValue();
 	}
 
