@@ -1,21 +1,11 @@
 package com.tool.ProjectTool.service;
 
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
-
-import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.UserAlreadyExistException;
@@ -23,12 +13,9 @@ import com.tool.ProjectTool.exception.UserNotFoundException;
 import com.tool.ProjectTool.model.request.UpdatePasswordRequest;
 import com.tool.ProjectTool.model.request.UpdateUserRequest;
 import com.tool.ProjectTool.model.request.UserRequest;
-import com.tool.ProjectTool.model.response.EmailResponse;
 import com.tool.ProjectTool.model.response.UserResponse;
 import com.tool.ProjectTool.repo.UserRepository;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
 
 @Service
 public class UserService {
@@ -43,16 +30,7 @@ public class UserService {
 	private BCryptPasswordEncoder passEncode;
 
 	@Autowired
-	private JavaMailSender mailSender;
-
-	@Value("${app.mail.from}")
-	private String mailFrom;
-
-	@Value("${app.frontend-url}")
-	private String frontendUrl;
-
-	@Autowired
-	private Configuration config;
+	private EmailService emailService;
 
 	static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	static SecureRandom rnd = new SecureRandom();
@@ -95,7 +73,7 @@ public class UserService {
 				users.setVerifyToken(token);
 
 				userRepo.save(users);
-				sendRegistrationConfirmationEmail(user.getUsername(), token);
+				emailService.sendVerifyAccount(user.getUsername(), token);
 
 				return "User Added successfully";
 
@@ -180,7 +158,7 @@ public class UserService {
 
 			user.setVerifyToken(token);
 			userRepo.save(user);
-			sendPasswordChangeRequestEmail(email, token);
+			emailService.sendPasswordReset(email, token);
 
 			return "Email sended";
 		}
@@ -225,87 +203,4 @@ public class UserService {
 		throw new UserNotFoundException("User does not exist");
 	}
 
-	public EmailResponse sendRegistrationConfirmationEmail(String email, String token) {
-
-		EmailResponse response = new EmailResponse();
-		MimeMessage message = mailSender.createMimeMessage();
-
-		Map<String, Object> model = new HashMap<>();
-
-		try {
-
-			MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-					StandardCharsets.UTF_8.name());
-
-			// helper.addAttachment("logo.png", new ClassPathResource("/static/logo.png"));
-
-			model.put("token", token);
-
-			model.put("frontendUrl", frontendUrl);
-
-			Template t = config.getTemplate("registration-confirmation-template.ftl");
-			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
-
-			helper.setTo(email);
-			helper.setText(html, true);
-			helper.setSubject("Verify email request");
-			helper.setFrom(mailFrom);
-			helper.addInline("logo.png", new ClassPathResource("logo.png"));
-
-			mailSender.send(message);
-
-			response.setMessage("Mail send to: " + email + " and successfuly requested.");
-			response.setStatus(true);
-
-		} catch (Exception e) {
-			response.setMessage(
-					"Mail Sending failure " + e.getMessage() + " and something went wrong while requesting.");
-			response.setStatus(false);
-		}
-
-		return response;
-
-	}
-
-	public EmailResponse sendPasswordChangeRequestEmail(String email, String token) {
-
-		EmailResponse response = new EmailResponse();
-		MimeMessage message = mailSender.createMimeMessage();
-
-		Map<String, Object> model = new HashMap<>();
-
-		try {
-
-			MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-					StandardCharsets.UTF_8.name());
-
-			// helper.addAttachment("logo.png", new ClassPathResource("/static/logo.png"));
-
-			model.put("token", token);
-
-			model.put("frontendUrl", frontendUrl);
-
-			Template t = config.getTemplate("password-change-template.ftl");
-			String html = FreeMarkerTemplateUtils.processTemplateIntoString(t, model);
-
-			helper.setTo(email);
-			helper.setText(html, true);
-			helper.setSubject("Complete your password reset request");
-			helper.setFrom(mailFrom);
-			helper.addInline("logo.png", new ClassPathResource("logo.png"));
-
-			mailSender.send(message);
-
-			response.setMessage("Mail send to: " + email + " and successfuly requested.");
-			response.setStatus(true);
-
-		} catch (Exception e) {
-			response.setMessage(
-					"Mail Sending failure " + e.getMessage() + " and something went wrong while requesting.");
-			response.setStatus(false);
-		}
-
-		return response;
-
-	}
 }

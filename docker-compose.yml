@@ -39,6 +39,44 @@ services:
     networks:
       - probucketool
 
+  # Queue for emails and other slow work. Admin page: http://localhost:15672
+  # (user/password: RABBITMQ_DEFAULT_USER / RABBITMQ_DEFAULT_PASS from backend/.env)
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    container_name: probucket_rabbitmq
+    # RabbitMQ keeps its data under the node name, which comes from the hostname
+    hostname: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file: ./backend/.env
+    # Queued jobs and the dead-letter queues survive a restart
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+    networks:
+      - probucketool
+
+  # Cache only, so nothing is written to disk
+  redis:
+    image: redis:7.4-alpine
+    container_name: probucket_redis
+    ports:
+      - 6379:6379
+    env_file: ./backend/.env
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --save '' --appendonly no"]
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - probucketool
+
   probucket_backend:
     container_name: pro_tool_backend
     build: ./backend
@@ -47,10 +85,18 @@ services:
     depends_on:
       postgresdb_init:
         condition: service_completed_successfully
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file: ./backend/.env
     environment:
       - DB_HOST=postgresdb
       - DB_PORT=5432
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - ATTACHMENTS_DIR=/application/attachments
     # Task images; kept when the container is rebuilt
     volumes:
@@ -73,6 +119,8 @@ volumes:
   postgres-data:
     driver: local
   attachments-data:
+    driver: local
+  rabbitmq-data:
     driver: local
 
 networks:
