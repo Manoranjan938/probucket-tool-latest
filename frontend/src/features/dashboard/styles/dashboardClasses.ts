@@ -74,7 +74,8 @@ export const searchInput =
   "flex-1 min-w-0 border-none bg-transparent outline-none [font-family:inherit] text-[14px] text-brand-ink placeholder:text-brand-muted";
 
 /* Home page */
-export const home = `${base} flex flex-col gap-6 max-w-[1200px]`;
+// Fills the width beside the sidebar (a max-width here left a gap on the right on wide screens)
+export const home = `${base} flex flex-col gap-6`;
 // Greeting with the New task button; the button wraps below it on narrow screens
 export const homeHeader = "flex items-start justify-between gap-4 flex-wrap";
 export const greeting = "mb-1 text-[24px] font-bold leading-[1.25] tracking-[-0.02em] text-brand-ink";
