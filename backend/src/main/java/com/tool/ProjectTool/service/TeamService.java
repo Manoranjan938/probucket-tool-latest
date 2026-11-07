@@ -71,7 +71,7 @@ public class TeamService {
 
 		// Nobody is added to a project that doesn't exist or is deleted
 		ProjectEntity project = projectRepo.findByProjectId(teamReq.getProjectId());
-		if (project == null || project.isDeleted()) {
+		if (project == null || !project.isActive()) {
 			throw new ProjectNotFoundException("Project not found");
 		}
 		

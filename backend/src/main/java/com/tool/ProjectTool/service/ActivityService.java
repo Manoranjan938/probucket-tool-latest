@@ -19,6 +19,9 @@ import com.tool.ProjectTool.entity.ActivityLog;
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.messaging.ActivityMessage;
+import com.tool.ProjectTool.messaging.JobPublisher;
+import com.tool.ProjectTool.messaging.MessagingConfig;
 import com.tool.ProjectTool.model.response.ActivityPageResponse;
 import com.tool.ProjectTool.model.response.ActivityPersonResponse;
 import com.tool.ProjectTool.model.response.ActivityResponse;
@@ -36,21 +39,31 @@ public class ActivityService {
 	@Autowired
 	private ActivityLogRepository activityRepo;
 
+	@Autowired
+	private JobPublisher publisher;
+
+	// Saved by the activity queue (ActivityListener), once the change itself has been saved
 	public void recordTaskActivity(ActivityType type, ProjectTask task, String oldValue, String newValue) {
-
-		ActivityLog activity = newActivity(type, task.getProjectIdentifier());
-		activity.setTaskSequence(task.getProjectSequence());
-		activity.setTaskName(task.getTaskName());
-		activity.setOldValue(oldValue);
-		activity.setNewValue(newValue);
-
-		activityRepo.save(activity);
+		queue(type, task.getProjectIdentifier(), task.getProjectSequence(), task.getTaskName(), oldValue, newValue);
 	}
 
 	public void recordMemberAdded(String projectIdentifier, String memberName) {
+		queue(ActivityType.MEMBER_ADDED, projectIdentifier, null, null, null, memberName);
+	}
 
-		ActivityLog activity = newActivity(ActivityType.MEMBER_ADDED, projectIdentifier);
-		activity.setNewValue(memberName);
+	/** Called from the activity queue: saves the entry as it was recorded */
+	public void save(ActivityMessage message) {
+
+		ActivityLog activity = new ActivityLog();
+		activity.setType(message.type());
+		activity.setProjectIdentifier(message.projectIdentifier());
+		activity.setTaskSequence(message.taskSequence());
+		activity.setTaskName(message.taskName());
+		activity.setOldValue(message.oldValue());
+		activity.setNewValue(message.newValue());
+		activity.setActorId(message.actorId());
+		activity.setActorName(message.actorName());
+		activity.setCreatedAt(Date.from(message.createdAt()));
 
 		activityRepo.save(activity);
 	}
@@ -132,20 +145,21 @@ public class ActivityService {
 				.stream().map(this::toResponse).toList();
 	}
 
-	// The actor comes from the login, never from the request, so an entry can't name someone else
-	private ActivityLog newActivity(ActivityType type, String projectIdentifier) {
+	// The actor comes from the login, never from the request, so an entry can't name someone else.
+	// The time is the time of the change, so the entry sorts in its place even if it is saved a moment later.
+	private void queue(ActivityType type, String projectIdentifier, String taskSequence, String taskName,
+			String oldValue, String newValue) {
 
-		ActivityLog activity = new ActivityLog();
-		activity.setType(type);
-		activity.setProjectIdentifier(projectIdentifier);
-
+		String actorId = null;
+		String actorName = null;
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null && auth.getPrincipal() instanceof Users actor) {
-			activity.setActorId(actor.getUserId());
-			activity.setActorName(actor.getName());
+			actorId = actor.getUserId();
+			actorName = actor.getName();
 		}
 
-		return activity;
+		publisher.publish(MessagingConfig.ACTIVITY_ROUTING_KEY, new ActivityMessage(type, projectIdentifier,
+				taskSequence, taskName, oldValue, newValue, actorId, actorName, Instant.now()));
 	}
 
 	private ActivityResponse toResponse(ActivityLog activity) {

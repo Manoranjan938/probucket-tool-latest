@@ -13,13 +13,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.tool.ProjectTool.entity.ProjectEntity;
+import com.tool.ProjectTool.messaging.FileCleanupMessage;
+import com.tool.ProjectTool.messaging.JobPublisher;
+import com.tool.ProjectTool.messaging.MessagingConfig;
+import com.tool.ProjectTool.messaging.ProjectPurgeMessage;
 import com.tool.ProjectTool.repo.ProjectRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 // Removes deleted projects for good: by hand from Recently deleted, or every night once their
-// ProjectService.RETENTION_DAYS are over. Team members keep their accounts; only their place on the team goes.
+// ProjectService.RETENTION_DAYS are over. Either way the project is first marked REMOVING, which hides it and
+// stops a restore, and queued; the project queue (ProjectPurgeListener) then removes it.
+// Team members keep their accounts; only their place on the team goes.
 @Service
 public class ProjectPurgeService {
 
@@ -32,45 +38,71 @@ public class ProjectPurgeService {
 	private ProjectRepository projectRepo;
 
 	@Autowired
-	private AttachmentStorage storage;
+	private JobPublisher publisher;
 
 	@Autowired
 	private PlatformTransactionManager transactionManager;
 
-	/** Everything in the project goes in one transaction; the image files go once it has committed */
-	public void purge(ProjectEntity project) {
-
-		List<String> files = new TransactionTemplate(transactionManager).execute(status -> deleteRows(project));
-		for (String file : files) {
-			try {
-				storage.delete(file);
-			} catch (RuntimeException e) {
-				// The project is already gone; a file left behind only takes space
-				log.warn("Couldn't delete image file {}", file, e);
-			}
-		}
+	/** Hides the project at once and queues its removal */
+	public void queuePurge(ProjectEntity project) {
+		project.setStatus(ProjectEntity.REMOVING);
+		projectRepo.save(project);
+		publish(project);
 	}
 
-	// Every night at 03:30 (server time), after the refresh-token clean-up. Each project is removed on its own,
-	// so one that fails doesn't stop the rest and is tried again the next night.
+	// Every night at 03:30 (server time), after the refresh-token clean-up: queues the deleted projects whose days
+	// are over, and again any project still being removed (its queueing failed, or its removal ended in the
+	// dead-letter queue). Removing a project twice is harmless.
 	@Scheduled(cron = "${app.projects.purge-cron:0 30 3 * * *}")
 	public void purgeExpired() {
 
 		Date cutoff = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(ProjectService.RETENTION_DAYS));
 		List<ProjectEntity> expired = projectRepo.findDeletedBefore(cutoff);
+		List<ProjectEntity> stuck = projectRepo.findByStatus(ProjectEntity.REMOVING);
 
-		int removed = 0;
+		int queued = 0;
 		for (ProjectEntity project : expired) {
 			try {
-				purge(project);
-				removed++;
+				queuePurge(project);
+				queued++;
 			} catch (RuntimeException e) {
-				log.error("Couldn't remove deleted project {} for good", project.getProjectIdentifier(), e);
+				// Tried again the next night
+				log.error("Couldn't queue deleted project {} for removal", project.getProjectIdentifier(), e);
 			}
 		}
-		if (!expired.isEmpty()) {
-			log.info("Removed {} of {} deleted projects for good", removed, expired.size());
+		stuck.forEach(this::publish);
+
+		if (!expired.isEmpty() || !stuck.isEmpty()) {
+			log.info("Queued {} of {} expired projects for removal, and {} still being removed again", queued,
+					expired.size(), stuck.size());
 		}
+	}
+
+	/**
+	 * Called from the project queue. Everything in the project goes in one transaction, and its image files are
+	 * queued for clean-up once that has committed. Throws if it fails, so the queue retries it.
+	 */
+	public void purge(String projectId) {
+
+		ProjectEntity project = projectRepo.findByProjectId(projectId);
+		if (project == null) {
+			log.info("Project {} is already removed", projectId);
+			return;
+		}
+		if (!project.isRemoving()) {
+			log.warn("Project {} isn't marked for removal, so it is left as it is", project.getProjectIdentifier());
+			return;
+		}
+
+		List<String> files = new TransactionTemplate(transactionManager).execute(status -> deleteRows(project));
+		for (String file : files) {
+			publisher.publish(MessagingConfig.FILE_CLEANUP_ROUTING_KEY, new FileCleanupMessage(file));
+		}
+		log.info("Removed project {} for good", project.getProjectIdentifier());
+	}
+
+	private void publish(ProjectEntity project) {
+		publisher.publish(MessagingConfig.PROJECT_PURGE_ROUTING_KEY, new ProjectPurgeMessage(project.getProjectId()));
 	}
 
 	// Children first, so no row is left pointing at one that is gone. Returns the stored names of the images.

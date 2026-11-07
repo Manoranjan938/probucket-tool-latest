@@ -37,6 +37,9 @@ import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.DataNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
+import com.tool.ProjectTool.messaging.FileCleanupMessage;
+import com.tool.ProjectTool.messaging.JobPublisher;
+import com.tool.ProjectTool.messaging.MessagingConfig;
 import com.tool.ProjectTool.model.response.AttachmentResponse;
 import com.tool.ProjectTool.repo.BacklogRepository;
 import com.tool.ProjectTool.repo.ProjectTaskRepository;
@@ -59,6 +62,9 @@ class AttachmentServiceTest {
 
 	@Mock
 	private ActivityService activityService;
+
+	@Mock
+	private JobPublisher publisher;
 
 	@InjectMocks
 	private AttachmentService service;
@@ -194,7 +200,7 @@ class AttachmentServiceTest {
 	}
 
 	@Test
-	void theUploaderCanDeleteAndTheFileGoesWithIt() {
+	void theUploaderCanDeleteAndTheFileIsQueuedForCleanUp() {
 		ProjectTask task = task();
 		ledBy(user("lead", "Lena"));
 		TaskAttachment attachment = attachment("user-1");
@@ -203,7 +209,9 @@ class AttachmentServiceTest {
 		assertEquals("Image deleted", service.delete("att-1"));
 
 		verify(attachmentRepo).delete(attachment);
-		verify(storage).delete("stored.png");
+		// The file clean-up queue deletes it once the row is gone, not the request
+		verify(publisher).publish(MessagingConfig.FILE_CLEANUP_ROUTING_KEY, new FileCleanupMessage("stored.png"));
+		verify(storage, never()).delete(anyString());
 		verify(activityService).recordTaskActivity(eq(ActivityType.ATTACHMENT_REMOVED), eq(task), eq("shot.png"), isNull());
 	}
 
@@ -230,7 +238,7 @@ class AttachmentServiceTest {
 
 		assertEquals("Only the person who attached it or the project lead can delete this image", error.getMessage());
 		verify(attachmentRepo, never()).delete(any());
-		verify(storage, never()).delete(anyString());
+		verify(publisher, never()).publish(anyString(), any());
 	}
 
 	@Test

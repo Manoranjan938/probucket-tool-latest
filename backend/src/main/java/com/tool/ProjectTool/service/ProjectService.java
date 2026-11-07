@@ -171,8 +171,8 @@ public class ProjectService {
 	public ProjectResponse getProjectById(String id) {
 
 		ProjectEntity project = projectRepo.findByProjectId(id);
-		// A deleted project can't be opened until it is restored
-		if (project != null && !project.isDeleted()) {
+		// A deleted project can't be opened until it is restored, nor one that is being removed
+		if (project != null && project.isActive()) {
 
 			ProjectResponse response = new ProjectResponse();
 
@@ -241,10 +241,11 @@ public class ProjectService {
 	}
 
 	// Lead only, from Recently deleted: the project must be deleted already. Can't be undone.
+	// It disappears at once; the project queue removes its data in the background.
 	public String deleteProjectForever(String projectId) {
 
 		ProjectEntity proj = findAsLead(projectId, "delete", true);
-		purgeService.purge(proj);
+		purgeService.queuePurge(proj);
 		return "Project deleted for good";
 	}
 
@@ -268,11 +269,12 @@ public class ProjectService {
 		return findAsLead(projectId, action, false);
 	}
 
-	// deleted: whether the project must be a deleted one (restore) or one that isn't (everything else)
+	// deleted: whether the project must be a deleted one (restore, delete forever) or an active one (everything else).
+	// One that is being removed is neither.
 	private ProjectEntity findAsLead(String projectId, String action, boolean deleted) {
 
 		ProjectEntity proj = projectRepo.findByProjectId(projectId);
-		if (proj == null || proj.isDeleted() != deleted) {
+		if (proj == null || (deleted ? !proj.isDeleted() : !proj.isActive())) {
 			throw new ProjectNotFoundException("Project Not found with this project id");
 		}
 

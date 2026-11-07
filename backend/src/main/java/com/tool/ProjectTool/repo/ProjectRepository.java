@@ -17,8 +17,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
 	public boolean existsByProjectIdentifier(String projectIdentifier);
 
-	// Deleted projects are left out (status 0)
-	@Query(value = "select * from projects p where user_id =:userId and status <> 0", nativeQuery = true)
+	// Only active projects (status 1): deleted ones and ones being removed are left out
+	@Query(value = "select * from projects p where user_id =:userId and status = 1", nativeQuery = true)
 	public List<ProjectEntity> getProjectsByUserId(long userId);
 
 	// The lead's deleted projects, the latest first
@@ -28,5 +28,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 	// Deleted projects whose time to be restored is over
 	@Query("select p from ProjectEntity p where p.status = 0 and p.deletedDate < :cutoff")
 	public List<ProjectEntity> findDeletedBefore(@Param("cutoff") Date cutoff);
+
+	public List<ProjectEntity> findByStatus(int status);
 
 }

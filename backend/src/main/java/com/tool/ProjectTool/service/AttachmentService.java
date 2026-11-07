@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,9 @@ import com.tool.ProjectTool.entity.Users;
 import com.tool.ProjectTool.exception.BadRequestException;
 import com.tool.ProjectTool.exception.DataNotFoundException;
 import com.tool.ProjectTool.exception.TaskIdNotFoundException;
+import com.tool.ProjectTool.messaging.FileCleanupMessage;
+import com.tool.ProjectTool.messaging.JobPublisher;
+import com.tool.ProjectTool.messaging.MessagingConfig;
 import com.tool.ProjectTool.model.response.AttachmentResponse;
 import com.tool.ProjectTool.repo.BacklogRepository;
 import com.tool.ProjectTool.repo.ProjectTaskRepository;
@@ -37,6 +42,8 @@ public class AttachmentService {
 	public static final long MAX_SIZE = 5L * 1024 * 1024;
 	public static final int MAX_PER_TASK = 10;
 	private static final int MAX_NAME_LENGTH = 120;
+
+	private static final Logger log = LoggerFactory.getLogger(AttachmentService.class);
 
 	@Autowired
 	private TaskAttachmentRepository attachmentRepo;
@@ -52,6 +59,9 @@ public class AttachmentService {
 
 	@Autowired
 	private ActivityService activityService;
+
+	@Autowired
+	private JobPublisher publisher;
 
 	// The image types we take, told apart by their first bytes rather than what the browser claims
 	enum ImageType {
@@ -144,7 +154,7 @@ public class AttachmentService {
 		Users me = currentUser();
 		List<String> stored = new ArrayList<>();
 		// If saving the rows fails, the files written for them go too
-		afterRollback(() -> stored.forEach(storage::delete));
+		afterRollback(() -> stored.forEach(this::deleteQuietly));
 
 		for (Checked item : checked) {
 			String storedName = UUID.randomUUID() + "." + item.type().extension;
@@ -196,8 +206,8 @@ public class AttachmentService {
 
 		attachmentRepo.delete(attachment);
 		activityService.recordTaskActivity(ActivityType.ATTACHMENT_REMOVED, task, attachment.getFileName(), null);
-		// The file goes once the row is really gone
-		afterCommit(() -> storage.delete(attachment.getStoredName()));
+		// The file clean-up queue removes the file once the row is really gone
+		publisher.publish(MessagingConfig.FILE_CLEANUP_ROUTING_KEY, new FileCleanupMessage(attachment.getStoredName()));
 		return "Image deleted";
 	}
 
@@ -264,6 +274,15 @@ public class AttachmentService {
 		return base + suffix;
 	}
 
+	// Best effort: the upload is failing anyway, and a file left behind only takes space
+	private void deleteQuietly(String storedName) {
+		try {
+			storage.delete(storedName);
+		} catch (RuntimeException e) {
+			log.warn("Couldn't delete image file {} after a failed upload", storedName, e);
+		}
+	}
+
 	private void afterRollback(Runnable action) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -274,19 +293,6 @@ public class AttachmentService {
 					}
 				}
 			});
-		}
-	}
-
-	private void afterCommit(Runnable action) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					action.run();
-				}
-			});
-		} else {
-			action.run();
 		}
 	}
 }

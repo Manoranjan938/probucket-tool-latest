@@ -1,3 +1,4 @@
+import type { UnknownAction } from "@reduxjs/toolkit";
 import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import type { AxiosRequestConfig } from "axios";
 import axios from "shared/services/axios";
@@ -44,6 +45,25 @@ export const api = createApi({
   tagTypes: ["Project", "Task", "Activity", "Comment", "Note", "TeamMember", "Attachment"],
   endpoints: () => ({}),
 });
+
+// Activity entries are saved by a background job on the server, a moment after the change itself
+export const ACTIVITY_RELOAD_DELAY_MS = 1500;
+
+/**
+ * For changes that are recorded in the activity: besides the usual reload when the change succeeds,
+ * activity is reloaded once more shortly after, to pick up the entry the server saves in the background.
+ */
+export const reloadActivityLater = async (
+  _arg: unknown,
+  { dispatch, queryFulfilled }: { dispatch: (action: UnknownAction) => unknown; queryFulfilled: Promise<unknown> },
+) => {
+  try {
+    await queryFulfilled;
+  } catch {
+    return;
+  }
+  setTimeout(() => dispatch(api.util.invalidateTags(["Activity"])), ACTIVITY_RELOAD_DELAY_MS);
+};
 
 /** Picks the data out of the response body */
 export const responseData = <T>(res: ApiResponse<T>) => res.data;

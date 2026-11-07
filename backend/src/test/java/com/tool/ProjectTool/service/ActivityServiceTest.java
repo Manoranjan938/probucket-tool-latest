@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,9 @@ import com.tool.ProjectTool.entity.ActivityLog;
 import com.tool.ProjectTool.entity.ActivityType;
 import com.tool.ProjectTool.entity.ProjectTask;
 import com.tool.ProjectTool.entity.Users;
+import com.tool.ProjectTool.messaging.ActivityMessage;
+import com.tool.ProjectTool.messaging.JobPublisher;
+import com.tool.ProjectTool.messaging.MessagingConfig;
 import com.tool.ProjectTool.model.response.ActivityPageResponse;
 import com.tool.ProjectTool.model.response.ActivityPersonResponse;
 import com.tool.ProjectTool.model.response.ActivityResponse;
@@ -41,6 +45,9 @@ class ActivityServiceTest {
 
 	@Mock
 	private ActivityLogRepository activityRepo;
+
+	@Mock
+	private JobPublisher publisher;
 
 	@InjectMocks
 	private ActivityService service;
@@ -58,10 +65,28 @@ class ActivityServiceTest {
 				.setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
 	}
 
+	// Recording only queues the entry; the activity queue then saves it. This does both, like the app does.
 	private ActivityLog saved() {
+		verify(activityRepo, never()).save(any());
+		ArgumentCaptor<ActivityMessage> queued = ArgumentCaptor.forClass(ActivityMessage.class);
+		verify(publisher).publish(eq(MessagingConfig.ACTIVITY_ROUTING_KEY), queued.capture());
+
+		service.save(queued.getValue());
 		ArgumentCaptor<ActivityLog> saved = ArgumentCaptor.forClass(ActivityLog.class);
 		verify(activityRepo).save(saved.capture());
 		return saved.getValue();
+	}
+
+	// Saved a moment later, the entry still carries the time of the change, so it sorts in its place
+	@Test
+	void anEntryKeepsTheTimeOfTheChange() {
+		Instant changedAt = Instant.parse("2026-11-07T10:00:00Z");
+		service.save(new ActivityMessage(ActivityType.STATUS_CHANGED, "AB", "AB-1", "Ship it", "TODO", "COMPLETED",
+				"user-1", "Asha", changedAt));
+
+		ArgumentCaptor<ActivityLog> saved = ArgumentCaptor.forClass(ActivityLog.class);
+		verify(activityRepo).save(saved.capture());
+		assertEquals(Date.from(changedAt), saved.getValue().getCreatedAt());
 	}
 
 	@Test

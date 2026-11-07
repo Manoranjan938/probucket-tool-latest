@@ -34,11 +34,12 @@ public class AttachmentStorage {
 		return new FileSystemResource(resolve(storedName));
 	}
 
+	/** A file that is already gone counts as deleted, so this is safe to repeat (the file clean-up queue retries it) */
 	public void delete(String storedName) {
 		try {
 			Files.deleteIfExists(resolve(storedName));
 		} catch (IOException e) {
-			// A file left behind only takes space; the attachment itself is gone
+			throw new UncheckedIOException("Couldn't delete the attachment file " + storedName, e);
 		}
 	}
 

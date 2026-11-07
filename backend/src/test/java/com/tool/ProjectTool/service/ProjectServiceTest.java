@@ -218,6 +218,40 @@ class ProjectServiceTest {
 		assertEquals(ProjectEntity.DELETED, project.getStatus());
 	}
 
+	// Delete forever was asked for: it is gone for everyone, and can't come back or be removed a second time
+	private ProjectEntity beingRemoved() {
+		ProjectEntity project = deleted();
+		project.setStatus(ProjectEntity.REMOVING);
+		return project;
+	}
+
+	@Test
+	void aProjectBeingRemovedCantBeOpened() {
+		beingRemoved();
+
+		assertThrows(ProjectNotFoundException.class, () -> service.getProjectById("p1"));
+	}
+
+	@Test
+	void aProjectBeingRemovedCantBeRestored() {
+		ProjectEntity project = beingRemoved();
+		loggedInAs("lead");
+
+		assertThrows(ProjectNotFoundException.class, () -> service.restoreProject("p1"));
+		assertEquals(ProjectEntity.REMOVING, project.getStatus());
+		verify(projectRepo, never()).save(any());
+	}
+
+	@Test
+	void aProjectBeingRemovedCantBeChangedOrDeletedForeverAgain() {
+		beingRemoved();
+		loggedInAs("lead");
+
+		assertThrows(ProjectNotFoundException.class, () -> service.updateProject(rename("New")));
+		assertThrows(ProjectNotFoundException.class, () -> service.deleteProjectForever("p1"));
+		verify(purgeService, never()).queuePurge(any());
+	}
+
 	@Test
 	void aProjectThatIsntDeletedCantBeRestored() {
 		existing();
@@ -250,7 +284,7 @@ class ProjectServiceTest {
 
 		service.deleteProjectForever("p1");
 
-		verify(purgeService).purge(project);
+		verify(purgeService).queuePurge(project);
 	}
 
 	@Test
@@ -259,7 +293,7 @@ class ProjectServiceTest {
 		loggedInAs("lead");
 
 		assertThrows(ProjectNotFoundException.class, () -> service.deleteProjectForever("p1"));
-		verify(purgeService, never()).purge(any());
+		verify(purgeService, never()).queuePurge(any());
 	}
 
 	@Test
@@ -268,7 +302,7 @@ class ProjectServiceTest {
 		loggedInAs("member");
 
 		assertThrows(BadRequestException.class, () -> service.deleteProjectForever("p1"));
-		verify(purgeService, never()).purge(any());
+		verify(purgeService, never()).queuePurge(any());
 	}
 
 	@Test

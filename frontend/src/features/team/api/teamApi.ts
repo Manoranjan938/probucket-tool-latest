@@ -1,4 +1,4 @@
-import { api, responseData } from "shared/services/api";
+import { api, reloadActivityLater, responseData } from "shared/services/api";
 import type { AddTeamMemberRequest, NewTeamMember, TeamMember, UpdateTeamRequest } from "features/team/types";
 import type { ApiResponse } from "shared/types";
 
@@ -13,6 +13,7 @@ const teamApi = api.injectEndpoints({
     addTeamMember: build.mutation<ApiResponse<NewTeamMember>, AddTeamMemberRequest>({
       query: (teamRequest) => ({ url: "/team/newTeamMember", method: "POST", data: teamRequest }),
       invalidatesTags: ["TeamMember", "Activity"],
+      onQueryStarted: reloadActivityLater,
     }),
     updateTeamMember: build.mutation<ApiResponse, UpdateTeamRequest>({
       query: (updateTeam) => ({ url: "/team/updateTeamMember", method: "POST", data: updateTeam }),

@@ -40,7 +40,7 @@ public interface TeamRepository extends JpaRepository<TeamDetails, Long> {
 			+ "	td.project_id = p.project_id\r\n"
 			+ "where\r\n"
 			+ "	td.user_id=:userId\r\n"
-			+ "	and p.status <> 0", nativeQuery = true)
+			+ "	and p.status = 1", nativeQuery = true)
 	List<Object> getProjectsByTeamMember(int userId);
 	
 	TeamDetails findByUserId(long userId);

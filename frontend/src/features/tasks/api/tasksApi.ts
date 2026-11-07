@@ -1,4 +1,4 @@
-import { api, responseData } from "shared/services/api";
+import { api, reloadActivityLater, responseData } from "shared/services/api";
 import type {
   Attachment,
   CreatedTask,
@@ -63,46 +63,57 @@ const tasksApi = api.injectEndpoints({
         return { url: `/task/uploadAttachments/${taskId}`, method: "POST", data: form, timeout: 120000 };
       },
       invalidatesTags: ["Attachment", "Activity"],
+      onQueryStarted: reloadActivityLater,
     }),
     deleteAttachment: build.mutation<ApiResponse, string>({
       query: (attachmentId) => ({ url: `/task/deleteAttachment/${attachmentId}`, method: "POST" }),
       invalidatesTags: ["Attachment", "Activity"],
+      onQueryStarted: reloadActivityLater,
     }),
     createTask: build.mutation<ApiResponse<CreatedTask>, ProjectTaskRequest>({
       query: (taskRequest) => ({ url: "/task/createTask", method: "POST", data: taskRequest }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     createSubtask: build.mutation<ApiResponse, CreateSubtaskRequest>({
       query: (subtask) => ({ url: "/task/createSubTask", method: "POST", data: subtask }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateTask: build.mutation<ApiResponse, UpdateTaskRequest>({
       query: (updateRequest) => ({ url: "/task/updateTask", method: "POST", data: updateRequest }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateBugDetails: build.mutation<ApiResponse, UpdateBugDetailsRequest>({
       query: (request) => ({ url: "/task/updateBugDetails", method: "POST", data: request }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateDueDate: build.mutation<ApiResponse, UpdateDueDateRequest>({
       query: (request) => ({ url: "/task/updateDueDate", method: "POST", data: request }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateAssignee: build.mutation<ApiResponse, UpdateAssigneeRequest>({
       query: (request) => ({ url: "/task/updateAssignee", method: "POST", data: request }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateStartDate: build.mutation<ApiResponse, UpdateStartDateRequest>({
       query: (request) => ({ url: "/task/updateStartDate", method: "POST", data: request }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateEstimate: build.mutation<ApiResponse, UpdateEstimateRequest>({
       query: (request) => ({ url: "/task/updateEstimate", method: "POST", data: request }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
     updateLabels: build.mutation<ApiResponse, UpdateLabelsRequest>({
       query: (request) => ({ url: "/task/updateLabels", method: "POST", data: request }),
       invalidatesTags: taskChanges,
+      onQueryStarted: reloadActivityLater,
     }),
   }),
 });

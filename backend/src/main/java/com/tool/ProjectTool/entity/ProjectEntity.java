@@ -25,6 +25,10 @@ public class ProjectEntity {
 
 	public static final int DELETED = 0;
 
+	// Delete forever was asked for (or the 30 days are over) and the project queue is removing it.
+	// Hidden everywhere like a deleted project, but it can't be restored any more.
+	public static final int REMOVING = 2;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -154,10 +158,21 @@ public class ProjectEntity {
 		this.status = status;
 	}
 
+	/** Only an active project is shown and can be opened or changed */
+	@Transient
+	public boolean isActive() {
+		return status == ACTIVE;
+	}
+
 	/** Deleted projects have status 0 and stay restorable until they are removed for good */
 	@Transient
 	public boolean isDeleted() {
 		return status == DELETED;
+	}
+
+	@Transient
+	public boolean isRemoving() {
+		return status == REMOVING;
 	}
 
 	public Date getCreatedAt() {

@@ -52,9 +52,12 @@ public class ActivityLog {
 	@Column(name = "created_at")
 	private Date createdAt;
 
+	// Entries from the activity queue already carry the time of the change
 	@PrePersist
 	protected void onCreate() {
-		this.createdAt = new Date();
+		if (this.createdAt == null) {
+			this.createdAt = new Date();
+		}
 	}
 
 	public Long getId() {

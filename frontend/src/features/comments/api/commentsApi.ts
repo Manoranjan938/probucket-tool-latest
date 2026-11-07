@@ -1,4 +1,4 @@
-import { api, responseData } from "shared/services/api";
+import { api, reloadActivityLater, responseData } from "shared/services/api";
 import type { Comment, CommentRequest } from "features/comments/types";
 import type { ApiResponse } from "shared/types";
 
@@ -13,6 +13,7 @@ const commentsApi = api.injectEndpoints({
     addComment: build.mutation<ApiResponse, CommentRequest>({
       query: (commentRequest) => ({ url: "/comment/addComment", method: "POST", data: commentRequest }),
       invalidatesTags: ["Comment", "Activity"],
+      onQueryStarted: reloadActivityLater,
     }),
   }),
 });
